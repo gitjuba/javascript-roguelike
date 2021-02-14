@@ -1,0 +1,17 @@
+{
+  "name": "new-javascript-project",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gitjuba/new-javascript-project.git"
+  },
+  "author": {
+    "name": "Jussi Mattas",
+    "email": "jussi.mattas@gmail.com"
+  },
+  "license": "UNLISENCED",
+  "devDependencies": {
+    "eslint": "^7.20.0",
+    "prettier": "^2.2.1"
+  }
+}
