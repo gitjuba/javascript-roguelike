@@ -39,3 +39,12 @@ To make the objects canvas transparent, it has to be cleared in the start of the
 As simple as possible: Add a hook to the `keyup` events which toggles a flag `redrawObjects` when the player moves. Also introduce a flag `redrawLevel` which, for the moment is set to true only in the beginning.
 
 Ended up separating the debug overlay to a canvas of its own, too. Now it doesn't hog that much resources.
+
+Let's fix the scope of this project. I'll make a Roguelike. Rename the repository to `javascript-roguelike`:
+
+- Create new repo in GitHub
+- Add new repo as remote: `git remote add newremote git@github.com:gitjuba/javascript-roguelike.git`
+- Push history to new remote: `git push -u newremote master`
+- Remove old remote: `git remote remove origin`
+- Rename new remote as `origin`: `git remote rename newremote origin`
+- Rename local folder

@@ -1,3 +1,9 @@
-# New JavaScript project
+# JavaScript Roguelike
 
-What will this become? I don't know... What I _do_ know is that it will contain JavaScript.
+(For the moment, beginnings of) a tilemap-based, turn-based adventure game.
+
+## Goal I
+
+- [] Draw ASCII tilemap and entities on screen
+- [] Player stats overlay
+- [] Fight a sigle enemy on a single-screen level
