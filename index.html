@@ -2,13 +2,23 @@
   <head>
     <meta charset="utf8" />
     <style>
-      #main {
+      #container {
+        position: fixed;
+      }
+      #level, #objects, #overlay {
         border: 1px solid black;
+        position: absolute;
+        top: 0;
+        left: 0;
       }
     </style>
   </head>
   <body>
-    <canvas id="main" width=""></canvas>
+    <div id="container">
+      <canvas id="level" width=""></canvas>
+      <canvas id="objects" width=""></canvas>
+      <canvas id="overlay" width=""></canvas>
+    </div>
     <script src="index.js"></script>
   </body>
 </html>
