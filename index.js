@@ -1,20 +1,21 @@
+var statsCanvas = document.getElementById('stats')
 var levelCanvas = document.getElementById('level')
 var objectCanvas = document.getElementById('objects')
-var overlayCanvas = document.getElementById('overlay')
+var debugCanvas = document.getElementById('debug')
 
 // Code page 850 character sheet (Base64 encoded PNG file)
 var charsImg = document.getElementById('chars')
 var charWidth = 9
 var charHeight = 14
 
-var charsAcross = 80
+var statsWidth = 10
+var charsAcross = 80 - statsWidth
 var charsDown = 24
 
-var canvasWidth = charsAcross * charWidth
+var canvasWidth = (charsAcross + statsWidth) * charWidth
 var canvasHeight = charsDown * charHeight
 
-// levelCanvas.style.width = '700px'
-;[levelCanvas, objectCanvas, overlayCanvas].forEach((el) => {
+;[statsCanvas, levelCanvas, objectCanvas, debugCanvas].forEach((el) => {
   el.style.transform = `translate(${canvasWidth / 2}px,${
     canvasHeight / 2
   }px)scale(2)`
@@ -24,10 +25,16 @@ var canvasHeight = charsDown * charHeight
 var charOffsetX = 4
 var charOffsetY = 4
 var charMap = {
+  ' ': { i: 0, j: 0 },
   '#': { i: 1, j: 3 }, // 2nd row, 4th column
   '.': { i: 1, j: 14 },
   '@': { i: 2, j: 0 },
   g: { i: 3, j: 7 },
+  H: { i: 2, j: 8 },
+  P: { i: 2, j: 16 },
+  ':': { i: 1, j: 26 },
+  0: { i: 1, j: 16 },
+  1: { i: 1, j: 17 },
 }
 
 // Initial single-screen map
@@ -39,60 +46,95 @@ var tileMap = [
   '#'.repeat(charsAcross),
 ].map((row) => row.split(''))
 
+statsCanvas.width = canvasWidth
+statsCanvas.height = canvasHeight
 levelCanvas.width = canvasWidth
 levelCanvas.height = canvasHeight
 objectCanvas.width = canvasWidth
 objectCanvas.height = canvasHeight
-overlayCanvas.width = canvasWidth
-overlayCanvas.height = canvasHeight
+debugCanvas.width = canvasWidth
+debugCanvas.height = canvasHeight
 
+var ctxS = statsCanvas.getContext('2d')
 var ctx0 = levelCanvas.getContext('2d')
 var ctx1 = objectCanvas.getContext('2d')
-var ctx2 = overlayCanvas.getContext('2d')
+var ctx2 = debugCanvas.getContext('2d')
 
 var lastTs = 0
 var dt
 var dtUpdate = 0
 var fps = 0
 
-// Initial player position
+// Initial player stats
 var playerX = 3
 var playerY = 3
+var playerHp = 10
 
 // Monster
 var monsterX = 50
 var monsterY = 12
 
 // Should redraw
+var redrawStats = true
 var redrawLevel = true
 var redrawObjects = true
+
+function drawChar(ctx, char, i, j) {
+  if (!(char in charMap)) {
+    throw new Error('invalid char')
+  }
+  ctx.drawImage(
+    charsImg,
+    charOffsetX + charMap[char].j * charWidth,
+    charOffsetY + charMap[char].i * charHeight,
+    charWidth,
+    charHeight,
+    j * charWidth,
+    i * charHeight,
+    charWidth,
+    charHeight
+  )
+}
+
+function drawText(ctx, text, i, j) {
+  var k
+  for (k = 0; k < text.length; k++) {
+    drawChar(ctx, text[k], i, j + k)
+  }
+}
 
 function gameLoop(ts) {
   dt = ts - lastTs
   lastTs = ts
 
+  var i, j
+
+  // Stats overlay
+  if (redrawStats) {
+    for (i = 0; i < charsDown; i++) {
+      for (j = 0; j < statsWidth; j++) {
+        drawChar(ctxS, ' ', i, j + charsAcross)
+      }
+    }
+    drawText(
+      ctxS,
+      `HP: ${playerHp.toString().padStart(3, ' ')}`,
+      1,
+      charsAcross + 1
+    )
+    redrawStats = false
+  }
+
   // Mostly static level map
   if (redrawLevel) {
     console.log('redrawing level')
-    ctx0.fillStyle = 'white'
-    ctx0.fillRect(0, 0, canvasWidth, canvasHeight)
+    ctx0.clearRect(0, 0, canvasWidth, canvasHeight)
 
-    var i, j
     for (i = 0; i < charsDown; i++) {
       for (j = 0; j < charsAcross; j++) {
         var tile = tileMap[i][j]
         if (tile in charMap) {
-          ctx0.drawImage(
-            charsImg,
-            charOffsetX + charMap[tile].j * charWidth,
-            charOffsetY + charMap[tile].i * charHeight,
-            charWidth,
-            charHeight,
-            j * charWidth,
-            i * charHeight,
-            charWidth,
-            charHeight
-          )
+          drawChar(ctx0, tile, i, j)
         } else {
           throw new Error('invalid char')
         }
@@ -109,30 +151,10 @@ function gameLoop(ts) {
     ctx1.clearRect(0, 0, canvasWidth, canvasHeight)
 
     // Draw player
-    ctx1.drawImage(
-      charsImg,
-      charOffsetX + charMap['@'].j * charWidth,
-      charOffsetY + charMap['@'].i * charHeight,
-      charWidth,
-      charHeight,
-      playerX * charWidth,
-      playerY * charHeight,
-      charWidth,
-      charHeight
-    )
+    drawChar(ctx1, '@', playerY, playerX)
 
     // Draw monster
-    ctx1.drawImage(
-      charsImg,
-      charOffsetX + charMap['g'].j * charWidth,
-      charOffsetY + charMap['g'].i * charHeight,
-      charWidth,
-      charHeight,
-      monsterX * charWidth,
-      monsterY * charHeight,
-      charWidth,
-      charHeight
-    )
+    drawChar(ctx1, 'g', monsterY, monsterX)
 
     redrawObjects = false
   }
