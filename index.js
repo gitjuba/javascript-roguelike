@@ -1,4 +1,5 @@
 var statsCanvas = document.getElementById('stats')
+var logCanvas = document.getElementById('log')
 var levelCanvas = document.getElementById('level')
 var objectCanvas = document.getElementById('objects')
 var debugCanvas = document.getElementById('debug')
@@ -8,46 +9,78 @@ var charsImg = document.getElementById('chars')
 var charWidth = 9
 var charHeight = 14
 
+// Screen divided to map, stats and log
+var mapWidth = 70
+var mapHeight = 20
+
 var statsWidth = 10
+var statsHeight = 20
+
+var logWidth = 80
+var logHeight = 5
+
 var charsAcross = 80 - statsWidth
-var charsDown = 24
+var charsDown = 25
 
 var canvasWidth = (charsAcross + statsWidth) * charWidth
 var canvasHeight = charsDown * charHeight
 
-;[statsCanvas, levelCanvas, objectCanvas, debugCanvas].forEach((el) => {
-  el.style.transform = `translate(${canvasWidth / 2}px,${
-    canvasHeight / 2
-  }px)scale(2)`
-})
+;[statsCanvas, logCanvas, levelCanvas, objectCanvas, debugCanvas].forEach(
+  (el) => {
+    el.style.transform = `translate(${canvasWidth / 2}px,${
+      canvasHeight / 2
+    }px)scale(2)`
+  }
+)
 
 // Map char to location (row, column) in image
 var charOffsetX = 4
 var charOffsetY = 4
 var charMap = {
   ' ': { i: 0, j: 0 },
+  '!': { i: 1, j: 1 },
   '#': { i: 1, j: 3 }, // 2nd row, 4th column
   '.': { i: 1, j: 14 },
-  '@': { i: 2, j: 0 },
-  g: { i: 3, j: 7 },
-  H: { i: 2, j: 8 },
-  P: { i: 2, j: 16 },
-  ':': { i: 1, j: 26 },
   0: { i: 1, j: 16 },
   1: { i: 1, j: 17 },
+  ':': { i: 1, j: 26 },
+  '>': { i: 1, j: 30 },
+  '@': { i: 2, j: 0 },
+  H: { i: 2, j: 8 },
+  P: { i: 2, j: 16 },
+  T: { i: 2, j: 20 },
+  W: { i: 2, j: 23 },
+  Y: { i: 2, j: 25 },
+  c: { i: 3, j: 3 },
+  d: { i: 3, j: 4 },
+  e: { i: 3, j: 5 },
+  g: { i: 3, j: 7 },
+  h: { i: 3, j: 8 },
+  i: { i: 3, j: 9 },
+  k: { i: 3, j: 11 },
+  l: { i: 3, j: 12 },
+  m: { i: 3, j: 13 },
+  n: { i: 3, j: 14 },
+  o: { i: 3, j: 15 },
+  r: { i: 3, j: 18 },
+  s: { i: 3, j: 19 },
+  t: { i: 3, j: 20 },
+  u: { i: 3, j: 21 },
 }
 
 // Initial single-screen map
 var tileMap = [
-  '#'.repeat(charsAcross),
-  ...Array(charsDown - 2)
+  '#'.repeat(mapWidth),
+  ...Array(mapHeight - 2)
     .fill(0)
-    .map(() => '#' + '.'.repeat(charsAcross - 2) + '#'),
-  '#'.repeat(charsAcross),
+    .map(() => '#' + '.'.repeat(mapWidth - 2) + '#'),
+  '#'.repeat(mapWidth),
 ].map((row) => row.split(''))
 
 statsCanvas.width = canvasWidth
 statsCanvas.height = canvasHeight
+logCanvas.width = canvasWidth
+logCanvas.height = canvasHeight
 levelCanvas.width = canvasWidth
 levelCanvas.height = canvasHeight
 objectCanvas.width = canvasWidth
@@ -56,6 +89,7 @@ debugCanvas.width = canvasWidth
 debugCanvas.height = canvasHeight
 
 var ctxS = statsCanvas.getContext('2d')
+var ctxL = logCanvas.getContext('2d')
 var ctx0 = levelCanvas.getContext('2d')
 var ctx1 = objectCanvas.getContext('2d')
 var ctx2 = debugCanvas.getContext('2d')
@@ -69,6 +103,7 @@ var fps = 0
 var playerX = 3
 var playerY = 3
 var playerHp = 10
+var hitChance = 0.5
 var attacking = false
 
 // Monster
@@ -76,14 +111,18 @@ var monsterX = 6
 var monsterY = 3
 var monsterHp = 1
 
+// Log
+var logBuffer = ['> Welcome!']
+
 // Should redraw
 var redrawStats = true
+var redrawLog = true
 var redrawLevel = true
 var redrawObjects = true
 
 function drawChar(ctx, char, i, j) {
   if (!(char in charMap)) {
-    throw new Error('invalid char')
+    throw new Error('invalid char: ' + char)
   }
   ctx.drawImage(
     charsImg,
@@ -100,6 +139,7 @@ function drawChar(ctx, char, i, j) {
 
 function drawText(ctx, text, i, j) {
   var k
+  console.log('drawing text ' + text)
   for (k = 0; k < text.length; k++) {
     drawChar(ctx, text[k], i, j + k)
   }
@@ -113,18 +153,31 @@ function gameLoop(ts) {
 
   // Stats overlay
   if (redrawStats) {
-    for (i = 0; i < charsDown; i++) {
+    for (i = 0; i < statsHeight; i++) {
       for (j = 0; j < statsWidth; j++) {
-        drawChar(ctxS, ' ', i, j + charsAcross)
+        drawChar(ctxS, ' ', i, j + mapWidth)
       }
     }
     drawText(
       ctxS,
       `HP: ${playerHp.toString().padStart(3, ' ')}`,
       1,
-      charsAcross + 1
+      mapWidth + 1
     )
     redrawStats = false
+  }
+
+  if (redrawLog) {
+    ctxL.clearRect(0, 0, canvasWidth, canvasHeight)
+    for (i = 0; i < logHeight; i++) {
+      for (j = 0; j < logWidth; j++) {
+        drawChar(ctxL, ' ', i + mapHeight, j)
+      }
+    }
+    for (i = 0; i < Math.min(logBuffer.length, logHeight); i++) {
+      drawText(ctxL, logBuffer[i], mapHeight + logHeight - 1 - i, 0)
+    }
+    redrawLog = false
   }
 
   // Mostly static level map
@@ -132,14 +185,10 @@ function gameLoop(ts) {
     console.log('redrawing level')
     ctx0.clearRect(0, 0, canvasWidth, canvasHeight)
 
-    for (i = 0; i < charsDown; i++) {
-      for (j = 0; j < charsAcross; j++) {
+    for (i = 0; i < mapHeight; i++) {
+      for (j = 0; j < mapWidth; j++) {
         var tile = tileMap[i][j]
-        if (tile in charMap) {
-          drawChar(ctx0, tile, i, j)
-        } else {
-          throw new Error('invalid char')
-        }
+        drawChar(ctx0, tile, i, j)
       }
     }
 
@@ -191,12 +240,21 @@ function getDisplacement(keyCode) {
 window.addEventListener('keyup', function (e) {
   var dx, dy
   var turnDone = false
+  var logMsg = '>'
   if (attacking) {
     if (arrowKeys.includes(e.keyCode)) {
       ;({ dx, dy } = getDisplacement(e.keyCode))
       console.log('attacking: ' + dx + ', ' + dy)
       if (monsterX == playerX + dx && monsterY == playerY + dy) {
-        monsterHp -= 1
+        if (Math.random() < hitChance) {
+          monsterHp -= 1
+          logMsg += ' You hit the monster.'
+          if (monsterHp == 0) {
+            logMsg += ' The monster is killed.'
+          }
+        } else {
+          logMsg += ' You miss the monster.'
+        }
       }
       attacking = false
       turnDone = true
@@ -217,11 +275,18 @@ window.addEventListener('keyup', function (e) {
       }
     } else {
       console.log(e.keyCode)
-      if (e.keyCode == 65) {
-        // a
+      if (e.keyCode == 65 /* a */) {
         attacking = true
+      } else if (e.keyCode == 83 /* s */) {
+        // Stand still
+        turnDone = true
       }
     }
+  }
+
+  if (logMsg.length > 1) {
+    logBuffer.unshift(logMsg)
+    redrawLog = true
   }
 
   if (turnDone) {

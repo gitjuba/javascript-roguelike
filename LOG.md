@@ -86,3 +86,9 @@ We need some turn logic. Set up a flag `turnDone` which is toggled on
 
 - successful motion (moving against wall or monster does nothing?)
 - a "resolved" attack (may attack empty space to make "void" attack)
+
+I need a log system, for showing game messages on screen. In ADOM the event log is shown on the top of the screen. Side note: ADOM screen was 80 by 25, of which 80 by 20 tiles showed the map. If I make the screen also 25 characters tall, I'll have 70x25 for the map. Can I fit the log in the side bar? Nah, that's too narrow. I could put it in the bottom. How may rows? I could show some log buffer. Five rows?
+
+How to format the log? Put a `>` in the beginning of each line. When an event (player or monster attacking) generates a log message, push it to a buffer which is five lines long.
+
+Or rather, the log can (for the moment) contain the whole game, but we only show five most recent entries.
