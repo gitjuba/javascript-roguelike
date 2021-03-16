@@ -69,10 +69,11 @@ var fps = 0
 var playerX = 3
 var playerY = 3
 var playerHp = 10
+var attacking = false
 
 // Monster
-var monsterX = 50
-var monsterY = 12
+var monsterX = 6
+var monsterY = 3
 
 // Should redraw
 var redrawStats = true
@@ -175,55 +176,53 @@ function gameLoop(ts) {
   window.requestAnimationFrame(gameLoop)
 }
 
+var arrowKeys = [37, 38, 39, 40]
+
+function getDisplacement(keyCode) {
+  return {
+    dx: keyCode - 38 < 2 ? keyCode - 38 : 0,
+    dy: keyCode - 39 > -2 ? keyCode - 39 : 0,
+  }
+}
+
 window.addEventListener('keyup', function (e) {
-  if (e.keyCode == 37) {
-    // left
-    if (tileMap[playerY][playerX - 1] == '.') {
-      playerX -= 1
+  var dx, dy
+  var turnDone = false
+  if (attacking) {
+    if (arrowKeys.includes(e.keyCode)) {
+      ;({ dx, dy } = getDisplacement(e.keyCode))
+      console.log('attacking: ' + dx + ', ' + dy)
     }
-  }
-  if (e.keyCode == 38) {
-    // up
-    if (tileMap[playerY - 1][playerX] == '.') {
-      playerY -= 1
-    }
-  }
-  if (e.keyCode == 39) {
-    // right
-    if (tileMap[playerY][playerX + 1] == '.') {
-      playerX += 1
-    }
-  }
-  if (e.keyCode == 40) {
-    // down
-    if (tileMap[playerY + 1][playerX] == '.') {
-      playerY += 1
+  } else {
+    if (arrowKeys.includes(e.keyCode)) {
+      ;({ dx, dy } = getDisplacement(e.keyCode))
+      console.log('moving: ' + dx + ', ' + dy)
+      if (
+        tileMap[playerY + dy][playerX + dx] == '.' &&
+        !(monsterX == playerX + dx && monsterY == playerY + dy)
+      ) {
+        playerX += dx
+        playerY += dy
+
+        turnDone = true
+      }
     }
   }
 
-  // Monster moves at random
-  var dir = Math.floor(Math.random() * 4)
-  if (dir == 0) {
-    if (tileMap[monsterY][monsterX - 1] == '.') {
-      monsterX -= 1
+  if (turnDone) {
+    // Monster moves at random
+    var dir = 37 + Math.floor(Math.random() * 4)
+    ;({ dx, dy } = getDisplacement(dir))
+    if (
+      tileMap[monsterY + dy][monsterX + dx] == '.' &&
+      !(playerX == monsterX + dx && playerY == monsterY + dy)
+    ) {
+      monsterX += dx
+      monsterY += dy
     }
+
+    redrawObjects = true
   }
-  if (dir == 1) {
-    if (tileMap[monsterY - 1][monsterX] == '.') {
-      monsterY -= 1
-    }
-  }
-  if (dir == 2) {
-    if (tileMap[monsterY][monsterX + 1] == '.') {
-      monsterX += 1
-    }
-  }
-  if (dir == 3) {
-    if (tileMap[monsterY + 1][monsterX] == '.') {
-      monsterY += 1
-    }
-  }
-  redrawObjects = true
 })
 
 window.requestAnimationFrame(gameLoop)

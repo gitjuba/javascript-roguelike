@@ -81,3 +81,8 @@ Next up, player stats. Let's draw them on yet another canvas element (as they ch
 I should probably start with a helper function for rendering text at given row/column.
 
 Alright, then let's make a fight! There are some design questions to address, here. Do I want a separate key for attacking or attack just by moving towards the enemy? I'll go with the former approach. Pressing _a_ toggles a flag which says the player is attacking, and with that flag up, only arrow keys yield something.
+
+We need some turn logic. Set up a flag `turnDone` which is toggled on
+
+- successful motion (moving against wall or monster does nothing?)
+- a "resolved" attack (may attack empty space to make "void" attack)
