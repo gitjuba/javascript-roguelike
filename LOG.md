@@ -48,3 +48,24 @@ Let's fix the scope of this project. I'll make a Roguelike. Rename the repositor
 - Remove old remote: `git remote remove origin`
 - Rename new remote as `origin`: `git remote rename newremote origin`
 - Rename local folder
+
+Then, let's talk ASCII. As a fan of the old Roguelikes, I want to use [Code page 437](https://en.wikipedia.org/wiki/Code_page_437) font. And the "terminal" size should of course be 80 by 24 characters.
+
+Or maybe [Code page 850](https://en.wikipedia.org/wiki/Code_page_850)?
+
+How do I use that font? Do I download the Wikipedia image and use it as a "sprite sheet"?
+
+## 2021-03-16
+
+Downloaded the Code page 850 character set image from Wikipedia. It seems to be decent resolution, the symbols are colored `#aaaaaa`. I'll worry about different colors later, now let's try to load the image and render something on screen, using (as the first choice which came to mind) the HTML canvas `drawImage` method, one method call for each tile.
+
+What's the minimal way to load an image? I don't want to introduce complicated asset loading logic, and the image is just a few kilobytes.
+
+Converted it to Base64 and created an image element inline in the main HTML file.
+
+```js
+var img = fs.readFileSync('./Codepage-850.png')
+var img_b64 = Buffer.from(img).toString('base64')
+```
+
+The game renderer extracts individual 9-by-14 pixel characters from this image.

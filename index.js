@@ -10,6 +10,20 @@ var tileSize = 40
 var tilesAcross = canvasWidth / tileSize
 var tilesDown = canvasHeight / tileSize
 
+// Code page 850 character sheet (Base64 encoded PNG file)
+var charsImg = document.getElementById('chars')
+var charWidth = 9
+var charHeight = 14
+
+// Map char to location (row, column) in image
+var charOffsetX = 4
+var charOffsetY = 4
+var charMap = {
+  '#': { i: 1, j: 3 }, // 2nd row, 4th column
+  '.': { i: 1, j: 14 },
+  '@': { i: 2, j: 0 },
+}
+
 // Initial single-screen map
 var tileMap = [
   '#'.repeat(tilesAcross),
@@ -57,14 +71,21 @@ function gameLoop(ts) {
     for (i = 0; i < tilesDown; i++) {
       for (j = 0; j < tilesAcross; j++) {
         var tile = tileMap[i][j]
-        var color = 'white'
-        if (tile == '#') {
-          color = 'black'
+        if (tile in charMap) {
+          ctx0.drawImage(
+            charsImg,
+            charOffsetX + charMap[tile].j * charWidth,
+            charOffsetY + charMap[tile].i * charHeight,
+            charWidth,
+            charHeight,
+            j * tileSize,
+            i * tileSize,
+            tileSize,
+            tileSize
+          )
+        } else {
+          throw new Error('invalid char')
         }
-        ctx0.fillStyle = color
-        ctx0.fillRect(j * tileSize, i * tileSize, tileSize, tileSize)
-        ctx0.strokeStyle = 'lightgrey'
-        ctx0.strokeRect(j * tileSize, i * tileSize, tileSize, tileSize)
       }
     }
 
@@ -78,8 +99,17 @@ function gameLoop(ts) {
     ctx1.clearRect(0, 0, canvasWidth, canvasHeight)
 
     // Draw player
-    ctx1.fillStyle = 'blue'
-    ctx1.fillRect(playerX * tileSize, playerY * tileSize, tileSize, tileSize)
+    ctx1.drawImage(
+      charsImg,
+      charOffsetX + charMap['@'].j * charWidth,
+      charOffsetY + charMap['@'].i * charHeight,
+      charWidth,
+      charHeight,
+      playerX * tileSize,
+      playerY * tileSize,
+      tileSize,
+      tileSize
+    )
 
     redrawObjects = false
   }
