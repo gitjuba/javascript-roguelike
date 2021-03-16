@@ -74,6 +74,7 @@ var attacking = false
 // Monster
 var monsterX = 6
 var monsterY = 3
+var monsterHp = 1
 
 // Should redraw
 var redrawStats = true
@@ -155,7 +156,9 @@ function gameLoop(ts) {
     drawChar(ctx1, '@', playerY, playerX)
 
     // Draw monster
-    drawChar(ctx1, 'g', monsterY, monsterX)
+    if (monsterHp > 0) {
+      drawChar(ctx1, 'g', monsterY, monsterX)
+    }
 
     redrawObjects = false
   }
@@ -192,6 +195,11 @@ window.addEventListener('keyup', function (e) {
     if (arrowKeys.includes(e.keyCode)) {
       ;({ dx, dy } = getDisplacement(e.keyCode))
       console.log('attacking: ' + dx + ', ' + dy)
+      if (monsterX == playerX + dx && monsterY == playerY + dy) {
+        monsterHp -= 1
+      }
+      attacking = false
+      turnDone = true
     }
   } else {
     if (arrowKeys.includes(e.keyCode)) {
@@ -199,26 +207,35 @@ window.addEventListener('keyup', function (e) {
       console.log('moving: ' + dx + ', ' + dy)
       if (
         tileMap[playerY + dy][playerX + dx] == '.' &&
-        !(monsterX == playerX + dx && monsterY == playerY + dy)
+        (monsterHp == 0 ||
+          !(monsterX == playerX + dx && monsterY == playerY + dy))
       ) {
         playerX += dx
         playerY += dy
 
         turnDone = true
       }
+    } else {
+      console.log(e.keyCode)
+      if (e.keyCode == 65) {
+        // a
+        attacking = true
+      }
     }
   }
 
   if (turnDone) {
-    // Monster moves at random
-    var dir = 37 + Math.floor(Math.random() * 4)
-    ;({ dx, dy } = getDisplacement(dir))
-    if (
-      tileMap[monsterY + dy][monsterX + dx] == '.' &&
-      !(playerX == monsterX + dx && playerY == monsterY + dy)
-    ) {
-      monsterX += dx
-      monsterY += dy
+    // Monster moves at random, if alive
+    if (monsterHp > 0) {
+      var dir = 37 + Math.floor(Math.random() * 4)
+      ;({ dx, dy } = getDisplacement(dir))
+      if (
+        tileMap[monsterY + dy][monsterX + dx] == '.' &&
+        !(playerX == monsterX + dx && playerY == monsterY + dy)
+      ) {
+        monsterX += dx
+        monsterY += dy
+      }
     }
 
     redrawObjects = true
