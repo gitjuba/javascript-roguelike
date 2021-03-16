@@ -2,18 +2,23 @@ var levelCanvas = document.getElementById('level')
 var objectCanvas = document.getElementById('objects')
 var overlayCanvas = document.getElementById('overlay')
 
-var canvasWidth = 1280
-var canvasHeight = 720
-
-var tileSize = 40
-
-var tilesAcross = canvasWidth / tileSize
-var tilesDown = canvasHeight / tileSize
-
 // Code page 850 character sheet (Base64 encoded PNG file)
 var charsImg = document.getElementById('chars')
 var charWidth = 9
 var charHeight = 14
+
+var charsAcross = 80
+var charsDown = 24
+
+var canvasWidth = charsAcross * charWidth
+var canvasHeight = charsDown * charHeight
+
+// levelCanvas.style.width = '700px'
+;[levelCanvas, objectCanvas, overlayCanvas].forEach((el) => {
+  el.style.transform = `translate(${canvasWidth / 2}px,${
+    canvasHeight / 2
+  }px)scale(2)`
+})
 
 // Map char to location (row, column) in image
 var charOffsetX = 4
@@ -26,11 +31,11 @@ var charMap = {
 
 // Initial single-screen map
 var tileMap = [
-  '#'.repeat(tilesAcross),
-  ...Array(tilesDown - 2)
+  '#'.repeat(charsAcross),
+  ...Array(charsDown - 2)
     .fill(0)
-    .map(() => '#' + '.'.repeat(tilesAcross - 2) + '#'),
-  '#'.repeat(tilesAcross),
+    .map(() => '#' + '.'.repeat(charsAcross - 2) + '#'),
+  '#'.repeat(charsAcross),
 ].map((row) => row.split(''))
 
 levelCanvas.width = canvasWidth
@@ -68,8 +73,8 @@ function gameLoop(ts) {
     ctx0.fillRect(0, 0, canvasWidth, canvasHeight)
 
     var i, j
-    for (i = 0; i < tilesDown; i++) {
-      for (j = 0; j < tilesAcross; j++) {
+    for (i = 0; i < charsDown; i++) {
+      for (j = 0; j < charsAcross; j++) {
         var tile = tileMap[i][j]
         if (tile in charMap) {
           ctx0.drawImage(
@@ -78,10 +83,10 @@ function gameLoop(ts) {
             charOffsetY + charMap[tile].i * charHeight,
             charWidth,
             charHeight,
-            j * tileSize,
-            i * tileSize,
-            tileSize,
-            tileSize
+            j * charWidth,
+            i * charHeight,
+            charWidth,
+            charHeight
           )
         } else {
           throw new Error('invalid char')
@@ -105,10 +110,10 @@ function gameLoop(ts) {
       charOffsetY + charMap['@'].i * charHeight,
       charWidth,
       charHeight,
-      playerX * tileSize,
-      playerY * tileSize,
-      tileSize,
-      tileSize
+      playerX * charWidth,
+      playerY * charHeight,
+      charWidth,
+      charHeight
     )
 
     redrawObjects = false
