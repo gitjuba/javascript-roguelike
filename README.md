@@ -4,6 +4,6 @@
 
 ## Goal I
 
-- [ ] Draw ASCII tilemap and entities on screen
+- [x] Draw ASCII tilemap and entities on screen
 - [ ] Player stats overlay
 - [ ] Fight a sigle enemy on a single-screen level

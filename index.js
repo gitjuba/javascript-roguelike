@@ -27,6 +27,7 @@ var charMap = {
   '#': { i: 1, j: 3 }, // 2nd row, 4th column
   '.': { i: 1, j: 14 },
   '@': { i: 2, j: 0 },
+  g: { i: 3, j: 7 },
 }
 
 // Initial single-screen map
@@ -57,6 +58,10 @@ var fps = 0
 // Initial player position
 var playerX = 3
 var playerY = 3
+
+// Monster
+var monsterX = 50
+var monsterY = 12
 
 // Should redraw
 var redrawLevel = true
@@ -116,6 +121,19 @@ function gameLoop(ts) {
       charHeight
     )
 
+    // Draw monster
+    ctx1.drawImage(
+      charsImg,
+      charOffsetX + charMap['g'].j * charWidth,
+      charOffsetY + charMap['g'].i * charHeight,
+      charWidth,
+      charHeight,
+      monsterX * charWidth,
+      monsterY * charHeight,
+      charWidth,
+      charHeight
+    )
+
     redrawObjects = false
   }
 
@@ -140,30 +158,50 @@ window.addEventListener('keyup', function (e) {
     // left
     if (tileMap[playerY][playerX - 1] == '.') {
       playerX -= 1
-      redrawObjects = true
     }
   }
   if (e.keyCode == 38) {
     // up
     if (tileMap[playerY - 1][playerX] == '.') {
       playerY -= 1
-      redrawObjects = true
     }
   }
   if (e.keyCode == 39) {
     // right
     if (tileMap[playerY][playerX + 1] == '.') {
       playerX += 1
-      redrawObjects = true
     }
   }
   if (e.keyCode == 40) {
     // down
     if (tileMap[playerY + 1][playerX] == '.') {
       playerY += 1
-      redrawObjects = true
     }
   }
+
+  // Monster moves at random
+  var dir = Math.floor(Math.random() * 4)
+  if (dir == 0) {
+    if (tileMap[monsterY][monsterX - 1] == '.') {
+      monsterX -= 1
+    }
+  }
+  if (dir == 1) {
+    if (tileMap[monsterY - 1][monsterX] == '.') {
+      monsterY -= 1
+    }
+  }
+  if (dir == 2) {
+    if (tileMap[monsterY][monsterX + 1] == '.') {
+      monsterX += 1
+    }
+  }
+  if (dir == 3) {
+    if (tileMap[monsterY + 1][monsterX] == '.') {
+      monsterY += 1
+    }
+  }
+  redrawObjects = true
 })
 
 window.requestAnimationFrame(gameLoop)
