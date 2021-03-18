@@ -1,6 +1,7 @@
 var statsCanvas = document.getElementById('stats')
 var logCanvas = document.getElementById('log')
 var levelCanvas = document.getElementById('level')
+var seenCanvas = document.getElementById('seen')
 var objectCanvas = document.getElementById('objects')
 var debugCanvas = document.getElementById('debug')
 
@@ -25,13 +26,18 @@ var charsDown = 25
 var canvasWidth = (charsAcross + statsWidth) * charWidth
 var canvasHeight = charsDown * charHeight
 
-;[statsCanvas, logCanvas, levelCanvas, objectCanvas, debugCanvas].forEach(
-  (el) => {
-    el.style.transform = `translate(${canvasWidth / 2}px,${
-      canvasHeight / 2
-    }px)scale(2)`
-  }
-)
+;[
+  statsCanvas,
+  logCanvas,
+  levelCanvas,
+  seenCanvas,
+  objectCanvas,
+  debugCanvas,
+].forEach((el) => {
+  el.style.transform = `translate(${canvasWidth / 2}px,${
+    canvasHeight / 2
+  }px)scale(2)`
+})
 
 // Map char to location (row, column) in image
 var charOffsetX = 4
@@ -83,6 +89,8 @@ logCanvas.width = canvasWidth
 logCanvas.height = canvasHeight
 levelCanvas.width = canvasWidth
 levelCanvas.height = canvasHeight
+seenCanvas.width = canvasWidth
+seenCanvas.height = canvasHeight
 objectCanvas.width = canvasWidth
 objectCanvas.height = canvasHeight
 debugCanvas.width = canvasWidth
@@ -90,6 +98,7 @@ debugCanvas.height = canvasHeight
 
 var ctxS = statsCanvas.getContext('2d')
 var ctxL = logCanvas.getContext('2d')
+var ctxV = seenCanvas.getContext('2d')
 var ctx0 = levelCanvas.getContext('2d')
 var ctx1 = objectCanvas.getContext('2d')
 var ctx2 = debugCanvas.getContext('2d')
@@ -104,6 +113,7 @@ var playerX = 3
 var playerY = 3
 var playerHp = 10
 var hitChance = 0.5
+var visRadius = 5
 var attacking = false
 
 // Monster
@@ -114,10 +124,13 @@ var monsterHp = 1
 // Log
 var logBuffer = ['> Welcome!']
 
+var initSeen = true
+
 // Should redraw
 var redrawStats = true
 var redrawLog = true
 var redrawLevel = true
+var redrawSeen = true
 var redrawObjects = true
 
 function drawChar(ctx, char, i, j) {
@@ -195,17 +208,46 @@ function gameLoop(ts) {
     redrawLevel = false
   }
 
+  if (initSeen) {
+    ctxV.clearRect(0, 0, canvasWidth, canvasHeight)
+
+    // Black except around player
+    for (i = 0; i < mapHeight; i++) {
+      for (j = 0; j < mapWidth; j++) {
+        if ((i - playerY) ** 2 + (j - playerX) ** 2 > visRadius ** 2) {
+          drawChar(ctxV, ' ', i, j)
+        }
+      }
+    }
+    initSeen = false
+  }
+
+  if (redrawSeen) {
+    for (i = 0; i < mapHeight; i++) {
+      for (j = 0; j < mapWidth; j++) {
+        // Clear seen mask from around player
+        if ((i - playerY) ** 2 + (j - playerX) ** 2 < visRadius ** 2) {
+          ctxV.clearRect(j * charWidth, i * charHeight, charWidth, charHeight)
+        }
+      }
+    }
+    redrawSeen = false
+  }
+
   // "Dynamic entities"
   if (redrawObjects) {
-    console.log('redrawing objects')
+    // console.log('redrawing objects')
 
     ctx1.clearRect(0, 0, canvasWidth, canvasHeight)
 
     // Draw player
     drawChar(ctx1, '@', playerY, playerX)
 
-    // Draw monster
-    if (monsterHp > 0) {
+    // Draw monster if alive and in visibility range
+    if (
+      monsterHp > 0 &&
+      (monsterX - playerX) ** 2 + (monsterY - playerY) ** 2 < visRadius ** 2
+    ) {
       drawChar(ctx1, 'g', monsterY, monsterX)
     }
 
@@ -272,6 +314,7 @@ window.addEventListener('keyup', function (e) {
         playerY += dy
 
         turnDone = true
+        redrawSeen = true
       }
     } else {
       console.log(e.keyCode)

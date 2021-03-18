@@ -92,3 +92,22 @@ I need a log system, for showing game messages on screen. In ADOM the event log 
 How to format the log? Put a `>` in the beginning of each line. When an event (player or monster attacking) generates a log message, push it to a buffer which is five lines long.
 
 Or rather, the log can (for the moment) contain the whole game, but we only show five most recent entries.
+
+## 2021-03-17
+
+Next goal would be line of sight, and, somewhat related to that, a visibility radius around the character.
+
+Line of sight feels like a more difficult problem, so let's start with the visibility radius. So tiles within a given distance from the player are _visible_ (whether or not behind obstacles or deep within a wall). Tiles which have at some point been _visible_ are _seen_.
+
+## 2021-03-18
+
+How to implement visible and seen tiles?
+
+- Draw the whole map on one canvas
+- Draw a _seen_ mask on another canvas, which at start is all black
+- Whenever the player moves, mark tiles within a given distance from the player as visible, and clear these tiles on the seen mask
+- Monsters are shown only if on visible tiles.
+
+I could think of some ways to optimise this. Keep track of the coordinates of the tiles on the edge (border) of the visibility circle, and update these coordinates together with the player coords.
+
+Or update the seen and visible flags to separate arrays, same size as the level map, and update those as the player moves.
