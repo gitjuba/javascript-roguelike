@@ -1,12 +1,14 @@
 var statsCanvas = document.getElementById('stats')
 var logCanvas = document.getElementById('log')
+var colorCanvas = document.getElementById('color')
 var levelCanvas = document.getElementById('level')
 var seenCanvas = document.getElementById('seen')
 var objectCanvas = document.getElementById('objects')
 var debugCanvas = document.getElementById('debug')
 
 // Code page 850 character sheet (Base64 encoded PNG file)
-var charsImg = document.getElementById('chars')
+var charsImgOpaque = document.getElementById('chars')
+var charsImgAlpha = document.getElementById('chars-alpha')
 var charWidth = 9
 var charHeight = 14
 
@@ -29,11 +31,14 @@ var canvasHeight = charsDown * charHeight
 ;[
   statsCanvas,
   logCanvas,
+  colorCanvas,
   levelCanvas,
   seenCanvas,
   objectCanvas,
   debugCanvas,
 ].forEach((el) => {
+  el.width = canvasWidth
+  el.height = canvasHeight
   el.style.transform = `translate(${canvasWidth / 2}px,${
     canvasHeight / 2
   }px)scale(2)`
@@ -83,23 +88,11 @@ var tileMap = [
   '#'.repeat(mapWidth),
 ].map((row) => row.split(''))
 
-statsCanvas.width = canvasWidth
-statsCanvas.height = canvasHeight
-logCanvas.width = canvasWidth
-logCanvas.height = canvasHeight
-levelCanvas.width = canvasWidth
-levelCanvas.height = canvasHeight
-seenCanvas.width = canvasWidth
-seenCanvas.height = canvasHeight
-objectCanvas.width = canvasWidth
-objectCanvas.height = canvasHeight
-debugCanvas.width = canvasWidth
-debugCanvas.height = canvasHeight
-
 var ctxS = statsCanvas.getContext('2d')
 var ctxL = logCanvas.getContext('2d')
-var ctxV = seenCanvas.getContext('2d')
+var ctxC = colorCanvas.getContext('2d')
 var ctx0 = levelCanvas.getContext('2d')
+var ctxV = seenCanvas.getContext('2d')
 var ctx1 = objectCanvas.getContext('2d')
 var ctx2 = debugCanvas.getContext('2d')
 
@@ -113,7 +106,7 @@ var playerX = 3
 var playerY = 3
 var playerHp = 10
 var hitChance = 0.5
-var visRadius = 5
+var visRadius = 7.5
 var attacking = false
 
 // Monster
@@ -133,7 +126,7 @@ var redrawLevel = true
 var redrawSeen = true
 var redrawObjects = true
 
-function drawChar(ctx, char, i, j) {
+function drawChar(ctx, charsImg, char, i, j) {
   if (!(char in charMap)) {
     throw new Error('invalid char: ' + char)
   }
@@ -150,11 +143,19 @@ function drawChar(ctx, char, i, j) {
   )
 }
 
+function drawCharOpaque(ctx, char, i, j) {
+  drawChar(ctx, charsImgOpaque, char, i, j)
+}
+
+function drawCharAlpha(ctx, char, i, j) {
+  drawChar(ctx, charsImgAlpha, char, i, j)
+}
+
 function drawText(ctx, text, i, j) {
   var k
   console.log('drawing text ' + text)
   for (k = 0; k < text.length; k++) {
-    drawChar(ctx, text[k], i, j + k)
+    drawCharOpaque(ctx, text[k], i, j + k)
   }
 }
 
@@ -168,7 +169,7 @@ function gameLoop(ts) {
   if (redrawStats) {
     for (i = 0; i < statsHeight; i++) {
       for (j = 0; j < statsWidth; j++) {
-        drawChar(ctxS, ' ', i, j + mapWidth)
+        drawCharOpaque(ctxS, ' ', i, j + mapWidth)
       }
     }
     drawText(
@@ -184,7 +185,7 @@ function gameLoop(ts) {
     ctxL.clearRect(0, 0, canvasWidth, canvasHeight)
     for (i = 0; i < logHeight; i++) {
       for (j = 0; j < logWidth; j++) {
-        drawChar(ctxL, ' ', i + mapHeight, j)
+        drawCharOpaque(ctxL, ' ', i + mapHeight, j)
       }
     }
     for (i = 0; i < Math.min(logBuffer.length, logHeight); i++) {
@@ -201,7 +202,7 @@ function gameLoop(ts) {
     for (i = 0; i < mapHeight; i++) {
       for (j = 0; j < mapWidth; j++) {
         var tile = tileMap[i][j]
-        drawChar(ctx0, tile, i, j)
+        drawCharAlpha(ctx0, tile, i, j)
       }
     }
 
@@ -215,7 +216,7 @@ function gameLoop(ts) {
     for (i = 0; i < mapHeight; i++) {
       for (j = 0; j < mapWidth; j++) {
         if ((i - playerY) ** 2 + (j - playerX) ** 2 > visRadius ** 2) {
-          drawChar(ctxV, ' ', i, j)
+          drawCharOpaque(ctxV, ' ', i, j)
         }
       }
     }
@@ -225,9 +226,14 @@ function gameLoop(ts) {
   if (redrawSeen) {
     for (i = 0; i < mapHeight; i++) {
       for (j = 0; j < mapWidth; j++) {
-        // Clear seen mask from around player
+        // Clear seen mask from around player, update visible circle
         if ((i - playerY) ** 2 + (j - playerX) ** 2 < visRadius ** 2) {
+          ctxC.fillStyle = '#ffffff'
+          ctxC.fillRect(j * charWidth, i * charHeight, charWidth, charHeight)
           ctxV.clearRect(j * charWidth, i * charHeight, charWidth, charHeight)
+        } else {
+          ctxC.fillStyle = '#aaaaaa'
+          ctxC.fillRect(j * charWidth, i * charHeight, charWidth, charHeight)
         }
       }
     }
@@ -241,14 +247,28 @@ function gameLoop(ts) {
     ctx1.clearRect(0, 0, canvasWidth, canvasHeight)
 
     // Draw player
-    drawChar(ctx1, '@', playerY, playerX)
+    ctx1.fillStyle = 'green'
+    ctx1.fillRect(
+      playerX * charWidth,
+      playerY * charHeight,
+      charWidth,
+      charHeight
+    )
+    drawCharAlpha(ctx1, '@', playerY, playerX)
 
     // Draw monster if alive and in visibility range
     if (
       monsterHp > 0 &&
       (monsterX - playerX) ** 2 + (monsterY - playerY) ** 2 < visRadius ** 2
     ) {
-      drawChar(ctx1, 'g', monsterY, monsterX)
+      ctx1.fillStyle = 'red'
+      ctx1.fillRect(
+        monsterX * charWidth,
+        monsterY * charHeight,
+        charWidth,
+        charHeight
+      )
+      drawCharAlpha(ctx1, 'g', monsterY, monsterX)
     }
 
     redrawObjects = false

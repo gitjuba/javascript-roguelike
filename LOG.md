@@ -111,3 +111,21 @@ How to implement visible and seen tiles?
 I could think of some ways to optimise this. Keep track of the coordinates of the tiles on the edge (border) of the visibility circle, and update these coordinates together with the player coords.
 
 Or update the seen and visible flags to separate arrays, same size as the level map, and update those as the player moves.
+
+Not sure if these are at all necessary optimizations (don't think so...) but it feels so wasteful to loop over the whole map when we know the exact difference between the currently and previously visible tiles.
+
+For the line of sight, we'll first need to somehow highlight the visible portion of the map. So that's where colors come into play.
+
+## 2021-03-22
+
+How to color the tiles? Let's try converting the character color to transparent in Gimp (_Colors >> Color to alpha..._) and replace the `chars` image element with that.
+
+Seems to work, now the character `@` is invisible because the mostly black `.` tiles show through.
+
+To test it out, draw a colored rectangle "under" the player and monster.
+
+Problem: Log and stats are not shown. Should I have two character sheets, one for transparent characters and one for areas which don't need coloring?
+
+If the base level map were opaque, there should be another layer of level tiles to indicate the visibility circle. So let's make the base map transparent, and under everything, draw a _color_ canvas which is some shade of grey in seen areas and bright white in visible area. These color tiles then have to be updated when the player moves. Note that this also supports coloring e.g. walls differently than walkable area.
+
+## 2021-03-23
