@@ -61,7 +61,7 @@ Downloaded the Code page 850 character set image from Wikipedia. It seems to be 
 
 What's the minimal way to load an image? I don't want to introduce complicated asset loading logic, and the image is just a few kilobytes.
 
-Converted it to Base64 and created an image element inline in the main HTML file.
+Converted it to Base64 and created an image element inline in the main HTML file. In NodeJS:
 
 ```js
 var img = fs.readFileSync('./Codepage-850.png')
@@ -129,3 +129,22 @@ Problem: Log and stats are not shown. Should I have two character sheets, one fo
 If the base level map were opaque, there should be another layer of level tiles to indicate the visibility circle. So let's make the base map transparent, and under everything, draw a _color_ canvas which is some shade of grey in seen areas and bright white in visible area. These color tiles then have to be updated when the player moves. Note that this also supports coloring e.g. walls differently than walkable area.
 
 ## 2021-03-23
+
+Well then, _line of sight_... We have to define visibility.
+
+Let `(x, y)` and `(x0, y0)` be two points in the plane with integer coordinates, and assume `x > x0` and `y > y0` (so that a line from `(x0, y0)` to `(x, y)` is in the first quandrant in a coordinate system fixed at `(x0, y0)`). Furthermore, assume that `y - y0 <= x - x0` (meaning that the joining line has slope at most 45 degrees).
+
+Let `m = (y - y0) / (x - x0)` be the slope of the line joining the two points. For each `j` in `[1, ..., x - x0 - 1]`, let `(xj, yj)` be the point `(x0 + j, y0 + m * j)`. We say that the point `(xj, yj)` _blocks the line_ from `(x0, y0)` to `(x, y)` in the current level, if either of the following holds:
+
+1. `yj` is an integer, and the current level has an obstacle (wall) at `(xj, yj)`
+2. `yj` is not an integer, and the current level has obstacles at `(xj, int(yj))` and `(xj, int(yj) + 1)`, where `int(y)` is the integer part of `y`
+
+We say that the point `(x, y)` is _visible_ from `(x0, y0)`, if there are no points which block the line between them.
+
+Hmm, maybe the second condition is too strict. We could combine the conditions to
+
+3. the current level has an obstacle at `(xj, round(yj))`, where `round(y)` is the nearest integer to `y`
+
+This condition may not be strict enough... How about
+
+4. the current level has an obstacle at `(xj, round(yj))` _and_ `abs(yj - round(yj)) <= c`, where `c` is some constant between zero and 0.5.
