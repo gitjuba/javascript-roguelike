@@ -148,3 +148,56 @@ Hmm, maybe the second condition is too strict. We could combine the conditions t
 This condition may not be strict enough... How about
 
 4. the current level has an obstacle at `(xj, round(yj))` _and_ `abs(yj - round(yj)) <= c`, where `c` is some constant between zero and 0.5.
+
+## 2021-03-24
+
+Make a map with more features, to test the line of sight.
+
+Bug: You can still hit the monster even if it's dead and not shown on screen.
+
+## 2021-04-17
+
+Implementing visibility. It seems all the definitions given above are a bit flawed. With condition 2, a single wall tile can block lines only along a cardinal direction. With condition 3, the bottom-right tile in the pic below is not visible.
+
+```
+@..
+.##
+```
+
+Condition 4 is equivalent to 3 if `c = 0.5`. If `c < 0.5`, the bottom-right tile in the pic below _is_ visible.
+
+```
+@##
+.##
+```
+
+So we need a combination of 2 and 4. So, `(xj, yj)` _blocks the line_ between `(x0, y0)` and `(x, y)` if
+
+- the current level has an obstacle at `(xj, round(yj))` and `abs(yj - round(yj)) <= c`
+
+_or_
+
+- the current level has obstacles at `(xj, int(yj))` and `(xj, int(yj) + 1)`
+
+Looks pretty good.
+
+Now, generalize the definition of visibility to cases where `(x, y)` is in a different angle from `(x0, y0)`. Generalizing to angles -45 to 45 degrees is straightforward, just drop the requirement `y > y0`, and require `abs(y - y0) <= x - x0`. The definition needs not be changed.
+
+## 2021-04-18
+
+Problem: with the above definition, the rightmost three wall tiles in the below image are not visible.
+
+```
+@.....
+######
+```
+
+Possible solution: Make the constant `c` in the definition depend on the tile to which visibility is calculated. For wall tiles this constant would be very low, something like 0.05, for empty space closer to 0.5, something like 0.45. Seems to solve it.
+
+Back to generalizing the definition of visibility in other directions. For the ranges of angles 135...180 and -180...-135 it's again straightforward: just choose the points `(xj, yj)` (choose the increment in `j`) according to the sign of `x - x0`.
+
+For the case `abs(y - y0) > abs(x - x0)` a similar definition can be made, just put `m = (x - x0) / (y - y0)` and `yj = y0 + j`, `xj = x0 + m * j`
+
+## 2021-04-19
+
+Continuing the above, the implementation is simple enough, might wanna DRY it out at some point. But, there's a problem: wall tiles are "seen" through single tile wide walls.

@@ -80,13 +80,31 @@ var charMap = {
 }
 
 // Initial single-screen map
-var tileMap = [
-  '#'.repeat(mapWidth),
-  ...Array(mapHeight - 2)
-    .fill(0)
-    .map(() => '#' + '.'.repeat(mapWidth - 2) + '#'),
-  '#'.repeat(mapWidth),
-].map((row) => row.split(''))
+var tileMap = `
+######################################################################
+#....................................................................#
+#....................................................................#
+#......###...........................................................#
+#......###...........................................................#
+#####..###...........................................................#
+#...#................................................................#
+#...#................................................................#
+#...#................................................................#
+#....................................................................#
+#....................................................................#
+#....................................................................#
+#....................................................................#
+#....................................................................#
+#....................................................................#
+#....................................................................#
+#....................................................................#
+#....................................................................#
+#....................................................................#
+######################################################################
+`
+  .trim()
+  .split('\n')
+  .map((row) => row.split(''))
 
 var ctxS = statsCanvas.getContext('2d')
 var ctxL = logCanvas.getContext('2d')
@@ -159,6 +177,54 @@ function drawText(ctx, text, i, j) {
   }
 }
 
+var visBlock = {
+  '#': 0.05,
+  '.': 0.45,
+}
+
+// Is (x,y) visible from (x0,y0) in tile map level
+function isVisible(x, y, x0, y0, level) {
+  var m, xj, yj, yj_, yj0, xj_, xj0, j, dj
+  if (Math.abs(y - y0) <= Math.abs(x - x0)) {
+    // "x-simple"
+    m = (y - y0) / (x - x0)
+    xj, yj, yj_, yj0
+    dj = x < x0 ? -1 : 1
+    for (j = 0; Math.abs(j) < Math.abs(x - x0); j += dj) {
+      xj = x0 + j
+      yj = y0 + m * j
+
+      yj_ = Math.floor(yj)
+      yj0 = Math.round(yj)
+      if (
+        (level[yj_][xj] == '#' && level[yj_ + 1][xj] == '#') ||
+        (level[yj0][xj] == '#' && Math.abs(yj - yj0) <= visBlock[level[y][x]])
+      ) {
+        return false
+      }
+    }
+  } else {
+    // "y-simple"
+    m = (x - x0) / (y - y0)
+    xj, yj, yj_, yj0
+    dj = y < y0 ? -1 : 1
+    for (j = 0; Math.abs(j) < Math.abs(y - y0); j += dj) {
+      yj = y0 + j
+      xj = x0 + m * j
+
+      xj_ = Math.floor(xj)
+      xj0 = Math.round(xj)
+      if (
+        (level[yj][xj_] == '#' && level[yj][xj_ + 1] == '#') ||
+        (level[yj][xj0] == '#' && Math.abs(xj - xj0) <= visBlock[level[y][x]])
+      ) {
+        return false
+      }
+    }
+  }
+  return true
+}
+
 function gameLoop(ts) {
   dt = ts - lastTs
   lastTs = ts
@@ -215,7 +281,10 @@ function gameLoop(ts) {
     // Black except around player
     for (i = 0; i < mapHeight; i++) {
       for (j = 0; j < mapWidth; j++) {
-        if ((i - playerY) ** 2 + (j - playerX) ** 2 > visRadius ** 2) {
+        if (
+          (i - playerY) ** 2 + (j - playerX) ** 2 > visRadius ** 2 ||
+          !isVisible(j, i, playerX, playerY, tileMap)
+        ) {
           drawCharOpaque(ctxV, ' ', i, j)
         }
       }
@@ -228,13 +297,16 @@ function gameLoop(ts) {
       for (j = 0; j < mapWidth; j++) {
         // Clear seen mask from around player, update visible circle
         if ((i - playerY) ** 2 + (j - playerX) ** 2 < visRadius ** 2) {
-          ctxC.fillStyle = '#ffffff'
-          ctxC.fillRect(j * charWidth, i * charHeight, charWidth, charHeight)
-          ctxV.clearRect(j * charWidth, i * charHeight, charWidth, charHeight)
+          if (isVisible(j, i, playerX, playerY, tileMap)) {
+            ctxC.fillStyle = '#ffffff'
+            ctxV.clearRect(j * charWidth, i * charHeight, charWidth, charHeight)
+          } else {
+            ctxC.fillStyle = '#aaaaaa'
+          }
         } else {
           ctxC.fillStyle = '#aaaaaa'
-          ctxC.fillRect(j * charWidth, i * charHeight, charWidth, charHeight)
         }
+        ctxC.fillRect(j * charWidth, i * charHeight, charWidth, charHeight)
       }
     }
     redrawSeen = false
@@ -324,7 +396,7 @@ window.addEventListener('keyup', function (e) {
   } else {
     if (arrowKeys.includes(e.keyCode)) {
       ;({ dx, dy } = getDisplacement(e.keyCode))
-      console.log('moving: ' + dx + ', ' + dy)
+      // console.log('moving: ' + dx + ', ' + dy)
       if (
         tileMap[playerY + dy][playerX + dx] == '.' &&
         (monsterHp == 0 ||
