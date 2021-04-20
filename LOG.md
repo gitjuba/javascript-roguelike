@@ -201,3 +201,17 @@ For the case `abs(y - y0) > abs(x - x0)` a similar definition can be made, just 
 ## 2021-04-19
 
 Continuing the above, the implementation is simple enough, might wanna DRY it out at some point. But, there's a problem: wall tiles are "seen" through single tile wide walls.
+
+## 2021-04-20
+
+We need a different definition of visibility, one that formulates the _visible portion_ of a tile in a way that tiles blocking line of sight from different directions would add up and block the line of sight completely. With the above notation (and slightly rephrased terminology), we say that, for each `j` in `[0, ..., x - x0 - 1]` the _blocked visible portion at distance `j`_ is `vj_ * (1 - abs(yj - int(yj))) + vj^ * (1 - abs(yj - (int(yj) + 1)))`, where `vj_` equals one if the level has an obstacle at `(xj, int(yj))`, and zero otherwise, and `vj^` equals one if the level has an obstacle at `(xj, int(yj) + 1)`, and zero otherwise.
+
+The _total blocked visible portion_ between `(x0, y0)` and `(x, y)` is the sum of the blocked visible portions at all distances `j`.
+
+No no no, we have to differentiate between _left visibility_ and _right visibility_, or, more generally, _rounded down visibility_ and _rounded up visibility_. So, the _blocked rounded down portion at distance `j`_ is `vj_ * (1 - abs(yj - int(yj)))`, and the _blocked rounded up portion at distance `j`_ is `vj^ * (1 - abs(yj - (int(yj) + 1)))`. Then, for both sides, the total blocked portion is the _maximum_ of the blocked portions at all distances, and the full total blocked portion is the sum of these two maxima.
+
+Let's try it.
+
+Side note, `j` can start at one (`j = 0` gives us `(x0, y0)`, which is trivially visible).
+
+Hey, seems to work!

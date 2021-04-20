@@ -85,7 +85,7 @@ var tileMap = `
 #....................................................................#
 #....................................................................#
 #......###...........................................................#
-#......###...........................................................#
+#......#.#...........................................................#
 #####..###...........................................................#
 #...#................................................................#
 #...#................................................................#
@@ -184,40 +184,55 @@ var visBlock = {
 
 // Is (x,y) visible from (x0,y0) in tile map level
 function isVisible(x, y, x0, y0, level) {
-  var m, xj, yj, yj_, yj0, xj_, xj0, j, dj
+  var m, xj, yj, yj_, xj_, j, dj, vbj_d, vbj_u, vb_d, vb_u
   if (Math.abs(y - y0) <= Math.abs(x - x0)) {
     // "x-simple"
     m = (y - y0) / (x - x0)
-    xj, yj, yj_, yj0
     dj = x < x0 ? -1 : 1
+    vb_d = 0
+    vb_u = 0
     for (j = 0; Math.abs(j) < Math.abs(x - x0); j += dj) {
       xj = x0 + j
       yj = y0 + m * j
 
       yj_ = Math.floor(yj)
-      yj0 = Math.round(yj)
-      if (
-        (level[yj_][xj] == '#' && level[yj_ + 1][xj] == '#') ||
-        (level[yj0][xj] == '#' && Math.abs(yj - yj0) <= visBlock[level[y][x]])
-      ) {
+
+      // Calculate blocked portion of visiblity to both sides
+      vbj_d = 1 - (yj - yj_)
+      vbj_u = 1 - vbj_d
+
+      if (level[yj_][xj] == '#' && vbj_d > vb_d) {
+        vb_d = vbj_d
+      }
+      if (level[yj_ + 1][xj] == '#' && vbj_u > vb_u) {
+        vb_u = vbj_u
+      }
+      if (vb_d + vb_u > 1 - visBlock[level[y][x]]) {
         return false
       }
     }
   } else {
     // "y-simple"
     m = (x - x0) / (y - y0)
-    xj, yj, yj_, yj0
     dj = y < y0 ? -1 : 1
+    vb_d = 0
+    vb_u = 0
     for (j = 0; Math.abs(j) < Math.abs(y - y0); j += dj) {
       yj = y0 + j
       xj = x0 + m * j
 
       xj_ = Math.floor(xj)
-      xj0 = Math.round(xj)
-      if (
-        (level[yj][xj_] == '#' && level[yj][xj_ + 1] == '#') ||
-        (level[yj][xj0] == '#' && Math.abs(xj - xj0) <= visBlock[level[y][x]])
-      ) {
+
+      vbj_d = 1 - (xj - xj_)
+      vbj_u = 1 - vbj_d
+
+      if (level[yj][xj_] == '#' && vbj_d > vb_d) {
+        vb_d = vbj_d
+      }
+      if (level[yj][xj_ + 1] == '#' && vbj_u > vb_u) {
+        vb_u = vbj_u
+      }
+      if (vb_d + vb_u > 1 - visBlock[level[y][x]]) {
         return false
       }
     }
