@@ -10,6 +10,6 @@
 
 ## Goal II
 
-- [ ] Line of sight / visibility
+- [x] Line of sight / visibility
 - [ ] Colors
 - [ ] Aggressive monsters

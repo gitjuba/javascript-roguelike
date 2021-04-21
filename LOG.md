@@ -215,3 +215,7 @@ Let's try it.
 Side note, `j` can start at one (`j = 0` gives us `(x0, y0)`, which is trivially visible).
 
 Hey, seems to work!
+
+## 2021-04-21
+
+There are still some annoying artefacts with the current visibility algorithm, but let's leave it as it is for now, and focus on the remaining items in the _Goal II_ checklist.
