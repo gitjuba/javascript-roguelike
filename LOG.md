@@ -261,3 +261,20 @@ Wow, I made a cool effect by accident: Repeatedly drawing rectangles with `rgba(
 Seems to work. Getting some serious ADOM vibes here... Anyway, _colors_ can be considered done.
 
 Side note: Prettier formats inline JS in HTML files quite bizarrely...
+
+---
+
+Next goal post is a big one: _aggressive monsters_. Break it down to more simple improvements:
+
+- Multiple monsters
+  - With individual stats, hit percentages, symbols and so forth
+- Monsters chase the player and attack when adjacent
+  - Don't try to make any sophisticated route finding algorithms, monsters simply move in the direction which minimizes distance to player.
+  - Are all monsters aggressive all the time? Let's make it so that each monster has some chance to become aggressive each turn if the player is too close (and the player sees them, assuming here that the player has the largest sight radius)).
+  - Once aggressive, monsters never cool down, and whenever seen, chase the player
+  - Having individual sight radii for all monsters might make it too complicated
+- The player can die.
+
+Let's start with multiple monsters. Player and monster movement needs to take into account all other monsters. This calls for some abstraction, and treating all objects (with x and y coordinates) in a more unified manner.
+
+Hmm, let's create an `isOccupied` array, and update it whenever an object (player or monster) moves. It could also check the tile map, put false for walls.

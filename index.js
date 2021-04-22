@@ -110,6 +110,8 @@ var tileMap = `
 
 var wasVisible = tileMap.map((row) => row.map(() => false))
 
+var isOccupied = tileMap.map((row) => row.map((tile) => tile == '#'))
+
 var tileColors = {
   '#': '#666',
   '.': '#ddd',
@@ -137,10 +139,17 @@ var hitChance = 0.5
 var visRadius = 7.5
 var attacking = false
 
-// Monster
-var monsterX = 6
-var monsterY = 3
-var monsterHp = 1
+isOccupied[playerY][playerX] = true
+
+// Monsters
+var monsters = [
+  { x: 6, y: 3, hp: 3, seen: false, aggressive: false },
+  { x: 5, y: 1, hp: 2, seen: false, aggressive: false },
+]
+
+monsters.forEach((m) => {
+  isOccupied[m.y][m.x] = true
+})
 
 // Log
 var logBuffer = ['> Welcome!']
@@ -362,13 +371,19 @@ function gameLoop(ts) {
     drawCharAlpha(objectContext, '@', playerY, playerX)
 
     // Draw monster if alive and in visibility range
-    if (
-      monsterHp > 0 &&
-      (monsterX - playerX) ** 2 + (monsterY - playerY) ** 2 < visRadius ** 2
-    ) {
-      drawTile(objectContext, 'red', monsterY, monsterX)
-      drawCharAlpha(objectContext, 'g', monsterY, monsterX)
-    }
+    monsters.forEach((monster) => {
+      if (
+        monster.hp > 0 &&
+        (monster.x - playerX) ** 2 + (monster.y - playerY) ** 2 < visRadius ** 2
+      ) {
+        // Monster within visibility radius, interpret it so that sees that player
+        monster.seen = true
+        drawTile(objectContext, 'red', monster.y, monster.x)
+        drawCharAlpha(objectContext, 'g', monster.y, monster.x)
+      } else {
+        monster.seen = false
+      }
+    })
 
     redrawObjects = false
   }
@@ -402,15 +417,21 @@ window.addEventListener('keyup', function (e) {
   var dx, dy
   var turnDone = false
   var logMsg = '>'
+  var monster
   if (attacking) {
     if (arrowKeys.includes(e.keyCode)) {
       ;({ dx, dy } = getDisplacement(e.keyCode))
       console.log('attacking: ' + dx + ', ' + dy)
-      if (monsterX == playerX + dx && monsterY == playerY + dy) {
+      // Check if there is a monster where player is attacking
+      monster = monsters.find(
+        (m) => m.x == playerX + dx && m.y == playerY + dy && m.hp > 0
+      )
+      if (monster) {
         if (Math.random() < hitChance) {
-          monsterHp -= 1
+          monster.hp -= 1
           logMsg += ' You hit the monster.'
-          if (monsterHp == 0) {
+          if (monster.hp == 0) {
+            isOccupied[monster.y][monster.x] = false
             logMsg += ' The monster is killed.'
           }
         } else {
@@ -424,13 +445,11 @@ window.addEventListener('keyup', function (e) {
     if (arrowKeys.includes(e.keyCode)) {
       ;({ dx, dy } = getDisplacement(e.keyCode))
       // console.log('moving: ' + dx + ', ' + dy)
-      if (
-        tileMap[playerY + dy][playerX + dx] == '.' &&
-        (monsterHp == 0 ||
-          !(monsterX == playerX + dx && monsterY == playerY + dy))
-      ) {
+      if (!isOccupied[playerY + dy][playerX + dx]) {
+        isOccupied[playerY][playerX] = false
         playerX += dx
         playerY += dy
+        isOccupied[playerY][playerX] = true
 
         turnDone = true
         redrawSeen = true
@@ -452,18 +471,62 @@ window.addEventListener('keyup', function (e) {
   }
 
   if (turnDone) {
-    // Monster moves at random, if alive
-    if (monsterHp > 0) {
-      var dir = 37 + Math.floor(Math.random() * 4)
-      ;({ dx, dy } = getDisplacement(dir))
-      if (
-        tileMap[monsterY + dy][monsterX + dx] == '.' &&
-        !(playerX == monsterX + dx && playerY == monsterY + dy)
-      ) {
-        monsterX += dx
-        monsterY += dy
+    // Monsters move at random, if alive
+    monsters.forEach((monster) => {
+      if (monster.hp > 0) {
+        // Seen monsters have certain chance to become aggressive
+        if (monster.seen && !monster.aggressive && Math.random() < 0.2) {
+          console.log('monster becomes aggressive')
+          monster.aggressive = true
+        }
+
+        if (monster.aggressive && monster.seen) {
+          // Aggressive monsters move towards player if they are visible
+          var pdx = playerX - monster.x
+          var pdy = playerY - monster.y
+          if (Math.abs(pdx) > Math.abs(pdy)) {
+            // Further away on the x axis
+            dx = pdx < 0 ? -1 : 1
+            dy = 0
+            if (isOccupied[monster.y + dy][monster.x + dx]) {
+              // "Primary" direction blocked, try other way
+              dx = 0
+              dy = pdy < 0 ? -1 : 1
+            }
+            if (isOccupied[monster.y + dy][monster.x + dx]) {
+              // Both directions blocked, stay here
+              dx = 0
+              dy = 0
+            }
+          } else {
+            // Further away on the y axis
+            dx = 0
+            dy = pdy < 0 ? -1 : 1
+            if (isOccupied[monster.y + dy][monster.x + dx]) {
+              // "Primary" direction blocked, try other way
+              dx = pdx < 0 ? -1 : 1
+              dy = 0
+            }
+            if (isOccupied[monster.y + dy][monster.x + dx]) {
+              // Both directions blocked, stay here
+              dx = 0
+              dy = 0
+            }
+          }
+        } else {
+          var dir = 37 + Math.floor(Math.random() * 4)
+          ;({ dx, dy } = getDisplacement(dir))
+          if (isOccupied[monster.y + dy][monster.x + dx]) {
+            dx = 0
+            dy = 0
+          }
+        }
+        isOccupied[monster.y][monster.x] = false
+        monster.x += dx
+        monster.y += dy
+        isOccupied[monster.y][monster.x] = true
       }
-    }
+    })
 
     redrawObjects = true
   }
