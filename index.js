@@ -1,6 +1,7 @@
 var statsCanvas = document.getElementById('stats')
 var logCanvas = document.getElementById('log')
 var colorCanvas = document.getElementById('color')
+var visibleCanvas = document.getElementById('visible')
 var levelCanvas = document.getElementById('level')
 var seenCanvas = document.getElementById('seen')
 var objectCanvas = document.getElementById('objects')
@@ -32,6 +33,7 @@ var canvasHeight = charsDown * charHeight
   statsCanvas,
   logCanvas,
   colorCanvas,
+  visibleCanvas,
   levelCanvas,
   seenCanvas,
   objectCanvas,
@@ -106,13 +108,21 @@ var tileMap = `
   .split('\n')
   .map((row) => row.split(''))
 
-var ctxS = statsCanvas.getContext('2d')
-var ctxL = logCanvas.getContext('2d')
-var ctxC = colorCanvas.getContext('2d')
-var ctx0 = levelCanvas.getContext('2d')
-var ctxV = seenCanvas.getContext('2d')
-var ctx1 = objectCanvas.getContext('2d')
-var ctx2 = debugCanvas.getContext('2d')
+var wasVisible = tileMap.map((row) => row.map(() => false))
+
+var tileColors = {
+  '#': '#666',
+  '.': '#ddd',
+}
+
+var statsContext = statsCanvas.getContext('2d')
+var logContext = logCanvas.getContext('2d')
+var colorContext = colorCanvas.getContext('2d')
+var visibleContext = visibleCanvas.getContext('2d')
+var levelContext = levelCanvas.getContext('2d')
+var seenContext = seenCanvas.getContext('2d')
+var objectContext = objectCanvas.getContext('2d')
+var debugContext = debugCanvas.getContext('2d')
 
 var lastTs = 0
 var dt
@@ -175,6 +185,15 @@ function drawText(ctx, text, i, j) {
   for (k = 0; k < text.length; k++) {
     drawCharOpaque(ctx, text[k], i, j + k)
   }
+}
+
+function drawTile(ctx, color, i, j) {
+  ctx.fillStyle = color
+  ctx.fillRect(j * charWidth, i * charHeight, charWidth, charHeight)
+}
+
+function clearTile(ctx, i, j) {
+  ctx.clearRect(j * charWidth, i * charHeight, charWidth, charHeight)
 }
 
 var visBlock = {
@@ -250,11 +269,11 @@ function gameLoop(ts) {
   if (redrawStats) {
     for (i = 0; i < statsHeight; i++) {
       for (j = 0; j < statsWidth; j++) {
-        drawCharOpaque(ctxS, ' ', i, j + mapWidth)
+        drawCharOpaque(statsContext, ' ', i, j + mapWidth)
       }
     }
     drawText(
-      ctxS,
+      statsContext,
       `HP: ${playerHp.toString().padStart(3, ' ')}`,
       1,
       mapWidth + 1
@@ -263,14 +282,14 @@ function gameLoop(ts) {
   }
 
   if (redrawLog) {
-    ctxL.clearRect(0, 0, canvasWidth, canvasHeight)
+    logContext.clearRect(0, 0, canvasWidth, canvasHeight)
     for (i = 0; i < logHeight; i++) {
       for (j = 0; j < logWidth; j++) {
-        drawCharOpaque(ctxL, ' ', i + mapHeight, j)
+        drawCharOpaque(logContext, ' ', i + mapHeight, j)
       }
     }
     for (i = 0; i < Math.min(logBuffer.length, logHeight); i++) {
-      drawText(ctxL, logBuffer[i], mapHeight + logHeight - 1 - i, 0)
+      drawText(logContext, logBuffer[i], mapHeight + logHeight - 1 - i, 0)
     }
     redrawLog = false
   }
@@ -278,12 +297,14 @@ function gameLoop(ts) {
   // Mostly static level map
   if (redrawLevel) {
     console.log('redrawing level')
-    ctx0.clearRect(0, 0, canvasWidth, canvasHeight)
+    levelContext.clearRect(0, 0, canvasWidth, canvasHeight)
 
     for (i = 0; i < mapHeight; i++) {
       for (j = 0; j < mapWidth; j++) {
         var tile = tileMap[i][j]
-        drawCharAlpha(ctx0, tile, i, j)
+        let tileColor = tileColors[tile]
+        drawTile(colorContext, tileColor, i, j)
+        drawCharAlpha(levelContext, tile, i, j)
       }
     }
 
@@ -291,7 +312,7 @@ function gameLoop(ts) {
   }
 
   if (initSeen) {
-    ctxV.clearRect(0, 0, canvasWidth, canvasHeight)
+    seenContext.clearRect(0, 0, canvasWidth, canvasHeight)
 
     // Black except around player
     for (i = 0; i < mapHeight; i++) {
@@ -300,7 +321,7 @@ function gameLoop(ts) {
           (i - playerY) ** 2 + (j - playerX) ** 2 > visRadius ** 2 ||
           !isVisible(j, i, playerX, playerY, tileMap)
         ) {
-          drawCharOpaque(ctxV, ' ', i, j)
+          drawCharOpaque(seenContext, ' ', i, j)
         }
       }
     }
@@ -310,18 +331,21 @@ function gameLoop(ts) {
   if (redrawSeen) {
     for (i = 0; i < mapHeight; i++) {
       for (j = 0; j < mapWidth; j++) {
-        // Clear seen mask from around player, update visible circle
-        if ((i - playerY) ** 2 + (j - playerX) ** 2 < visRadius ** 2) {
-          if (isVisible(j, i, playerX, playerY, tileMap)) {
-            ctxC.fillStyle = '#ffffff'
-            ctxV.clearRect(j * charWidth, i * charHeight, charWidth, charHeight)
-          } else {
-            ctxC.fillStyle = '#aaaaaa'
-          }
-        } else {
-          ctxC.fillStyle = '#aaaaaa'
+        var nonVisible = 'rgba(0, 0, 0, 0.2)'
+        if (
+          (i - playerY) ** 2 + (j - playerX) ** 2 < visRadius ** 2 &&
+          isVisible(j, i, playerX, playerY, tileMap)
+        ) {
+          wasVisible[i][j] = true
+          // Remove "fog of war" once tile becomes visible for first time
+          clearTile(seenContext, i, j)
+
+          // Clear visibility range mask too
+          clearTile(visibleContext, i, j)
+        } else if (wasVisible[i][j]) {
+          wasVisible[i][j] = false
+          drawTile(visibleContext, nonVisible, i, j)
         }
-        ctxC.fillRect(j * charWidth, i * charHeight, charWidth, charHeight)
       }
     }
     redrawSeen = false
@@ -331,31 +355,19 @@ function gameLoop(ts) {
   if (redrawObjects) {
     // console.log('redrawing objects')
 
-    ctx1.clearRect(0, 0, canvasWidth, canvasHeight)
+    objectContext.clearRect(0, 0, canvasWidth, canvasHeight)
 
-    // Draw player
-    ctx1.fillStyle = 'green'
-    ctx1.fillRect(
-      playerX * charWidth,
-      playerY * charHeight,
-      charWidth,
-      charHeight
-    )
-    drawCharAlpha(ctx1, '@', playerY, playerX)
+    // Draw player (color rectangle and symbol)
+    drawTile(objectContext, 'green', playerY, playerX)
+    drawCharAlpha(objectContext, '@', playerY, playerX)
 
     // Draw monster if alive and in visibility range
     if (
       monsterHp > 0 &&
       (monsterX - playerX) ** 2 + (monsterY - playerY) ** 2 < visRadius ** 2
     ) {
-      ctx1.fillStyle = 'red'
-      ctx1.fillRect(
-        monsterX * charWidth,
-        monsterY * charHeight,
-        charWidth,
-        charHeight
-      )
-      drawCharAlpha(ctx1, 'g', monsterY, monsterX)
+      drawTile(objectContext, 'red', monsterY, monsterX)
+      drawCharAlpha(objectContext, 'g', monsterY, monsterX)
     }
 
     redrawObjects = false
@@ -363,15 +375,15 @@ function gameLoop(ts) {
 
   // Debug overlays
   if (ts - dtUpdate > 500) {
-    ctx2.clearRect(0, 0, canvasWidth, canvasHeight)
+    debugContext.clearRect(0, 0, canvasWidth, canvasHeight)
 
     fps = (1000 / dt).toFixed(1)
     dtUpdate = ts
 
     // FPS
-    ctx2.font = '10px sans-serif'
-    ctx2.fillStyle = 'red'
-    ctx2.fillText('FPS ' + fps, 10, 20)
+    debugContext.font = '10px sans-serif'
+    debugContext.fillStyle = 'red'
+    debugContext.fillText('FPS ' + fps, 10, 20)
   }
 
   window.requestAnimationFrame(gameLoop)

@@ -219,3 +219,45 @@ Hey, seems to work!
 ## 2021-04-21
 
 There are still some annoying artefacts with the current visibility algorithm, but let's leave it as it is for now, and focus on the remaining items in the _Goal II_ checklist.
+
+## 2021-04-22
+
+Let's do colors. How can I combine visibility with colors? Do I _need_ to do that? Perhaps only empty space needs to be colored differently based on whether or not it is visible to the player. On the other hand, I might want to have empty space of different colors (dungeon floor, grass, ...).
+
+Let's review the different canvases in use in the map (ignoring stats and log for now, although they could use some coloring, too, at some point). Ignoring also the debug canvas. The order at the moment is
+
+1. Color
+1. Level
+1. Seen
+1. Objects
+
+If you think about it, the order should in fact be
+
+1. Color
+1. Level
+1. Objects
+1. Seen
+
+And we'll need a new canvas to show the visible portion of the level map. The idea is to blend the colors in the color canvas and visibility canvas to produce a brighter color on the visible tiles. So the new order would be
+
+1. Color
+1. Visiblity
+1. Level
+1. Objects
+1. Seen
+
+How to blend colors? Let's make a new HTML file to test it. The opacity of what is drawn on the canvas can be controlled by setting the fill style as an `rgba` quadruplet, e.g. `ctx.fillStyle = rgba(255, 0, 0, 0.5)` for semi-transparent red.
+
+Ok, let's handle the visibility by dimming out the squares which are not visible.
+
+Another option would be to specify two colors for each tile type, one for when the tile is visible and another for when it isn't. But I don't want to mix the color and visibility too much. Having a separate visiblity layer allows to draw the level and its color canvas only once (whenever the level is altered).
+
+Anyway, we have to specify tile colors. Let's have the tile symbol define it for now, later it might be different per level.
+
+Note that object colors are handled in the object canvas.
+
+Wow, I made a cool effect by accident: Repeatedly drawing rectangles with `rgba(0, 0, 0, 0.1)` on the canvas slowly fades the level map to black. This could be used at some point. But, at the moment, we only want to draw the dimming rectangle once, when the tile first becomes not visible. Let's make an array `wasVisible`.
+
+Seems to work. Getting some serious ADOM vibes here... Anyway, _colors_ can be considered done.
+
+Side note: Prettier formats inline JS in HTML files quite bizarrely...
