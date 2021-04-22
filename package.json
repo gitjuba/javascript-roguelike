@@ -1,9 +1,9 @@
 {
-  "name": "new-javascript-project",
+  "name": "javascript-roguelike",
   "version": "0.0.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gitjuba/new-javascript-project.git"
+    "url": "git+https://github.com/gitjuba/javascript-roguelike.git"
   },
   "author": {
     "name": "Jussi Mattas",
