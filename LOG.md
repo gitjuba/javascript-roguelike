@@ -278,3 +278,15 @@ Next goal post is a big one: _aggressive monsters_. Break it down to more simple
 Let's start with multiple monsters. Player and monster movement needs to take into account all other monsters. This calls for some abstraction, and treating all objects (with x and y coordinates) in a more unified manner.
 
 Hmm, let's create an `isOccupied` array, and update it whenever an object (player or monster) moves. It could also check the tile map, put false for walls.
+
+## 2021-04-23
+
+Let's do diagonal movement. I want this to be playable on a laptop with no separate numpad, so movement is made with keys `uiojklm,.`. Later when we add more commands, movement keys can be toggled on/off with, say, _Tab_.
+
+Player only first. Also enable attacking diagonally.
+
+Write a helper function which takes two objects with X and Y coordinates, and computes a list of preferred approach directions from one to another.
+
+Side note, this is a weird combination of `l_2` and `l_max` metrics.
+
+Writing a game calls for better debugging capabilities than `console.log`...
