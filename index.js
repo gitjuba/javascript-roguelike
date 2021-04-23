@@ -53,32 +53,74 @@ var charMap = {
   ' ': { i: 0, j: 0 },
   '!': { i: 1, j: 1 },
   '#': { i: 1, j: 3 }, // 2nd row, 4th column
+  '-': { i: 1, j: 13 },
   '.': { i: 1, j: 14 },
+  '/': { i: 1, j: 15 },
   0: { i: 1, j: 16 },
   1: { i: 1, j: 17 },
+  2: { i: 1, j: 18 },
+  3: { i: 1, j: 19 },
+  4: { i: 1, j: 20 },
+  5: { i: 1, j: 21 },
+  6: { i: 1, j: 22 },
+  7: { i: 1, j: 23 },
+  8: { i: 1, j: 24 },
+  9: { i: 1, j: 25 },
   ':': { i: 1, j: 26 },
   '>': { i: 1, j: 30 },
   '@': { i: 2, j: 0 },
+  A: { i: 2, j: 1 },
+  B: { i: 2, j: 2 },
+  C: { i: 2, j: 3 },
+  D: { i: 2, j: 4 },
+  E: { i: 2, j: 5 },
+  F: { i: 2, j: 6 },
+  G: { i: 2, j: 7 },
   H: { i: 2, j: 8 },
+  I: { i: 2, j: 9 },
+  J: { i: 2, j: 10 },
+  K: { i: 2, j: 11 },
+  L: { i: 2, j: 12 },
+  M: { i: 2, j: 13 },
+  N: { i: 2, j: 14 },
+  O: { i: 2, j: 15 },
   P: { i: 2, j: 16 },
+  Q: { i: 2, j: 17 },
+  R: { i: 2, j: 18 },
+  S: { i: 2, j: 19 },
   T: { i: 2, j: 20 },
+  U: { i: 2, j: 21 },
+  V: { i: 2, j: 22 },
   W: { i: 2, j: 23 },
+  X: { i: 2, j: 24 },
   Y: { i: 2, j: 25 },
+  Z: { i: 2, j: 26 },
+  a: { i: 3, j: 1 },
+  b: { i: 3, j: 2 },
   c: { i: 3, j: 3 },
   d: { i: 3, j: 4 },
   e: { i: 3, j: 5 },
+  f: { i: 3, j: 6 },
   g: { i: 3, j: 7 },
   h: { i: 3, j: 8 },
   i: { i: 3, j: 9 },
+  j: { i: 3, j: 10 },
   k: { i: 3, j: 11 },
   l: { i: 3, j: 12 },
   m: { i: 3, j: 13 },
   n: { i: 3, j: 14 },
   o: { i: 3, j: 15 },
+  p: { i: 3, j: 16 },
+  q: { i: 3, j: 17 },
   r: { i: 3, j: 18 },
   s: { i: 3, j: 19 },
   t: { i: 3, j: 20 },
   u: { i: 3, j: 21 },
+  v: { i: 3, j: 22 },
+  w: { i: 3, j: 23 },
+  x: { i: 3, j: 24 },
+  y: { i: 3, j: 25 },
+  z: { i: 3, j: 26 },
 }
 
 // Initial single-screen map
@@ -145,8 +187,8 @@ isOccupied[player.y][player.x] = true
 
 // Monsters
 var monsters = [
-  { x: 6, y: 3, hp: 3, seen: false, aggressive: false },
-  { x: 5, y: 1, hp: 2, seen: false, aggressive: false },
+  { x: 6, y: 3, hp: 3, hitChance: 0.3, seen: false, aggressive: false },
+  { x: 5, y: 1, hp: 2, hitChance: 0.3, seen: false, aggressive: false },
 ]
 
 monsters.forEach((m) => {
@@ -192,7 +234,7 @@ function drawCharAlpha(ctx, char, i, j) {
 
 function drawText(ctx, text, i, j) {
   var k
-  console.log('drawing text ' + text)
+  // console.log('drawing text ' + text)
   for (k = 0; k < text.length; k++) {
     drawCharOpaque(ctx, text[k], i, j + k)
   }
@@ -459,6 +501,13 @@ window.addEventListener('keyup', function (e) {
   var turnDone = false
   var logMsg = '>'
   var monster
+
+  if (player.hp <= 0) {
+    console.log('you are dead')
+    // Press some key to restart?
+    return
+  }
+
   if (player.attacking) {
     if (movementKeys.includes(e.keyCode)) {
       ;({ dx, dy } = keyDisplacement[e.keyCode])
@@ -508,14 +557,9 @@ window.addEventListener('keyup', function (e) {
     }
   }
 
-  if (logMsg.length > 1) {
-    logBuffer.unshift(logMsg)
-    redrawLog = true
-  }
-
   if (turnDone) {
     // Monsters move at random, if alive
-    monsters.forEach((monster) => {
+    for (monster of monsters) {
       if (monster.hp > 0) {
         // Seen monsters have certain chance to become aggressive
         if (monster.seen && !monster.aggressive && Math.random() < 0.2) {
@@ -529,6 +573,18 @@ window.addEventListener('keyup', function (e) {
             console.log('monster attacks')
             dx = 0
             dy = 0
+            if (Math.random() < monster.hitChance) {
+              logMsg += ' The monster hits you.'
+              player.hp -= 1
+              redrawStats = true
+              if (player.hp <= 0) {
+                logMsg += ' You die.'
+                // Game stops here
+                break
+              }
+            } else {
+              logMsg += ' The monster misses you.'
+            }
           } else {
             var vectors = getApproachVectors(monster, player)
             var vectorFound = false
@@ -559,9 +615,14 @@ window.addEventListener('keyup', function (e) {
         monster.y += dy
         isOccupied[monster.y][monster.x] = true
       }
-    })
+    }
 
     redrawObjects = true
+  }
+
+  if (logMsg.length > 1) {
+    logBuffer.unshift(logMsg)
+    redrawLog = true
   }
 })
 

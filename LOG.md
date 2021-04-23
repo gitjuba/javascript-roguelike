@@ -290,3 +290,5 @@ Write a helper function which takes two objects with X and Y coordinates, and co
 Side note, this is a weird combination of `l_2` and `l_max` metrics.
 
 Writing a game calls for better debugging capabilities than `console.log`...
+
+Then, make the monsters actually attack.
