@@ -12,4 +12,4 @@
 
 - [x] Line of sight / visibility
 - [x] Colors
-- [ ] Aggressive monsters
+- [x] Aggressive monsters

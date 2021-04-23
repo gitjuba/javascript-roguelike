@@ -189,6 +189,9 @@ isOccupied[player.y][player.x] = true
 var monsters = [
   { x: 6, y: 3, hp: 3, hitChance: 0.3, seen: false, aggressive: false },
   { x: 5, y: 1, hp: 2, hitChance: 0.3, seen: false, aggressive: false },
+  { x: 2, y: 2, hp: 4, hitChance: 0.3, seen: false, aggressive: false },
+  { x: 2, y: 4, hp: 1, hitChance: 0.3, seen: false, aggressive: false },
+  { x: 4, y: 4, hp: 5, hitChance: 0.3, seen: false, aggressive: false },
 ]
 
 monsters.forEach((m) => {
@@ -341,8 +344,28 @@ function gameLoop(ts) {
         drawCharOpaque(logContext, ' ', i + mapHeight, j)
       }
     }
-    for (i = 0; i < Math.min(logBuffer.length, logHeight); i++) {
-      drawText(logContext, logBuffer[i], mapHeight + logHeight - 1 - i, 0)
+    var latestLines = []
+    var iLog = 0
+    while (latestLines.length <= logHeight && iLog < logBuffer.length) {
+      var msg = logBuffer[iLog]
+      var lineRegex = new RegExp(`(.{0,${logWidth}}$|.{0,${logWidth}}\\b)`, 'g')
+      var lines = msg
+        .match(lineRegex)
+        .filter((line) => line)
+        .map((line) => line.trim())
+        .reverse()
+      lines.forEach((line) => {
+        latestLines.unshift(line)
+      })
+      iLog += 1
+    }
+    for (i = 0; i < Math.min(latestLines.length, logHeight); i++) {
+      drawText(
+        logContext,
+        latestLines[latestLines.length - 1 - i],
+        mapHeight + logHeight - 1 - i,
+        0
+      )
     }
     redrawLog = false
   }
@@ -511,7 +534,7 @@ window.addEventListener('keyup', function (e) {
   if (player.attacking) {
     if (movementKeys.includes(e.keyCode)) {
       ;({ dx, dy } = keyDisplacement[e.keyCode])
-      console.log('attacking: ' + dx + ', ' + dy)
+      // console.log('attacking: ' + dx + ', ' + dy)
       // Check if there is a monster where player is attacking
       monster = monsters.find(
         (m) => m.x == player.x + dx && m.y == player.y + dy && m.hp > 0
@@ -547,12 +570,13 @@ window.addEventListener('keyup', function (e) {
         redrawSeen = true
       }
     } else {
-      console.log(e.keyCode)
       if (e.keyCode == 65 /* a */) {
         player.attacking = true
       } else if (e.keyCode == 83 /* s */) {
         // Stand still
         turnDone = true
+      } else {
+        console.log('unknown command: ' + e.keyCode)
       }
     }
   }

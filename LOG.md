@@ -292,3 +292,5 @@ Side note, this is a weird combination of `l_2` and `l_max` metrics.
 Writing a game calls for better debugging capabilities than `console.log`...
 
 Then, make the monsters actually attack.
+
+When there are multiple monsters attacking, the log messages in one turn may span several lines. Also, if there are even more monsters, the five line log buffer may be completely filled. First of all, break each log message into chunks of at most line length (break at whitespace). Basically we want to separate the log buffer (list of messages) from the log buffer display (five lines).
