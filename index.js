@@ -442,7 +442,8 @@ function gameLoop(ts) {
       if (
         monster.hp > 0 &&
         (monster.x - player.x) ** 2 + (monster.y - player.y) ** 2 <
-          player.visRadius ** 2
+          player.visRadius ** 2 &&
+        isVisible(monster.x, monster.y, player.x, player.y, tileMap)
       ) {
         // Monster within visibility radius, interpret it so that sees that player
         monster.seen = true
