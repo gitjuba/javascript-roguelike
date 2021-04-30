@@ -294,3 +294,45 @@ Writing a game calls for better debugging capabilities than `console.log`...
 Then, make the monsters actually attack.
 
 When there are multiple monsters attacking, the log messages in one turn may span several lines. Also, if there are even more monsters, the five line log buffer may be completely filled. First of all, break each log message into chunks of at most line length (break at whitespace). Basically we want to separate the log buffer (list of messages) from the log buffer display (five lines).
+
+---
+
+Next goal is the biggest one yet: random dungeon levels.
+
+## 2021-04-24
+
+Didn't have an implementation idea for random levels right away so I watched a couple of tutorials on procedural level generation. Probably the simplest method is to place rectangles on the screen at random (in such a way that they don't overlap), and connect them (in random order?) with corridors. More detail:
+
+1. Sample the width `w` and height `h` of the room from uniform distributions over `[w0, ..., w1]` and `[h0, ..., h1]` where `w0` and `w1` are, respectively, the minimum and maximum room _width_, and `h0` and `h1` are the minimum and maximum room _height_.
+2. Assuming the map spans the tiles `[0, ..., W - 1] x [0, ..., H - 1]`, sample the coordinates of the top left corner of the room from uniform distributions `[1, W - 1 - w]` and `[1, H - 1 - h]`
+
+- We require that the outermost tiles are always walls.
+
+3. Loop over already placed rooms. If the new room overlaps some of them, go back to step 1.
+
+- Re-sample the size too? A smaller room might have better chances of fitting.
+
+4. If there are no overlaps, place the new room.
+
+Stop placing rooms when either of the following conditions are satisfied:
+
+- The percentage of floor tiles is above some threshold
+
+or
+
+- Step 3. above has failed enough times.
+
+Then, how to place the corridors? First, pick two rooms and connect them with a corridor. Then, as long as there are unconnected rooms remaining, pick one unconnected room and one connected room, and connect them with a corridor.
+
+1. Pick two rooms, `j` and `k` at random, pick points within these rooms, `p_j = (x_j, y_j)` and `p_k = (x_k, y_k)` at random.
+2. Pick one of the points `(x_k, y_j)` and `(x_j, y_k)` (turning point of the corridor) at random and call it `p_jk`. **Note** this point will coincide with one of the points within the rooms if `x_j == x_k` or `y_j == y_k`.
+3. A _corridor_ between the rooms `j` and `k` is defined as the triplet `[p_j, p_jk, p_k]`. The pair `[p_j, p_jk]` is called the first leg of the corridor and `[p_jk, p_k]` the second leg.
+4. Two rooms `j` and `k` are called _connected_ if there exists a chain of rooms `i_1,...,i_r` where `i_1 == j` and `i_r == k` and for each pair `(i_q, i_q+1)` there exists a corridor between them.
+5. Loop over the remaining rooms and check if either of the legs of the corridor between rooms `j` and `k` overlaps with the room. If, say, room `i` overlaps with the corridor, pick a point `p_i` within the intersection.
+6. If the first leg overlaps, then `[p_j, p_i, p_i]` forms a corridor between `j` and `i` and `[p_i, p_jk, p_k]` forms a corridor between `i` and `k`, and if the second leg overlaps, `[p_j, p_jk, p_i]` is a corridor between `j` and `i` and `[p_i, p_i, p_k]` between `i` and `k`.
+
+## 2021-04-30
+
+For convenience, each corridor can be represented as two rooms.
+
+Alright, a basically working level generator is done. Now, how to hook it up with the rest of the game?

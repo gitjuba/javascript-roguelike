@@ -13,3 +13,9 @@
 - [x] Line of sight / visibility
 - [x] Colors
 - [x] Aggressive monsters
+
+## Goal III
+
+- [] Multiple levels
+- [] Procedurally generated levels
+- [] Procedurally generated monsters

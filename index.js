@@ -338,6 +338,7 @@ function gameLoop(ts) {
   }
 
   if (redrawLog) {
+    // TODO: There must be a better way...
     logContext.clearRect(0, 0, canvasWidth, canvasHeight)
     for (i = 0; i < logHeight; i++) {
       for (j = 0; j < logWidth; j++) {
@@ -534,6 +535,7 @@ window.addEventListener('keyup', function (e) {
 
   if (player.attacking) {
     if (movementKeys.includes(e.keyCode)) {
+      /* eslint-disable-next-line no-extra-semi */
       ;({ dx, dy } = keyDisplacement[e.keyCode])
       // console.log('attacking: ' + dx + ', ' + dy)
       // Check if there is a monster where player is attacking
@@ -557,6 +559,7 @@ window.addEventListener('keyup', function (e) {
     }
   } else {
     if (movementKeys.includes(e.keyCode)) {
+      /* eslint-disable-next-line no-extra-semi */
       ;({ dx, dy } = keyDisplacement[e.keyCode])
       // console.log('moving: ' + dx + ', ' + dy)
       if (dx == 0 && dy == 0) {
