@@ -16,6 +16,6 @@
 
 ## Goal III
 
-- [] Multiple levels
-- [] Procedurally generated levels
-- [] Procedurally generated monsters
+- [ ] Multiple levels
+- [x] Procedurally generated levels
+- [ ] Procedurally generated monsters

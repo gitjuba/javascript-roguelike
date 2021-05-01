@@ -1,3 +1,5 @@
+/* global randInt, getRandomRoomPosition, generateLevel */
+
 var statsCanvas = document.getElementById('stats')
 var logCanvas = document.getElementById('log')
 var colorCanvas = document.getElementById('color')
@@ -52,7 +54,16 @@ var charOffsetY = 4
 var charMap = {
   ' ': { i: 0, j: 0 },
   '!': { i: 1, j: 1 },
+  '"': { i: 1, j: 2 },
   '#': { i: 1, j: 3 }, // 2nd row, 4th column
+  $: { i: 1, j: 4 },
+  '%': { i: 1, j: 5 },
+  '&': { i: 1, j: 6 },
+  '(': { i: 1, j: 8 },
+  ')': { i: 1, j: 9 },
+  '*': { i: 1, j: 10 },
+  '+': { i: 1, j: 11 },
+  ',': { i: 1, j: 12 },
   '-': { i: 1, j: 13 },
   '.': { i: 1, j: 14 },
   '/': { i: 1, j: 15 },
@@ -67,7 +78,11 @@ var charMap = {
   8: { i: 1, j: 24 },
   9: { i: 1, j: 25 },
   ':': { i: 1, j: 26 },
+  ';': { i: 1, j: 27 },
+  '<': { i: 1, j: 28 },
+  '=': { i: 1, j: 29 },
   '>': { i: 1, j: 30 },
+  '?': { i: 1, j: 31 },
   '@': { i: 2, j: 0 },
   A: { i: 2, j: 1 },
   B: { i: 2, j: 2 },
@@ -123,40 +138,74 @@ var charMap = {
   z: { i: 3, j: 26 },
 }
 
-// Initial single-screen map
-var tileMap = `
+// Dungeon with multiple levels
+var dungeonLevels = []
+var levelMap = generateLevel(mapWidth, mapHeight, { down: true })
+dungeonLevels[0] = levelMap
+var currentLevel = 0
+
+function carveRoom(room, level) {
+  for (var i = room.y; i < room.y + room.h; i++) {
+    for (var j = room.x; j < room.x + room.w; j++) {
+      level[i][j] = '.'
+    }
+  }
+}
+
+function createTileMap(levelMap) {
+  var tileMap = `
 ######################################################################
-#......####################....#######################################
-#......####################......#####################################
-#......####################....#.#########.........###################
-#......#########################.#########.........###################
-#####.#########....................................###################
-#####.#########.################.#########.........###################
-#####.#########.################.#########.........###################
-#####.#########.################.#########.........###################
-###........####.################.#########.........###################
-###........####.#####....#######.################.####################
-###......................###..........###########.####################
-###........##########....###..........###########.###########....#####
-###........#################..........###########................#####
-############################..........#######################....#####
-############################..........#######################....#####
-#############################################################....#####
+######################################################################
+######################################################################
+######################################################################
+######################################################################
+######################################################################
+######################################################################
+######################################################################
+######################################################################
+######################################################################
+######################################################################
+######################################################################
+######################################################################
+######################################################################
+######################################################################
+######################################################################
+######################################################################
 ######################################################################
 ######################################################################
 ######################################################################
 `
-  .trim()
-  .split('\n')
-  .map((row) => row.split(''))
+    .trim()
+    .split('\n')
+    .map((row) => row.split(''))
 
-var wasVisible = tileMap.map((row) => row.map(() => false))
+  levelMap.rooms.forEach((room) => {
+    carveRoom(room, tileMap)
+  })
+  levelMap.corridors.forEach((room) => {
+    carveRoom(room, tileMap)
+  })
 
-var isOccupied = tileMap.map((row) => row.map((tile) => tile == '#'))
+  if (levelMap.up) {
+    tileMap[levelMap.up.y][levelMap.up.x] = '<'
+  }
+  if (levelMap.down) {
+    tileMap[levelMap.down.y][levelMap.down.x] = '>'
+  }
+
+  return tileMap
+}
+
+var tileMap = createTileMap(dungeonLevels[currentLevel])
+
+levelMap.wasVisible = tileMap.map((row) => row.map(() => false))
+levelMap.isOccupied = tileMap.map((row) => row.map((tile) => tile == '#'))
 
 var tileColors = {
   '#': '#666',
   '.': '#ddd',
+  '<': '#ddd',
+  '>': '#ddd',
 }
 
 var statsContext = statsCanvas.getContext('2d')
@@ -174,29 +223,36 @@ var dtUpdate = 0
 var fps = 0
 
 // Initial player stats
+var startPos = getRandomRoomPosition(dungeonLevels[currentLevel])
 var player = {
-  x: 3,
-  y: 3,
+  x: startPos.x,
+  y: startPos.y,
   hp: 10,
   hitChance: 0.5,
   visRadius: 7.5,
   attacking: false,
 }
 
-isOccupied[player.y][player.x] = true
+levelMap.isOccupied[player.y][player.x] = true
 
 // Monsters
-var monsters = [
-  { x: 6, y: 3, hp: 3, hitChance: 0.3, seen: false, aggressive: false },
-  { x: 5, y: 1, hp: 2, hitChance: 0.3, seen: false, aggressive: false },
-  { x: 2, y: 2, hp: 4, hitChance: 0.3, seen: false, aggressive: false },
-  { x: 2, y: 4, hp: 1, hitChance: 0.3, seen: false, aggressive: false },
-  { x: 4, y: 4, hp: 5, hitChance: 0.3, seen: false, aggressive: false },
-]
-
-monsters.forEach((m) => {
-  isOccupied[m.y][m.x] = true
-})
+var nMonsters = 5
+var monsters = []
+for (var iMonster = 0; iMonster < nMonsters; iMonster++) {
+  var pos = getRandomRoomPosition(dungeonLevels[currentLevel])
+  while (levelMap.isOccupied[pos.y][pos.x]) {
+    pos = getRandomRoomPosition(dungeonLevels[currentLevel])
+  }
+  monsters.push({
+    x: pos.x,
+    y: pos.y,
+    hp: randInt(1, 5),
+    hitChance: 0.3,
+    seen: false,
+    aggressive: false,
+  })
+  levelMap.isOccupied[pos.y][pos.x] = true
+}
 
 // Log
 var logBuffer = ['> Welcome!']
@@ -255,6 +311,8 @@ function clearTile(ctx, i, j) {
 var visBlock = {
   '#': 0.05,
   '.': 0.45,
+  '<': 0.45,
+  '>': 0.45,
 }
 
 // Is (x,y) visible from (x0,y0) in tile map level
@@ -413,14 +471,14 @@ function gameLoop(ts) {
           (i - player.y) ** 2 + (j - player.x) ** 2 < player.visRadius ** 2 &&
           isVisible(j, i, player.x, player.y, tileMap)
         ) {
-          wasVisible[i][j] = true
+          levelMap.wasVisible[i][j] = true
           // Remove "fog of war" once tile becomes visible for first time
           clearTile(seenContext, i, j)
 
           // Clear visibility range mask too
           clearTile(visibleContext, i, j)
-        } else if (wasVisible[i][j]) {
-          wasVisible[i][j] = false
+        } else if (levelMap.wasVisible[i][j]) {
+          levelMap.wasVisible[i][j] = false
           drawTile(visibleContext, nonVisible, i, j)
         }
       }
@@ -547,7 +605,7 @@ window.addEventListener('keyup', function (e) {
           monster.hp -= 1
           logMsg += ' You hit the monster.'
           if (monster.hp == 0) {
-            isOccupied[monster.y][monster.x] = false
+            levelMap.isOccupied[monster.y][monster.x] = false
             logMsg += ' The monster is killed.'
           }
         } else {
@@ -564,11 +622,11 @@ window.addEventListener('keyup', function (e) {
       // console.log('moving: ' + dx + ', ' + dy)
       if (dx == 0 && dy == 0) {
         turnDone = true
-      } else if (!isOccupied[player.y + dy][player.x + dx]) {
-        isOccupied[player.y][player.x] = false
+      } else if (!levelMap.isOccupied[player.y + dy][player.x + dx]) {
+        levelMap.isOccupied[player.y][player.x] = false
         player.x += dx
         player.y += dy
-        isOccupied[player.y][player.x] = true
+        levelMap.isOccupied[player.y][player.x] = true
 
         turnDone = true
         redrawSeen = true
@@ -577,8 +635,21 @@ window.addEventListener('keyup', function (e) {
       if (e.keyCode == 65 /* a */) {
         player.attacking = true
       } else if (e.keyCode == 83 /* s */) {
-        // Stand still
-        turnDone = true
+        // Use staircase
+        if (tileMap[player.y][player.x] == '<') {
+          // Up
+        } else if (tileMap[player.y][player.x] == '>') {
+          // Down
+          /*
+          if (currentLevel == dungeonLevels.length - 1) {
+            // Bottom of currently generated levels, generate new one
+            dungeonLevels.push(
+              generateLevel(mapWidth, mapHeight, { up: true, down: true })
+            )
+            currentLevel += 1
+          }
+          */
+        }
       } else {
         console.log('unknown command: ' + e.keyCode)
       }
@@ -617,7 +688,7 @@ window.addEventListener('keyup', function (e) {
             var vectors = getApproachVectors(monster, player)
             var vectorFound = false
             for (var v of vectors) {
-              if (!isOccupied[monster.y + v.dy][monster.x + v.dx]) {
+              if (!levelMap.isOccupied[monster.y + v.dy][monster.x + v.dx]) {
                 dx = v.dx
                 dy = v.dy
                 vectorFound = true
@@ -633,15 +704,15 @@ window.addEventListener('keyup', function (e) {
           var dirInd = Math.floor(9 * Math.random())
           var dir = movementKeys[dirInd]
           ;({ dx, dy } = keyDisplacement[dir])
-          if (isOccupied[monster.y + dy][monster.x + dx]) {
+          if (levelMap.isOccupied[monster.y + dy][monster.x + dx]) {
             dx = 0
             dy = 0
           }
         }
-        isOccupied[monster.y][monster.x] = false
+        levelMap.isOccupied[monster.y][monster.x] = false
         monster.x += dx
         monster.y += dy
-        isOccupied[monster.y][monster.x] = true
+        levelMap.isOccupied[monster.y][monster.x] = true
       }
     }
 

@@ -336,3 +336,48 @@ Then, how to place the corridors? First, pick two rooms and connect them with a 
 For convenience, each corridor can be represented as two rooms.
 
 Alright, a basically working level generator is done. Now, how to hook it up with the rest of the game?
+
+It's a bit annoying to have a corridor run right next to a room. But that and other issues can wait further developments.
+
+A level can be defined simply as a list of rooms (with corridors interpreted as rooms, too). As a first test, generate the level in that form and immediately draw the tile map.
+
+We have to differentiate between rooms and corridors because the player starting position (and stairs etc) has to be in a room, as it traditionally is.
+
+It works! This is kinda cool already. Surely we're not far from a complete game. Surely.
+
+On to the next challenge: multiple levels!
+
+## 2021-05-01
+
+First, let's make two levels with staircases connecting them.
+
+- Staircase up is `<`, doẁn `>`, as in ADOM.
+- For the moment, allow only one upwards staircase and one downwards, i.e. no branching dungeons.
+- We have an array of level maps (collections of rooms and corridors), and a pointer to that array denoting the current level
+- When player enters a staircase, raise a flag `levelChanged` and, when redrawing level, recreate tile map from new level map
+
+We need to store the "seen" mask values per level, and also the monsters, and the "occupied" mask.
+
+---
+
+Some high level goals and/or visions, for the far future, i.e. _What makes this game unique?_
+
+- Sprawling dungeons: A dungeon level could extend to the sides as well as up and down
+  - This could be represented as a two-dimensional map using ASCII, see below
+  - One probably can't extend one dungeon level to all four directions.
+
+```
+-----------
+| Level 1 |
+-----------
+     |_________________
+     |                 |
+------------     ------------      ------------
+| Level 2a |     | Level 2b |------| Level 2c |
+------------     ------------      ------------
+```
+
+- Resource management
+  - Yes, that's right. Resource management.
+  - I've had the idea for a long time of a resource management / city builder game where, instead of assuming the role of an all-seeing controller, the player is a single character in the world, who, in particular, can be in only one place at a time. They would have to rely on NPC's to control most of the cities/factories/mines etc and their production when they are busy dungeoneering or something.
+  - No idea yet how this will in practice be implemented. Or what those resources would be used.
