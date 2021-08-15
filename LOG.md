@@ -489,3 +489,40 @@ window.requestAnimationFrame(gameLoop)
 Are there some global level objects needed? The HTML canvas element where the game is rendered can be dynamically created in the `Game` constructor. To get things started we need some parameters which can actually be given as constants, such as canvas dimensions, character sizes, parameters how to divide the screen into regions for the map, stats and log etc.
 
 Because the display is split to so many different canvases, it's probably better to have a separate renderer object. Inside `game.render()` we check each component whether they have changed and call the renderer.
+
+## 2021-08-15
+
+Next: Really start re-writing the game. Create a constant game state and render it.
+
+Rename old source files with `_old` suffix, start from scratch.
+
+Keep the `index.html` file minimal and create the canvas elements and charset image elements dynamically.
+
+```xml
+<html>
+  <head>
+    <meta charset="utf8" />
+    <link rel="stylesheet" href="layout.css" />
+    <link rel="shortcut icon" href="favicon.png" type="image/png" />
+  </head>
+  <body>
+    <script src="index.js"></script>
+  </body>
+</html>
+```
+
+Put the CSS in a separate stylesheet file. Use a class selector instead of a ton of IDs to set the canvas styles.
+
+Create the canvas elements and set their attributes. The CSS transform has to be set dynamically (as we don't want to fix the dimensions outside the game itself).
+
+Browsers complain not being able to find favicon. Let's create one. From MDN,
+
+> Usually, a favicon is 16 x 16 pixels in size and stored in the GIF, PNG, or ICO file format.
+
+Let's use the `@` symbol. Open the Codepage 850 charsheet in Gimp, copy the `@` and paste as new image. Choose _Image >> Canvas size_, resize to 16 by 16, under _Resize layers_ select _All layers_ and _Fill with foreground color_ (assuming it's black). Export as `favicon.png` or something, and add `<link>` tag to HTML header.
+
+Introduce the concept of a _renderer_, which means a HTML canvas 2D drawing context, with a given rectangle (topleft corner, width and height) to draw in.
+
+For the character sheets, it would be cleaner to give the image source file to the img elements instead of the Base64 string. I suppose we need an `onload` hook then, and create the rest of the game elements there.
+
+Can I use a single character sheet, the one with the alpha values? The opaque sheet is used only for drawing text, for the stats and log canvases. Those could also use some colors.
