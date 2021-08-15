@@ -380,4 +380,112 @@ Some high level goals and/or visions, for the far future, i.e. _What makes this 
 - Resource management
   - Yes, that's right. Resource management.
   - I've had the idea for a long time of a resource management / city builder game where, instead of assuming the role of an all-seeing controller, the player is a single character in the world, who, in particular, can be in only one place at a time. They would have to rely on NPC's to control most of the cities/factories/mines etc and their production when they are busy dungeoneering or something.
-  - No idea yet how this will in practice be implemented. Or what those resources would be used.
+  - No idea yet how this will in practice be implemented. Or what those resources would be used for.
+
+## 2021-05-07/08/09
+
+The project needs some refactoring and probably better tooling. Jot down some notes below.
+
+Tools:
+
+- Exclude this file from Prettier automatic formatting on save (the Prettier plugin is kind of slow so formatting a 400 line MarkDown file takes some time, and this doesn't really need to be autoformatted).
+- Let's try to use VS Code for better debugging capabilities
+  - `sudo pacman -S code`
+- I feel like ST3 suits better for writing notes though. I guess that sentiment might change once I get more familiar with VSCode. Seems there are no conflicts editing files in both editors.
+
+Game:
+
+What does a _level_ consist of?
+
+- Level layout or blueprint, i.e. placement of rooms and corridors, and staircases/exits
+  - For the moment, only staircases leading either up or down.
+  - First level also has player starting point (or is it set on the fly?)
+- Level map, a.k.a. tile map (is this needed? could be generated when the level is entered)
+- _Seen_ mask, a boolean mask marking the tiles which the player has seen
+- Monsters (coordinates and stats)
+- Later on, items (coords and stats)
+
+Rethink the game loop.
+
+- On the first turn the player enters a new level.
+  - Generate level blueprint. Put it as the first element of the dungeon levels list.
+  - Set player position (at random) in first level.
+  - Create level tile map.
+
+## 2021-08-12/13
+
+Back where I left off: Updating the editor to VSCode for better debugging. So, let's launch VSCode and open the project folder.
+
+How to debug the game? Need to select a debug environment (browser(Chrome)/NodeJS)
+
+Hmm, didn't have Chrome installed. It's not available in the Arch Linux package repository, but it is in AUR. So install it.
+
+Installed Chrome from AUR. Pressing _Launch Chrome against localhost_ opens up Chrome but fails to reach `http://localhost:8080/`. In the debug console it says
+
+```
+crbug/1173575, non-JS module files deprecated.
+```
+
+I stopped the session, Chrome was closed, but when I tried again, it complains "a browser is already running from an old debug session". Chose _Debug anyway_, Chrome started with complaint "Chrome didn't shut down properly, restore session?" and again failed to connect to localhost.
+
+Tried using `request: "attach"` instead of `"launch"`, complaint "Could not find any debuggable target".
+
+So VSCode does not launch a web server to serve the HTML files, even with the "launch" debug config? Let's read the tutorial article _in alle Ruhe_.
+
+> The best way to explain the difference between launch and attach is to think of a launch configuration as a recipe for how to start your app in debug mode before VS Code attaches to it, while an attach configuration is a recipe for how to connect VS Code's debugger to an app or process that's already running.
+
+I guess _launching_ is more for NodeJS (server) apps, whereas _attaching_ is more for web apps (which can use stuff like Webpack which VSCode doesn't know about). So I'll have to run a NodeJS (e.g. Express) app to serve the files.
+
+Or maybe VSCode has some extension which does that.
+
+Hmm, for the moment just run a dummy Python web server in the project folder: `python -m http.server`, which starts a server in `http://localhost:8000`. Then in VSCode, create a launch configuration
+
+```json
+{
+    "type": "pwa-chrome",
+    "request": "launch",
+    "name": "Launch Chrome against localhost",
+    "url": "http://localhost:8000",
+    "webRoot": "${workspaceFolder}"
+}
+```
+
+## 2021-08-14
+
+The code feels too tangled to do anything. Let's rewrite the main business logic in a separate file.
+
+But first, configure VSCode editor.
+
+- Tab width. Can I use an `.editorconfig` file? Using EditorConfig requires a plugin, but I'll happily install that. I'll also install it for Sublime Text.
+  - Had issue with extensions marketplace (unable to connect). Found (temporary) solution online: https://github.com/VSCodium/vscodium/issues/746#issuecomment-881049046
+    - So add the line `"enable-browser-code-loading": false` to `~/.vscode/argv.json` and restart VSCode.
+  - Right-click the workspace in the _Explorer_ view, and choose _Generage .editorconfig_. A file is generated with mostly OK settings.
+- Autosave files on focus change: Open settings and search for "autosave"
+
+In a turn-based game one does not have to update game state in every frame. Instead, event listeners are registered to get user input independently from the animation loop (e.g. keyboard controlled games listening to _keyup_ events). And those two should be clearly separated, because, a priori, user inputs and the animation frame cycle can occur at the same time. So when handling user input we have to raise a flag indicating that the game state has changed, and that flag needs to be raised after the input is completely processed.
+
+So on the highest level it looks like this:
+
+```js
+function Game() {
+  this.updateState = function(event) { }
+  this.render = function() {}
+}
+
+var game = new Game();
+
+function gameLoop() {
+  game.render()
+  window.requestAnimationFrame(gameLoop)
+}
+
+window.addEventListener('keyup', function(e) {
+  game.updateState(e)
+})
+
+window.requestAnimationFrame(gameLoop)
+```
+
+Are there some global level objects needed? The HTML canvas element where the game is rendered can be dynamically created in the `Game` constructor. To get things started we need some parameters which can actually be given as constants, such as canvas dimensions, character sizes, parameters how to divide the screen into regions for the map, stats and log etc.
+
+Because the display is split to so many different canvases, it's probably better to have a separate renderer object. Inside `game.render()` we check each component whether they have changed and call the renderer.
