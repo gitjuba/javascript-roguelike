@@ -526,3 +526,28 @@ Introduce the concept of a _renderer_, which means a HTML canvas 2D drawing cont
 For the character sheets, it would be cleaner to give the image source file to the img elements instead of the Base64 string. I suppose we need an `onload` hook then, and create the rest of the game elements there.
 
 Can I use a single character sheet, the one with the alpha values? The opaque sheet is used only for drawing text, for the stats and log canvases. Those could also use some colors.
+
+## 2021-08-16
+
+Created a bunch of renderers. For reference, they are responsible for:
+
+- Stats
+- Log
+- Level color
+- Visibility mask (dim out a bit tiles not currently visible)
+  - This is the reason why level color and level map need to be separated
+- Level (tile map characters)
+- Seen mask (fog of war)
+  - The array which this renderer uses is a property of the (current) level object
+- Objects
+- Debug
+
+I want to render levels, so create a constructor function for levels. In the constructor:
+
+- Create the level blueprint using the level generator
+  - For now, parameters only include whether or not there are staircases up and/or down
+- Create an empty (filled with `#`) tile map
+- Carve the rooms in the tile map using the blueprint.
+- Create a blank _seen_ mask (a 2d array same size as tile map, full of false)
+- Create an _is occupied_ map, initialize with wall tiles being occupied, floor tiles not
+

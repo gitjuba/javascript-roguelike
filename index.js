@@ -10,8 +10,10 @@ function createCharacterSheet(imageFile) {
   img.className = 'character-sheet'
   img.onload = function() {
     console.log('image loaded')
+    startGame()
   }
   document.body.appendChild(img)
+  return img
 }
 
 var charsImg = createCharacterSheet('Codepage-850_alpha.png')
@@ -48,6 +50,10 @@ function Renderer(id, top, left, width, height) {
 
   this.context = createDrawingContext(id)
 
+  this.clear = function() {
+    this.context.clearRect(0, 0, canvasWidth, canvasHeight)
+  }
+
   this.drawChar = function(char, i, j) {
     if (!(char in charMap)) {
       throw new Error('invalid char: ' + char)
@@ -80,32 +86,125 @@ function Renderer(id, top, left, width, height) {
       charHeightPixels
     )
   }
+
+  this.fillWithChar = function(char) {
+    for (var i = 0; i < this.height; i++) {
+      for (var j = 0; j < this.width; j++) {
+        this.drawChar(char, i, j)
+      }
+    }
+  }
 }
 
-var statsContext = createDrawingContext('stats')
-var logContext = createDrawingContext('log')
-var colorContext = createDrawingContext('color')
-var visibleContext = createDrawingContext('visible')
-var levelContext = createDrawingContext('level')
-var seenContext = createDrawingContext('seen')
-var objectContext = createDrawingContext('objects')
-var debugContext = createDrawingContext('debug')
+var mapWidth = 70
+var mapHeight = 20
+
+function createEmptyTileMap() {
+  var tileMap = Array(mapHeight)
+  for (var i = 0; i < mapHeight; i++) {
+    tileMap[i] = Array(mapWidth)
+    for (var j = 0; j < mapWidth; j++) {
+      tileMap[i][j] = '#'
+    }
+  }
+  return tileMap
+}
+
+function Level(params) {
+  this.map = generateLevel(mapWidth, mapHeight, params)
+  this.tileMap = createEmptyTileMap()
+
+  this.seenMap = this.tileMap.map(row => row.map(() => false))
+  this.isOccupied = this.tileMap.map(row => row.map(tile => (tile == '#')))
+
+  this.monsters = []
+  for (var iMonster = 0; iMonster < 5; iMonster++) {
+    var position
+    do {
+      position = getRandomRoomPosition(this.map)
+    } while (this.isOccupied[pos.y][pos.x])
+    this.monsters.push({
+      x: position.x,
+      y: position.y,
+      hp: randInt(1, 5),
+      hitChance = 0.3,
+      seen: false,
+      aggressive: false
+    })
+  }
+}
+
+var statsRenderer = new Renderer('stats', 0,
+  mapWidth, canvasWidthChars - mapWidth, mapHeight)
+var logRenderer = new Renderer('log', mapHeight, 0, canvasWidthChars, 5)
+
+var colorRenderer = new Renderer('color', 0, 0, mapWidth, mapHeight)
+var visibleRenderer = new Renderer('visible', 0, 0, mapWidth, mapHeight)
+var levelRenderer = new Renderer('level', 0, 0, mapWidth, mapHeight)
+var seenRenderer = new Renderer('seen', 0, 0, mapWidth, mapHeight)
+var objectRenderer = new Renderer('objects', 0, 0, mapWidth, mapHeight)
+var debugRenderer = new Renderer('debug', 0, 0, mapWidth, mapHeight)
 
 function Game() {
+  this.shouldRenderStats = true
+  this.shouldRenderLog = true
+  this.shouldRenderLevel = true
+  this.shouldRenderObjects = true
+
+  this.levels = []
+  this.levels.push(new Level({ down: true }))
+  this.currentLevel = 0
 
   this.updateState = function(event) { }
-  this.render = function() {}
+  this.render = function() {
+    if (this.shouldRenderStats) {
+      this.renderStats()
+      this.shouldRenderStats = false
+    }
+    if (this.shouldRenderLog) {
+      this.renderLog()
+      this.shouldRenderLog = false
+    }
+    if (this.shouldRenderLevel) {
+      this.renderLevel()
+      this.shouldRenderLevel = false
+    }
+    if (this.shouldRenderObjects) {
+      this.renderObjects()
+      this.shouldRenderObjects = false
+    }
+  }
+
+  this.renderStats = function() {
+    statsRenderer.fillWithChar(' ')
+  }
+
+  this.renderLog = function() {
+    logRenderer.fillWithChar(' ')
+  }
+
+  this.renderLevel = function() {
+    levelRenderer.fillWithChar('.')
+  }
+
+  this.renderObjects = function() {
+    objectRenderer.clear()
+    objectRenderer.drawTile('green', 10, 10)
+    objectRenderer.drawChar('@', 10, 10)
+  }
 }
 
-var game = new Game();
+function startGame() {
+  var game = new Game();
 
-function gameLoop() {
-  game.render()
+  function gameLoop() {
+    game.render()
+    window.requestAnimationFrame(gameLoop)
+  }
+
+  window.addEventListener('keyup', function(e) {
+    game.updateState(e)
+  })
+
   window.requestAnimationFrame(gameLoop)
 }
-
-window.addEventListener('keyup', function(e) {
-  game.updateState(e)
-})
-
-window.requestAnimationFrame(gameLoop)
