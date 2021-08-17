@@ -112,7 +112,7 @@ var tileMap = createTileMap(dungeonLevels[currentLevel])
 levelMap.wasVisible = tileMap.map((row) => row.map(() => false))
 levelMap.isOccupied = tileMap.map((row) => row.map((tile) => tile == '#'))
 
-var tileColors = {
+var defaultTileColors = {
   '#': '#666',
   '.': '#ddd',
   '<': '#ddd',
@@ -348,7 +348,7 @@ function gameLoop(ts) {
     for (i = 0; i < mapHeight; i++) {
       for (j = 0; j < mapWidth; j++) {
         var tile = tileMap[i][j]
-        let tileColor = tileColors[tile]
+        let tileColor = defaultTileColors[tile]
         drawTile(colorContext, tileColor, i, j)
         drawCharAlpha(levelContext, tile, i, j)
       }

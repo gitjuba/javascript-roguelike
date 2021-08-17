@@ -551,3 +551,23 @@ I want to render levels, so create a constructor function for levels. In the con
 - Create a blank _seen_ mask (a 2d array same size as tile map, full of false)
 - Create an _is occupied_ map, initialize with wall tiles being occupied, floor tiles not
 
+## 2021-08-17
+
+The color map (color of tiles) is also level-specific, i.e. property of the level object.
+
+Similarly the symbol (and its color) representing a player or a monster is a property of the object.
+
+Monsters and the player have a lot of properties in common. Let's do JS prototype based inheritance!
+
+```js
+function Character() {
+  this.x = 0
+  this.y = 0
+  // ...
+}
+
+function Monster() {
+  Character.call(this)
+  // ...
+}
+```

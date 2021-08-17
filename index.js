@@ -87,6 +87,11 @@ function Renderer(id, top, left, width, height) {
     )
   }
 
+  this.drawColoredChar = function(char, color, i, j) {
+    this.drawTile(color, i, j)
+    this.drawChar(char, i, j)
+  }
+
   this.fillWithChar = function(char) {
     for (var i = 0; i < this.height; i++) {
       for (var j = 0; j < this.width; j++) {
@@ -110,27 +115,84 @@ function createEmptyTileMap() {
   return tileMap
 }
 
+var defaultTileColors = {
+  '#': '#666',
+  '.': '#ddd',
+  '<': '#ddd',
+  '>': '#ddd',
+}
+
+function carveRoom(room, level) {
+  for (var i = room.y; i < room.y + room.h; i++) {
+    for (var j = room.x; j < room.x + room.w; j++) {
+      level[i][j] = '.'
+    }
+  }
+}
+
+function LivingEntity(char, color) {
+  this.char = char
+  this.color = color
+  this.x = 0
+  this.y = 0
+  this.hp = randInt(1, 5)
+  this.hitChance = 0.3
+
+  this.setPosition = function(position) {
+    this.x = position.x
+    this.y = position.y
+  }
+}
+
+function Monster(char, color) {
+  LivingEntity.call(this, char, color)
+
+  this.seen = false
+  this.aggressive = false
+}
+
+function Player(char, color) {
+  LivingEntity.call(this, char, color)
+
+  this.visRadius = 7.5
+  this.attacking = false
+}
+
 function Level(params) {
   this.map = generateLevel(mapWidth, mapHeight, params)
   this.tileMap = createEmptyTileMap()
+  this.map.rooms.forEach(room => {
+    carveRoom(room, this.tileMap)
+  })
+  this.map.corridors.forEach(room => {
+    carveRoom(room, this.tileMap)
+  })
+  if (this.map.up) {
+    this.tileMap[this.map.up.y][this.map.up.x] = '<'
+  }
+  if (this.map.down) {
+    this.tileMap[this.map.down.y][this.map.down.x] = '>'
+  }
+
+  this.colorMap = defaultTileColors
 
   this.seenMap = this.tileMap.map(row => row.map(() => false))
   this.isOccupied = this.tileMap.map(row => row.map(tile => (tile == '#')))
 
-  this.monsters = []
-  for (var iMonster = 0; iMonster < 5; iMonster++) {
+  this.getRandomUnoccupiedTile = function() {
     var position
     do {
       position = getRandomRoomPosition(this.map)
-    } while (this.isOccupied[pos.y][pos.x])
-    this.monsters.push({
-      x: position.x,
-      y: position.y,
-      hp: randInt(1, 5),
-      hitChance = 0.3,
-      seen: false,
-      aggressive: false
-    })
+    } while (this.isOccupied[position.y][position.x])
+    return position
+  }
+
+  this.monsters = []
+  for (var iMonster = 0; iMonster < 5; iMonster++) {
+    var monster = new Monster('g', 'red')
+    var position = this.getRandomUnoccupiedTile()
+    monster.setPosition(position)
+    this.monsters.push(monster)
   }
 }
 
@@ -141,8 +203,8 @@ var logRenderer = new Renderer('log', mapHeight, 0, canvasWidthChars, 5)
 var colorRenderer = new Renderer('color', 0, 0, mapWidth, mapHeight)
 var visibleRenderer = new Renderer('visible', 0, 0, mapWidth, mapHeight)
 var levelRenderer = new Renderer('level', 0, 0, mapWidth, mapHeight)
-var seenRenderer = new Renderer('seen', 0, 0, mapWidth, mapHeight)
 var objectRenderer = new Renderer('objects', 0, 0, mapWidth, mapHeight)
+var seenRenderer = new Renderer('seen', 0, 0, mapWidth, mapHeight)
 var debugRenderer = new Renderer('debug', 0, 0, mapWidth, mapHeight)
 
 function Game() {
@@ -154,6 +216,13 @@ function Game() {
   this.levels = []
   this.levels.push(new Level({ down: true }))
   this.currentLevel = 0
+
+  seenRenderer.fillWithChar(' ')
+
+  this.player = new Player('@', 'green')
+  this.player.setPosition(this.levels[this.currentLevel].getRandomUnoccupiedTile())
+
+  
 
   this.updateState = function(event) { }
   this.render = function() {
@@ -184,13 +253,26 @@ function Game() {
   }
 
   this.renderLevel = function() {
-    levelRenderer.fillWithChar('.')
+    levelRenderer.clear()
+    var level = this.levels[this.currentLevel]
+    for (var i = 0; i < mapHeight; i++) {
+      for (var j = 0; j < mapWidth; j++) {
+        var tile = level.tileMap[i][j]
+        colorRenderer.drawTile(level.colorMap[tile], i, j)
+        levelRenderer.drawChar(tile, i, j)
+      }
+    }
   }
 
   this.renderObjects = function() {
     objectRenderer.clear()
-    objectRenderer.drawTile('green', 10, 10)
-    objectRenderer.drawChar('@', 10, 10)
+    objectRenderer.drawColoredChar(this.player.char, this.player.color, this.player.y, this.player.x)
+
+    var level = this.levels[this.currentLevel]
+    for (var iMonster = 0; iMonster < level.monsters.length; iMonster++) {
+      var monster = level.monsters[iMonster]
+      objectRenderer.drawColoredChar(monster.char, monster.color, monster.y, monster.x)
+    }
   }
 }
 
