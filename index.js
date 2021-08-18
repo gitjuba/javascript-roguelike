@@ -145,11 +145,48 @@ function LivingEntity(char, color) {
   this.x = 0
   this.y = 0
   this.hp = randInt(1, 5)
-  this.hitChance = 0.3
+  this.hitChance = 0.5
 
   this.setPosition = function(position) {
     this.x = position.x
     this.y = position.y
+  }
+
+  this.isAdjacentTo = function(that) {
+    return Math.max(Math.abs(this.x - that.x), Math.abs(this.y - that.y)) == 1
+  }
+
+  this.attack = function(that) {
+    if (Math.random() < this.hitChance) {
+      that.hp -= 1
+      return true
+    } else {
+      return false
+    }
+  }
+
+  this.getApproachVectorsTo = function(that) {
+    var dispX = that.x - this.x
+    var dispY = that.y - this.y
+    var dx0 = dispX != 0 ? (dispX < 0 ? -1 : 1) : 0
+    var dy0 = dispY != 0 ? (dispY < 0 ? -1 : 1) : 0
+
+    var vectors = [{ dx: dx0, dy: dy0 }]
+
+    // If preferred direction along cardinal axis try also both diagonals around it
+    if (dx0 == 0) {
+      vectors.push({ dx: -1, dy: dy0 })
+      vectors.push({ dx: 1, dy: dy0 })
+    } else if (dy0 == 0) {
+      vectors.push({ dx: dx0, dy: -1 })
+      vectors.push({ dx: dx0, dy: 1 })
+    } else {
+      // Preferred direction is diagonal: try also both cardinal directions around it
+      vectors.push({ dx: 0, dy: dy0 })
+      vectors.push({ dx: dx0, dy: 0 })
+    }
+
+    return vectors
   }
 }
 
@@ -166,7 +203,7 @@ function Player(char, color) {
   this.visRadius = 7.5
   this.attacking = false
 
-  this.isWithinRange = function(i, j) {
+  this.isWithinVisRadius = function(i, j) {
     return (this.x - j) ** 2 + (this.y - i) ** 2 < this.visRadius ** 2
   }
 }
@@ -277,7 +314,7 @@ function Level(params) {
     this.occupy(player)
     for (var i = 0; i < mapHeight; i++) {
       for (var j = 0; j < mapWidth; j++) {
-        if (player.isWithinRange(i, j) &&
+        if (player.isWithinVisRadius(i, j) &&
             isVisible(j, i, player.x ,player.y, this.tileMap)) {
           this.seenMap[i][j] = true
         }
@@ -319,6 +356,9 @@ function Level(params) {
     monster.setPosition(position)
     this.isOccupied[position.y][position.x] = true
     this.monsters.push(monster)
+  }
+  this.getMonsterAt = function(x, y) {
+    return this.monsters.find(m => m.x == x && m.y == y && m.hp > 0)
   }
 }
 
@@ -385,24 +425,46 @@ function Game() {
 
     var level = this.levels[this.currentLevel]
 
+    var playerTurnDone = false
+
+    if (this.player.hp <= 0) {
+      console.log('you are dead')
+      return
+    }
+
     if (movementKeys.includes(key)) {
       ({ dx, dy } = keyDisplacement[key])
-      if (dx == 0 && dy == 0) {
-
-      } else if (!level.isOccupied[this.player.y + dy][this.player.x + dx]) {
-        level.unoccupy(this.player)
-        this.player.x += dx
-        this.player.y += dy
-        level.placePlayer(this.player)
-        this.shouldRenderSeen = true
+      if (this.player.attacking) {
+        var monster = level.getMonsterAt(this.player.x + dx, this.player.y + dy)
+        if (monster) {
+          var success = this.player.attack(monster)
+          if (monster.hp == 0) {
+            level.unoccupy(monster)
+          }
+        }
+        this.player.attacking = false
         this.shouldRenderObjects = true
+        playerTurnDone = true
       } else {
-        // Moving against occupied space, turn not done
+        if (dx == 0 && dy == 0) {
+          playerTurnDone = true
+        } else if (!level.isOccupied[this.player.y + dy][this.player.x + dx]) {
+          level.unoccupy(this.player)
+          this.player.x += dx
+          this.player.y += dy
+          level.placePlayer(this.player)
+          this.shouldRenderSeen = true
+          this.shouldRenderObjects = true
+          playerTurnDone = true
+        } else {
+          // Moving against occupied space, turn not done
+        }
       }
     } else {
       switch (key) {
         case 'a':
           console.log('attack')
+          this.player.attacking = true
           break
         case 's':
           console.log('use stairs')
@@ -427,6 +489,24 @@ function Game() {
           break
         default:
           console.log('unknown command: ' + key)
+      }
+    }
+
+    if (playerTurnDone) {
+      for (var iMonster = 0; iMonster < level.monsters.length; iMonster++) {
+        var monster = level.monsters[iMonster]
+        if (monster.hp > 0) {
+          if (monster.aggressive && monster.seen) {
+            if (monster.isAdjacentTo(this.player)) {
+              var success = monster.attack(this.player)
+              if (this.player.hp <= 0) {
+                console.log('you die')
+              }
+            } else {
+              var vectors = monster.getApproachVectorsTo(player)
+            }
+          }
+        }
       }
     }
   }
@@ -481,7 +561,9 @@ function Game() {
     var level = this.levels[this.currentLevel]
     for (var iMonster = 0; iMonster < level.monsters.length; iMonster++) {
       var monster = level.monsters[iMonster]
-      objectRenderer.drawColoredChar(monster.char, monster.color, monster.y, monster.x)
+      if (monster.hp > 0) {
+        objectRenderer.drawColoredChar(monster.char, monster.color, monster.y, monster.x)
+      }
     }
   }
 

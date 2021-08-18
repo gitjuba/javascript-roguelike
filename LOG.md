@@ -578,4 +578,25 @@ I already feel I'll need another major rewrite soon. How to organize the code? S
 
 There is a duplicate loop over the tile map: updating the level seen mask when player position is updated, and rendering the seen mask.
 
-`Event.keyCode` is deprecated? Ok, there's `KeyboardEvent.key` which contains the actual pressed key (e.g. `a` instead of 63). Yay! Side note: when I add support for capitalized keys, the `keyup` event does not work, as
+`Event.keyCode` is deprecated? Ok, there's `KeyboardEvent.key` which contains the actual pressed key (e.g. `a` instead of 63). Yay! Side note: when I add support for capitalized keys, the `keyup` event does not work, as, when pressing e.g. _Shift+M_, the _shift_ key is often released before the _m_ key and there is never a `keyup` event for capital _M_.
+
+Logging. I want it clean and flexible. Could the logger be a singleton object, and all objects would get a reference to it? For example, player attacks a monster, there might be blocking or dodging which should be logged. For the moment it can be just a global object, but I'll probably do something like
+
+```js
+function Logger() {
+  if (Logger.instance) {
+    throw new Error('')
+  }
+  Logger.instance = this
+  // ...
+}
+
+// Is this a static method?
+Logger.getInstance = function() {
+  return Logger.instance || new Logger()
+}
+```
+
+Anyway, everything related to handling the log buffer can conveniently be encapsulated to the `Logger` class (or (constructor) function or whatever it is you call them).
+
+I'm seeing some patterns and "stuff-going-to-its-right-place" now. For example, procedures which require only the coordinates of one or two entities fall naturally to the `LivingEntity` class.
