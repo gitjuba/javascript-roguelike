@@ -87,6 +87,15 @@ function Renderer(id, top, left, width, height) {
     )
   }
 
+  this.clearTile = function(i, j) {
+    this.context.clearRect(
+      (this.left + j) * charWidthPixels,
+      (this.top + i) * charHeightPixels,
+      charWidthPixels,
+      charHeightPixels
+    )
+  }
+
   this.drawColoredChar = function(char, color, i, j) {
     this.drawTile(color, i, j)
     this.drawChar(char, i, j)
@@ -156,6 +165,75 @@ function Player(char, color) {
 
   this.visRadius = 7.5
   this.attacking = false
+
+  this.isWithinRange = function(i, j) {
+    return (this.x - j) ** 2 + (this.y - i) ** 2 < this.visRadius ** 2
+  }
+}
+
+var visBlock = {
+  '#': 0.05,
+  '.': 0.45,
+  '<': 0.45,
+  '>': 0.45,
+}
+
+// Is (x,y) visible from (x0,y0) in tile map level
+function isVisible(x, y, x0, y0, level) {
+  var m, xj, yj, yj_, xj_, j, dj, vbj_d, vbj_u, vb_d, vb_u
+  if (Math.abs(y - y0) <= Math.abs(x - x0)) {
+    // "x-simple"
+    m = (y - y0) / (x - x0)
+    dj = x < x0 ? -1 : 1
+    vb_d = 0
+    vb_u = 0
+    for (j = 0; Math.abs(j) < Math.abs(x - x0); j += dj) {
+      xj = x0 + j
+      yj = y0 + m * j
+
+      yj_ = Math.floor(yj)
+
+      // Calculate blocked portion of visiblity to both sides
+      vbj_d = 1 - (yj - yj_)
+      vbj_u = 1 - vbj_d
+
+      if (level[yj_][xj] == '#' && vbj_d > vb_d) {
+        vb_d = vbj_d
+      }
+      if (level[yj_ + 1][xj] == '#' && vbj_u > vb_u) {
+        vb_u = vbj_u
+      }
+      if (vb_d + vb_u > 1 - visBlock[level[y][x]]) {
+        return false
+      }
+    }
+  } else {
+    // "y-simple"
+    m = (x - x0) / (y - y0)
+    dj = y < y0 ? -1 : 1
+    vb_d = 0
+    vb_u = 0
+    for (j = 0; Math.abs(j) < Math.abs(y - y0); j += dj) {
+      yj = y0 + j
+      xj = x0 + m * j
+
+      xj_ = Math.floor(xj)
+
+      vbj_d = 1 - (xj - xj_)
+      vbj_u = 1 - vbj_d
+
+      if (level[yj][xj_] == '#' && vbj_d > vb_d) {
+        vb_d = vbj_d
+      }
+      if (level[yj][xj_ + 1] == '#' && vbj_u > vb_u) {
+        vb_u = vbj_u
+      }
+      if (vb_d + vb_u > 1 - visBlock[level[y][x]]) {
+        return false
+      }
+    }
+  }
+  return true
 }
 
 function Level(params) {
@@ -187,11 +265,59 @@ function Level(params) {
     return position
   }
 
+  this.occupy = function(position) {
+    this.isOccupied[position.y][position.x] = true
+  }
+
+  this.unoccupy = function(position) {
+    this.isOccupied[position.y][position.x] = false
+  }
+
+  this.placePlayer = function(player) {
+    this.occupy(player)
+    for (var i = 0; i < mapHeight; i++) {
+      for (var j = 0; j < mapWidth; j++) {
+        if (player.isWithinRange(i, j) &&
+            isVisible(j, i, player.x ,player.y, this.tileMap)) {
+          this.seenMap[i][j] = true
+        }
+      }
+    }
+  }
+
+  this.hasDownStaircase = function() {
+    return this.map.down
+  }
+  this.hasUpStaircase = function() {
+    return this.map.up
+  }
+  this.isDownStaircaseAt = function(position) {
+    return this.tileMap[position.y][position.x] == '>'
+  }
+  this.isUpStaircaseAt = function(position) {
+    return this.tileMap[position.y][position.x] == '<'
+  }
+  this.getDownStaircasePosition = function() {
+    if (this.hasDownStaircase()) {
+      return this.map.down
+    } else {
+      throw new Error('No down staircase in level')
+    }
+  }
+  this.getUpStaircasePosition = function() {
+    if (this.hasUpStaircase()) {
+      return this.map.up
+    } else {
+      throw new Error('No up staircase in level')
+    }
+  }
+
   this.monsters = []
   for (var iMonster = 0; iMonster < 5; iMonster++) {
     var monster = new Monster('g', 'red')
     var position = this.getRandomUnoccupiedTile()
     monster.setPosition(position)
+    this.isOccupied[position.y][position.x] = true
     this.monsters.push(monster)
   }
 }
@@ -207,24 +333,104 @@ var objectRenderer = new Renderer('objects', 0, 0, mapWidth, mapHeight)
 var seenRenderer = new Renderer('seen', 0, 0, mapWidth, mapHeight)
 var debugRenderer = new Renderer('debug', 0, 0, mapWidth, mapHeight)
 
+var movementKeys = 'uiojklm,.'
+var keyDisplacement = {
+  u: { dx: -1, dy: -1 },
+  i: { dx: 0, dy: -1 },
+  o: { dx: 1, dy: -1 },
+  j: { dx: -1, dy: 0 },
+  k: { dx: 0, dy: 0 },
+  l: { dx: 1, dy: 0 },
+  m: { dx: -1, dy: 1 },
+  ',': { dx: 0, dy: 1 },
+  '.': { dx: 1, dy: 1 }
+}
+
 function Game() {
-  this.shouldRenderStats = true
-  this.shouldRenderLog = true
-  this.shouldRenderLevel = true
-  this.shouldRenderObjects = true
+  this.resetRenderFlags = function() {
+    this.shouldRenderStats = true
+    this.shouldRenderLog = true
+    this.shouldRenderLevel = true
+    this.shouldRenderObjects = true
+    this.shouldRenderSeen = true
+  }
+  this.resetRenderFlags()
 
   this.levels = []
-  this.levels.push(new Level({ down: true }))
   this.currentLevel = 0
+
+  this.addNewLevel = function() {
+    var newLevel = new Level({ down: true, up: this.levels.length > 0 })
+    this.levels.push(newLevel)
+    return newLevel
+  }
+  this.isFirstLevel = function() {
+    return this.currentLevel == 0
+  }
+  this.isLatestLevel = function() {
+    return this.currentLevel == this.levels.length - 1
+  }
+
+  this.addNewLevel()
 
   seenRenderer.fillWithChar(' ')
 
   this.player = new Player('@', 'green')
-  this.player.setPosition(this.levels[this.currentLevel].getRandomUnoccupiedTile())
+  var playerPosition = this.levels[this.currentLevel].getRandomUnoccupiedTile()
+  this.player.setPosition(playerPosition)
+  this.levels[this.currentLevel].placePlayer(this.player)
 
-  
+  this.updateState = function(event) {
+    var key = event.key
 
-  this.updateState = function(event) { }
+    var level = this.levels[this.currentLevel]
+
+    if (movementKeys.includes(key)) {
+      ({ dx, dy } = keyDisplacement[key])
+      if (dx == 0 && dy == 0) {
+
+      } else if (!level.isOccupied[this.player.y + dy][this.player.x + dx]) {
+        level.unoccupy(this.player)
+        this.player.x += dx
+        this.player.y += dy
+        level.placePlayer(this.player)
+        this.shouldRenderSeen = true
+        this.shouldRenderObjects = true
+      } else {
+        // Moving against occupied space, turn not done
+      }
+    } else {
+      switch (key) {
+        case 'a':
+          console.log('attack')
+          break
+        case 's':
+          console.log('use stairs')
+          if (level.isDownStaircaseAt(this.player)) {
+            var newLevel
+            if (this.isLatestLevel()) {
+              newLevel = this.addNewLevel()
+            } else {
+              newLevel = this.levels[this.currentLevel + 1]
+            }
+            this.currentLevel += 1
+            this.resetRenderFlags()
+            this.player.setPosition(newLevel.getUpStaircasePosition())
+            newLevel.placePlayer(this.player)
+          } else if (level.isUpStaircaseAt(this.player)) {
+            var newLevel = this.levels[this.currentLevel - 1]
+            this.currentLevel -= 1
+            this.resetRenderFlags()
+            this.player.setPosition(newLevel.getDownStaircasePosition())
+            newLevel.placePlayer(this.player)
+          }
+          break
+        default:
+          console.log('unknown command: ' + key)
+      }
+    }
+  }
+
   this.render = function() {
     if (this.shouldRenderStats) {
       this.renderStats()
@@ -241,6 +447,10 @@ function Game() {
     if (this.shouldRenderObjects) {
       this.renderObjects()
       this.shouldRenderObjects = false
+    }
+    if (this.shouldRenderSeen) {
+      this.renderSeen()
+      this.shouldRenderSeen = false
     }
   }
 
@@ -272,6 +482,19 @@ function Game() {
     for (var iMonster = 0; iMonster < level.monsters.length; iMonster++) {
       var monster = level.monsters[iMonster]
       objectRenderer.drawColoredChar(monster.char, monster.color, monster.y, monster.x)
+    }
+  }
+
+  this.renderSeen = function() {
+    var level = this.levels[this.currentLevel]
+    for (var i = 0; i < mapHeight; i++) {
+      for (var j = 0; j < mapWidth; j++) {
+        if (level.seenMap[i][j]) {
+          seenRenderer.clearTile(i, j)
+        } else {
+          seenRenderer.drawChar(' ', i, j)
+        }
+      }
     }
   }
 }

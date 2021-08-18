@@ -571,3 +571,11 @@ function Monster() {
   // ...
 }
 ```
+
+## 2021-08-18
+
+I already feel I'll need another major rewrite soon. How to organize the code? Should the player have a reference to the current level? Which one is better: `level.placePlayer(player)` or `player.enterLevel(level)`?
+
+There is a duplicate loop over the tile map: updating the level seen mask when player position is updated, and rendering the seen mask.
+
+`Event.keyCode` is deprecated? Ok, there's `KeyboardEvent.key` which contains the actual pressed key (e.g. `a` instead of 63). Yay! Side note: when I add support for capitalized keys, the `keyup` event does not work, as
