@@ -144,8 +144,6 @@ function LivingEntity(char, color) {
   this.color = color
   this.x = 0
   this.y = 0
-  this.hp = randInt(1, 5)
-  this.hitChance = 0.5
 
   this.setPosition = function(position) {
     this.x = position.x
@@ -193,12 +191,26 @@ function LivingEntity(char, color) {
 function Monster(char, color) {
   LivingEntity.call(this, char, color)
 
+  this.hp = randInt(1, 5)
+  this.hitChance = 0.3
+
   this.seen = false
   this.aggressive = false
+  this.aggravationChance = 0.2
+
+  this.rollAggravation = function() {
+    if (this.seen && !this.aggressive && Math.random() < this.aggravationChance) {
+      console.log('monster becomes agressive')
+      this.aggressive = true
+    }
+  }
 }
 
 function Player(char, color) {
   LivingEntity.call(this, char, color)
+
+  this.hp = 10
+  this.hitChance = 0.5
 
   this.visRadius = 7.5
   this.attacking = false
@@ -291,7 +303,9 @@ function Level(params) {
 
   this.colorMap = defaultTileColors
 
-  this.seenMap = this.tileMap.map(row => row.map(() => false))
+  this.seenMask = this.tileMap.map(row => row.map(() => false))
+  this.isVisibleMask = this.tileMap.map(row => row.map(() => false))
+  this.wasVisibleMask = this.tileMap.map(row => row.map(() => false))
   this.isOccupied = this.tileMap.map(row => row.map(tile => (tile == '#')))
 
   this.getRandomUnoccupiedTile = function() {
@@ -314,12 +328,20 @@ function Level(params) {
     this.occupy(player)
     for (var i = 0; i < mapHeight; i++) {
       for (var j = 0; j < mapWidth; j++) {
+        this.wasVisibleMask[i][j] = this.isVisibleMask[i][j]
         if (player.isWithinVisRadius(i, j) &&
             isVisible(j, i, player.x ,player.y, this.tileMap)) {
-          this.seenMap[i][j] = true
+          this.seenMask[i][j] = true
+          this.isVisibleMask[i][j] = true
+        } else {
+          this.isVisibleMask[i][j] = false
         }
       }
     }
+  }
+
+  this.becameNotVisible = function(i, j) {
+    return this.wasVisibleMask[i][j] && !this.isVisibleMask[i][j]
   }
 
   this.hasDownStaircase = function() {
@@ -393,6 +415,7 @@ function Game() {
     this.shouldRenderLevel = true
     this.shouldRenderObjects = true
     this.shouldRenderSeen = true
+    this.shouldRenderVisible = true
   }
   this.resetRenderFlags()
 
@@ -421,6 +444,8 @@ function Game() {
   this.levels[this.currentLevel].placePlayer(this.player)
 
   this.updateState = function(event) {
+    var dx, dy
+
     var key = event.key
 
     var level = this.levels[this.currentLevel]
@@ -454,11 +479,12 @@ function Game() {
           this.player.y += dy
           level.placePlayer(this.player)
           this.shouldRenderSeen = true
-          this.shouldRenderObjects = true
+          this.shouldRenderVisible = true
           playerTurnDone = true
         } else {
           // Moving against occupied space, turn not done
         }
+        this.shouldRenderObjects = true
       }
     } else {
       switch (key) {
@@ -496,16 +522,49 @@ function Game() {
       for (var iMonster = 0; iMonster < level.monsters.length; iMonster++) {
         var monster = level.monsters[iMonster]
         if (monster.hp > 0) {
+          if (!monster.seen && level.isVisibleMask[monster.y][monster.x]) {
+            monster.seen = true
+          } else if (monster.seen && !level.isVisibleMask[monster.y][monster.x]) {
+            monster.seen = false
+          }
+          monster.rollAggravation()
           if (monster.aggressive && monster.seen) {
             if (monster.isAdjacentTo(this.player)) {
+              dx = 0
+              dy = 0
               var success = monster.attack(this.player)
               if (this.player.hp <= 0) {
                 console.log('you die')
               }
             } else {
-              var vectors = monster.getApproachVectorsTo(player)
+              var vectors = monster.getApproachVectorsTo(this.player)
+              var vectorFound = false
+              for (var v of vectors) {
+                if (!level.isOccupied[monster.y + v.dy][monster.x + v.dx]) {
+                  dx = v.dx
+                  dy = v.dy
+                  vectorFound = true
+                  break
+                }
+              }
+              if (!vectorFound) {
+                dx = 0
+                dy = 0
+              }
+            }
+          } else {
+            var dirInd = Math.floor(9 * Math.random())
+            var dir = movementKeys[dirInd]
+            ;({ dx, dy } = keyDisplacement[dir])
+            if (level.isOccupied[monster.y + dy][monster.x + dx]) {
+              dx = 0
+              dy = 0
             }
           }
+          level.unoccupy(monster)
+          monster.x += dx
+          monster.y += dy
+          level.occupy(monster)
         }
       }
     }
@@ -531,6 +590,10 @@ function Game() {
     if (this.shouldRenderSeen) {
       this.renderSeen()
       this.shouldRenderSeen = false
+    }
+    if (this.shouldRenderVisible) {
+      this.renderVisible()
+      this.shouldRenderVisible = false
     }
   }
 
@@ -561,7 +624,7 @@ function Game() {
     var level = this.levels[this.currentLevel]
     for (var iMonster = 0; iMonster < level.monsters.length; iMonster++) {
       var monster = level.monsters[iMonster]
-      if (monster.hp > 0) {
+      if (monster.hp > 0 && level.isVisibleMask[monster.y][monster.x]) {
         objectRenderer.drawColoredChar(monster.char, monster.color, monster.y, monster.x)
       }
     }
@@ -571,10 +634,23 @@ function Game() {
     var level = this.levels[this.currentLevel]
     for (var i = 0; i < mapHeight; i++) {
       for (var j = 0; j < mapWidth; j++) {
-        if (level.seenMap[i][j]) {
+        if (level.seenMask[i][j]) {
           seenRenderer.clearTile(i, j)
         } else {
           seenRenderer.drawChar(' ', i, j)
+        }
+      }
+    }
+  }
+
+  this.renderVisible = function() {
+    var level = this.levels[this.currentLevel]
+    for (var i = 0; i < mapHeight; i++) {
+      for (var j = 0; j < mapWidth; j++) {
+        if (level.isVisibleMask[i][j]) {
+          visibleRenderer.clearTile(i, j)
+        } else if (level.becameNotVisible(i, j)) {
+          visibleRenderer.drawTile('rgba(0, 0, 0, 0.2)', i, j)
         }
       }
     }

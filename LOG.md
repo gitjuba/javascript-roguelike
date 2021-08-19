@@ -600,3 +600,13 @@ Logger.getInstance = function() {
 Anyway, everything related to handling the log buffer can conveniently be encapsulated to the `Logger` class (or (constructor) function or whatever it is you call them).
 
 I'm seeing some patterns and "stuff-going-to-its-right-place" now. For example, procedures which require only the coordinates of one or two entities fall naturally to the `LivingEntity` class.
+
+## 2021-08-19
+
+Some of the game logic gets easily mixed in with the rendering code. For example, monsters became "seen" in the `renderObjects` method. Move that to the `updateState` method: After player has finished their turn, loop over monsters and check if they are seen.
+
+I should create a visibility mask (a simple 2D array) which is updated whenever the player moves, so the `isVisible` function need not be called more than once for every tile within the player visibility radius. Have to combine it with updating the seen mask of the level. It could actually be a property of the level, together with the seen mask. Update them together in the `Level.placePlayer` method.
+
+Ok, I need one turns worth of visibility history. Let's just have another `isVisible` array in the level object.
+
+Should probably combine some of the rendering loops, at least _seen_ and _visible_. On the other hand, is it faster to render all the stuff on one canvas first, instead of going back and forth between them?
