@@ -610,3 +610,18 @@ I should create a visibility mask (a simple 2D array) which is updated whenever 
 Ok, I need one turns worth of visibility history. Let's just have another `isVisible` array in the level object.
 
 Should probably combine some of the rendering loops, at least _seen_ and _visible_. On the other hand, is it faster to render all the stuff on one canvas first, instead of going back and forth between them?
+
+Getting the lines of log to be printed could be done as a generator.
+
+```js
+function Logger() {
+  this.logBuffer = [] // (long) lines of log, newest at index 0
+  // ...
+  this.getLog = function*() {
+    while (linesLogged < this.numLines) {
+      // compute next line from logBuffer
+      yield line
+      // ...
+    }
+  }
+}

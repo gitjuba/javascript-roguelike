@@ -72,8 +72,9 @@ function Renderer(id, top, left, width, height) {
   }
 
   this.drawText = function(text, i, j) {
+    // negative i means count lines from bottom
     for (var k = 0; k < text.length; k++) {
-      this.drawChar(text[k], i, j + k)
+      this.drawChar(text[k], i >= 0 ? i : this.height - 1 - i, j + k)
     }
   }
 
@@ -108,6 +109,18 @@ function Renderer(id, top, left, width, height) {
       }
     }
   }
+}
+
+// "singleton"
+function Logger() {
+  if (Logger.instance) {
+    throw new Error('Use Logger.getInstance')
+  }
+  Logger.instance = this
+  this.logBuffer = ['> Welcome!']
+}
+Logger.getInstance = function() {
+  return Logger.instance || new Logger()
 }
 
 var mapWidth = 70
@@ -603,6 +616,12 @@ function Game() {
 
   this.renderLog = function() {
     logRenderer.fillWithChar(' ')
+    var logger = Logger.getInstance()
+    var logLines = logger.getLogLines()
+    var iLine = 0
+    for (var line of logLines) {
+      logRenderer.drawText(line, )
+    }
   }
 
   this.renderLevel = function() {
