@@ -207,6 +207,10 @@ function LivingEntity(char, color) {
   this.x = 0
   this.y = 0
 
+  this.hp = 0
+  this.hitChance = 0
+  this.hitDamage = 0
+
   this.setPosition = function(position) {
     this.x = position.x
     this.y = position.y
@@ -218,7 +222,7 @@ function LivingEntity(char, color) {
 
   this.attack = function(that) {
     if (Math.random() < this.hitChance) {
-      that.hp -= 1
+      that.hp -= this.hitDamage
       return true
     } else {
       return false
@@ -253,10 +257,6 @@ function LivingEntity(char, color) {
 function Monster(char, color) {
   LivingEntity.call(this, char, color)
 
-  this.hp = randInt(1, 5)
-  this.hitChance = 0.3
-  this.hitDamage = 1
-
   this.seen = false
   this.aggressive = false
   this.aggravationChance = 0.2
@@ -270,6 +270,7 @@ function Monster(char, color) {
 }
 Monster.fromSpawner = function(spawner) {
   var monster = new Monster(spawner.char, spawner.color)
+  monster.name = spawner.name
   monster.hp = spawner.hp()
   monster.hitChance = spawner.hitChance()
   monster.hitDamage = spawner.hitDamage()
@@ -281,6 +282,7 @@ function Player(char, color) {
 
   this.hp = 10
   this.hitChance = 0.5
+  this.hitDamage = 2
 
   this.visRadius = 7.5
   this.attacking = false
@@ -353,28 +355,6 @@ function isVisible(x, y, x0, y0, level) {
     }
   }
   return true
-}
-
-function BasicMonster(level) {
-  this.level = level
-  this.char = 'g'
-  this.color = 'red'
-
-  this.hp = function() {
-    var minHp = 1
-    var maxHp = this.level
-    return randInt(minHp, maxHp)
-  }
-  this.hitChance = function() {
-    var minPercent = Math.min(50, 10 + this.level)
-    var maxPercent = Math.min(100, 20 + 2 * this.level)
-    return randInt(minPercent, maxPercent) / 100
-  }
-  this.hitDamage = function() {
-    var minDamage = 1
-    var maxDamage = Math.floor(1 + this.level / 2)
-    return randInt(minDamage, maxDamage)
-  }
 }
 
 function Level(level, mapGenParams) {
@@ -465,25 +445,11 @@ function Level(level, mapGenParams) {
     }
   }
 
-  this.rollMonsterType = function() {
-    var dictionary = getMonsterDictionaryFor(this.level)
-    var roll = Math.random()
-    for (var iType = 0; iType < dictionary.length; iType++) {
-      var type = dictionary[iType]
-      if (roll < type.spawnChance(level)) {
-        return type
-      }
-    }
-  }
-
   this.monsters = []
   var numMonsters = 5 + this.level
-  var spawner = new BasicMonster(this.level)
   for (var iMonster = 0; iMonster < numMonsters; iMonster++) {
-    var monsterType = this.rollMonsterType()
-    console.log('monster ', monsterType.name)
+    var monsterType = rollMonster(this.level)
     var monster = Monster.fromSpawner(monsterType)
-    console.log(JSON.stringify(monster))
     var position = this.getRandomUnoccupiedTile()
     monster.setPosition(position)
     this.isOccupied[position.y][position.x] = true
@@ -590,12 +556,12 @@ function Game() {
         if (monster) {
           var success = this.player.attack(monster)
           if (success) {
-            logger.appendToLine('You hit the monster.')
+            logger.appendToLine(`You hit the ${monster.name}.`)
           } else {
-            logger.appendToLine('You miss the monster.')
+            logger.appendToLine(`You miss the ${monster.name}.`)
           }
-          if (monster.hp == 0) {
-            logger.appendToLine('The monster is killed.')
+          if (monster.hp <= 0) {
+            logger.appendToLine(`The ${monster.name} is killed.`)
             level.unoccupy(monster)
           }
         }
@@ -668,10 +634,10 @@ function Game() {
               dy = 0
               var success = monster.attack(this.player)
               if (success) {
-                logger.appendToLine('The monster hits you.')
+                logger.appendToLine(`The ${monster.name} hits you.`)
                 this.shouldRenderStats = true
               } else {
-                logger.appendToLine('The monster misses you.')
+                logger.appendToLine(`The ${monster.name} misses you.`)
               }
               if (this.player.hp <= 0) {
                 logger.appendToLine('You die.')
