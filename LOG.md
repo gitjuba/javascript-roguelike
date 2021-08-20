@@ -625,3 +625,10 @@ function Logger() {
     }
   }
 }
+```
+
+## 2021-08-20
+
+Rendering the log with the transparent letters, I can't fill the log area with black before. Let's add color to the logger and text rendering. Also I have to pad the log lines to 80 characters wide. And also the logger has to return empty lines (filled with space bar) if log lines run out.
+
+There should be a default text color, let's use the color on the character sheet, `#aaaaaa`.

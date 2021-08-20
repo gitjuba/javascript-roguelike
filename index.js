@@ -71,10 +71,10 @@ function Renderer(id, top, left, width, height) {
     )
   }
 
-  this.drawText = function(text, i, j) {
+  this.drawText = function(text, color, i, j) {
     // negative i means count lines from bottom
     for (var k = 0; k < text.length; k++) {
-      this.drawChar(text[k], i >= 0 ? i : this.height - 1 - i, j + k)
+      this.drawColoredChar(text[k], color, i >= 0 ? i : this.height + i, j + k)
     }
   }
 
@@ -117,7 +117,55 @@ function Logger() {
     throw new Error('Use Logger.getInstance')
   }
   Logger.instance = this
-  this.logBuffer = ['> Welcome!']
+  this.logBuffer = [
+    'Welcome!',
+    'Very long line with monsters attacking and all sorts of crazy stuff going on so that this has to be split into multiple lines for sure'
+  ]
+  this.maxLineWidth = logWidth - 2 // '> ' prefix
+  this.lineRegex = new RegExp(`(.{0,${this.maxLineWidth}}$|.{0,${this.maxLineWidth}}\\b)`, 'g')
+
+  this.newLine = ''
+  this.appendToLine = function(msg) {
+    if (this.newLine.length == 0) {
+      this.newLine += msg
+    } else {
+      this.newLine += (' ' + msg)
+    }
+  }
+  this.finishLine = function() {
+    if (this.newLine.length > 0) {
+      this.logBuffer.unshift(this.newLine)
+    }
+    this.newLine = ''
+  }
+
+  this.getLogLines = function*() {
+    var linesToDisplay = []
+    var iLine = 0
+    while (linesToDisplay.length < logHeight) {
+      if (iLine < this.logBuffer.length) {
+        var line = this.logBuffer[iLine]
+        var split = line.match(this.lineRegex)
+          .map(part => part.trim())
+          .filter(part => part.length > 0)
+        for (var iPart = split.length - 1; iPart > 0; iPart--) {
+          var part = '  ' + split[iPart]
+          linesToDisplay.push(part)
+        }
+        var firstPart = '> ' + split[0]
+        linesToDisplay.push(firstPart)
+      } else {
+        linesToDisplay.push('  ')
+      }
+      iLine += 1
+    }
+    iLine = 0
+    while (iLine < logHeight) {
+      var line = linesToDisplay[iLine]
+      yield line.padEnd(logWidth, ' ')
+      iLine += 1
+    }
+  }
 }
 Logger.getInstance = function() {
   return Logger.instance || new Logger()
@@ -143,6 +191,7 @@ var defaultTileColors = {
   '<': '#ddd',
   '>': '#ddd',
 }
+var defaultTextColor = '#aaa'
 
 function carveRoom(room, level) {
   for (var i = room.y; i < room.y + room.h; i++) {
@@ -399,7 +448,10 @@ function Level(params) {
 
 var statsRenderer = new Renderer('stats', 0,
   mapWidth, canvasWidthChars - mapWidth, mapHeight)
-var logRenderer = new Renderer('log', mapHeight, 0, canvasWidthChars, 5)
+
+var logWidth = canvasWidthChars
+var logHeight = canvasHeightChars - mapHeight
+var logRenderer = new Renderer('log', mapHeight, 0, logWidth, logHeight)
 
 var colorRenderer = new Renderer('color', 0, 0, mapWidth, mapHeight)
 var visibleRenderer = new Renderer('visible', 0, 0, mapWidth, mapHeight)
@@ -465,7 +517,12 @@ function Game() {
 
     var playerTurnDone = false
 
+    var logger = Logger.getInstance()
+    this.shouldRenderLog = true
+
     if (this.player.hp <= 0) {
+      logger.appendToLine('You are dead. Refresh page to try again.')
+      logger.finishLine()
       console.log('you are dead')
       return
     }
@@ -476,7 +533,13 @@ function Game() {
         var monster = level.getMonsterAt(this.player.x + dx, this.player.y + dy)
         if (monster) {
           var success = this.player.attack(monster)
+          if (success) {
+            logger.appendToLine('You hit the monster.')
+          } else {
+            logger.appendToLine('You miss the monster.')
+          }
           if (monster.hp == 0) {
+            logger.appendToLine('The monster is killed.')
             level.unoccupy(monster)
           }
         }
@@ -514,12 +577,14 @@ function Game() {
             } else {
               newLevel = this.levels[this.currentLevel + 1]
             }
+            logger.appendToLine('You descend the staircase.')
             this.currentLevel += 1
             this.resetRenderFlags()
             this.player.setPosition(newLevel.getUpStaircasePosition())
             newLevel.placePlayer(this.player)
           } else if (level.isUpStaircaseAt(this.player)) {
             var newLevel = this.levels[this.currentLevel - 1]
+            logger.appendToLine('You ascend the staircase.')
             this.currentLevel -= 1
             this.resetRenderFlags()
             this.player.setPosition(newLevel.getDownStaircasePosition())
@@ -546,7 +611,13 @@ function Game() {
               dx = 0
               dy = 0
               var success = monster.attack(this.player)
+              if (success) {
+                logger.appendToLine('The monster hits you.')
+              } else {
+                logger.appendToLine('The monster misses you.')
+              }
               if (this.player.hp <= 0) {
+                logger.appendToLine('You die.')
                 console.log('you die')
               }
             } else {
@@ -581,6 +652,7 @@ function Game() {
         }
       }
     }
+    logger.finishLine()
   }
 
   this.render = function() {
@@ -615,12 +687,13 @@ function Game() {
   }
 
   this.renderLog = function() {
-    logRenderer.fillWithChar(' ')
+    logRenderer.clear()
     var logger = Logger.getInstance()
     var logLines = logger.getLogLines()
-    var iLine = 0
+    var iLine = 1
     for (var line of logLines) {
-      logRenderer.drawText(line, )
+      logRenderer.drawText(line, defaultTextColor, -iLine, 0)
+      iLine++
     }
   }
 
