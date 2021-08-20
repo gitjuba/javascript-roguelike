@@ -632,3 +632,9 @@ function Logger() {
 Rendering the log with the transparent letters, I can't fill the log area with black before. Let's add color to the logger and text rendering. Also I have to pad the log lines to 80 characters wide. And also the logger has to return empty lines (filled with space bar) if log lines run out.
 
 There should be a default text color, let's use the color on the character sheet, `#aaaaaa`.
+
+Logging rewrite done, only the stats panel left. Now that we have multiple floors to our dungeon, let's show the current level in the panel.
+
+Tiny bug: If there are multiple monster attacking the player, handling the attacks should stop when the player dies (the remaining monster skip their turn).
+
+Formatting the log lines or stats lines should be done in the renderer, not the logger or game object.

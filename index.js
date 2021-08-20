@@ -446,8 +446,10 @@ function Level(params) {
   }
 }
 
+var statsWidth = canvasWidthChars - mapWidth
+var statsHeight = mapHeight
 var statsRenderer = new Renderer('stats', 0,
-  mapWidth, canvasWidthChars - mapWidth, mapHeight)
+  mapWidth, statsWidth, statsHeight)
 
 var logWidth = canvasWidthChars
 var logHeight = canvasHeightChars - mapHeight
@@ -508,6 +510,13 @@ function Game() {
   this.player.setPosition(playerPosition)
   this.levels[this.currentLevel].placePlayer(this.player)
 
+  this.getStatsLines = function() {
+    return [
+      'D  ' + String(this.currentLevel).padStart(5, ' '),
+      'HP ' + String(this.player.hp).padStart(5, ' ')
+    ]
+  }
+
   this.updateState = function(event) {
     var dx, dy
 
@@ -523,7 +532,6 @@ function Game() {
     if (this.player.hp <= 0) {
       logger.appendToLine('You are dead. Refresh page to try again.')
       logger.finishLine()
-      console.log('you are dead')
       return
     }
 
@@ -613,12 +621,13 @@ function Game() {
               var success = monster.attack(this.player)
               if (success) {
                 logger.appendToLine('The monster hits you.')
+                this.shouldRenderStats = true
               } else {
                 logger.appendToLine('The monster misses you.')
               }
               if (this.player.hp <= 0) {
                 logger.appendToLine('You die.')
-                console.log('you die')
+                break
               }
             } else {
               var vectors = monster.getApproachVectorsTo(this.player)
@@ -683,7 +692,18 @@ function Game() {
   }
 
   this.renderStats = function() {
-    statsRenderer.fillWithChar(' ')
+    statsRenderer.clear()
+    var statsLines = this.getStatsLines()
+    statsRenderer.drawText(''.padEnd(statsWidth, ' '), defaultTextColor, 0, 0)
+    var iLine = 1
+    for (var line of statsLines) {
+      statsRenderer.drawText(line.padEnd(statsWidth, ' '), defaultTextColor, iLine, 0)
+      iLine += 1
+    }
+    while (iLine < statsHeight) {
+      statsRenderer.drawText(''.padEnd(statsWidth, ' '), defaultTextColor, iLine, 0)
+      iLine += 1
+    }
   }
 
   this.renderLog = function() {
@@ -693,7 +713,7 @@ function Game() {
     var iLine = 1
     for (var line of logLines) {
       logRenderer.drawText(line, defaultTextColor, -iLine, 0)
-      iLine++
+      iLine += 1
     }
   }
 
