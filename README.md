@@ -18,4 +18,4 @@
 
 - [x] Multiple levels
 - [x] Procedurally generated levels
-- [ ] Procedurally generated monsters
+- [x] Procedurally generated monsters
