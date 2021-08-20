@@ -255,6 +255,7 @@ function Monster(char, color) {
 
   this.hp = randInt(1, 5)
   this.hitChance = 0.3
+  this.hitDamage = 1
 
   this.seen = false
   this.aggressive = false
@@ -266,6 +267,13 @@ function Monster(char, color) {
       this.aggressive = true
     }
   }
+}
+Monster.fromSpawner = function(spawner) {
+  var monster = new Monster(spawner.char, spawner.color)
+  monster.hp = spawner.hp()
+  monster.hitChance = spawner.hitChance()
+  monster.hitDamage = spawner.hitDamage()
+  return monster
 }
 
 function Player(char, color) {
@@ -347,8 +355,32 @@ function isVisible(x, y, x0, y0, level) {
   return true
 }
 
-function Level(params) {
-  this.map = generateLevel(mapWidth, mapHeight, params)
+function BasicMonster(level) {
+  this.level = level
+  this.char = 'g'
+  this.color = 'red'
+
+  this.hp = function() {
+    var minHp = 1
+    var maxHp = this.level
+    return randInt(minHp, maxHp)
+  }
+  this.hitChance = function() {
+    var minPercent = Math.min(50, 10 + this.level)
+    var maxPercent = Math.min(100, 20 + 2 * this.level)
+    return randInt(minPercent, maxPercent) / 100
+  }
+  this.hitDamage = function() {
+    var minDamage = 1
+    var maxDamage = Math.floor(1 + this.level / 2)
+    return randInt(minDamage, maxDamage)
+  }
+}
+
+function Level(level, mapGenParams) {
+  this.level = level
+
+  this.map = generateLevel(mapWidth, mapHeight, mapGenParams)
   this.tileMap = createEmptyTileMap()
   this.map.rooms.forEach(room => {
     carveRoom(room, this.tileMap)
@@ -433,9 +465,25 @@ function Level(params) {
     }
   }
 
+  this.rollMonsterType = function() {
+    var dictionary = getMonsterDictionaryFor(this.level)
+    var roll = Math.random()
+    for (var iType = 0; iType < dictionary.length; iType++) {
+      var type = dictionary[iType]
+      if (roll < type.spawnChance(level)) {
+        return type
+      }
+    }
+  }
+
   this.monsters = []
-  for (var iMonster = 0; iMonster < 5; iMonster++) {
-    var monster = new Monster('g', 'red')
+  var numMonsters = 5 + this.level
+  var spawner = new BasicMonster(this.level)
+  for (var iMonster = 0; iMonster < numMonsters; iMonster++) {
+    var monsterType = this.rollMonsterType()
+    console.log('monster ', monsterType.name)
+    var monster = Monster.fromSpawner(monsterType)
+    console.log(JSON.stringify(monster))
     var position = this.getRandomUnoccupiedTile()
     monster.setPosition(position)
     this.isOccupied[position.y][position.x] = true
@@ -490,7 +538,7 @@ function Game() {
   this.currentLevel = 0
 
   this.addNewLevel = function() {
-    var newLevel = new Level({ down: true, up: this.levels.length > 0 })
+    var newLevel = new Level(this.levels.length, { down: true, up: this.levels.length > 0 })
     this.levels.push(newLevel)
     return newLevel
   }

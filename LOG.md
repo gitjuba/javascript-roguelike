@@ -638,3 +638,23 @@ Logging rewrite done, only the stats panel left. Now that we have multiple floor
 Tiny bug: If there are multiple monster attacking the player, handling the attacks should stop when the player dies (the remaining monster skip their turn).
 
 Formatting the log lines or stats lines should be done in the renderer, not the logger or game object.
+
+I'd like to start using a module bundler (probably Webpack) to modularize the code. But let's do procedurally generated monsters first, as that's one of the current goal posts. So, how do I do that?
+
+- Ignoring new monster spawning for the moment, each dungeon level has a "monster profile", meaning:
+  - How many and what type of monsters to spawn
+  - The average (or minimum and maximum) hit points and damage of each monster
+
+That might be enough for "procedurally generated monster" for now. So, add the dungeon level as a parameter to the level constructor.
+
+Monster property parameters depend on the dungeon level, so we need a `Monster.fromParameters(params)` factory function. Also the monster type (in effect, used character and color (also name)) will be set through the parameters, something like
+
+```js
+Monster.setType(type) {
+  this.name = type.name
+  this.char = type.char
+  this.color = type.color
+}
+```
+
+Do I have to start writing some sort of monster compedium right away?
