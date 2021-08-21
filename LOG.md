@@ -662,3 +662,9 @@ Do I have to start writing some sort of monster compedium right away?
 The monster compendium/dictionary should work like this: For a given dungeon level (integer), get a list of possible monster types together with their spawn probabilities on that level. Then we roll for the monster type, and should get the spawner for that monster type, on that dungeon level. So the "spawner" is created from the monster dictionary and the level number, and it's just an object with methods to roll the monster stats.
 
 Side note on the probabilities: I'd rather use easier-to-read weights which can then be normalized to probabilities at some point before rolling the monster type. For example, I could keep the weight of the normal monster a constant, and decrease the weight of the small monsters relative to that as dungeon level increases, and similarly increase the weight of the large and huge monsters.
+
+## 2021-08-21
+
+Planning next goal. I want to try out different map generation algorithms. And I want to write a better AI for the monsters, wayfinding in particular, so they don't lose the player around a simple corner. Wayfinding is also useful for player movement, I want to mimic ADOM's "walk" mode, perhaps also add _go to staircase_ commands. The wayfinding graph (or something equivalent) has to be added to the map generation.
+
+Monster wayfinding could also be used to make "idle animations" of monsters, they could patrol around some area or move back and forth between some locations. There could even be some faciliites in the dungeon where the monsters work! That would fit well with the resource management theme I've been throwing around. Resource management could be the _unique twist_ this game would have.

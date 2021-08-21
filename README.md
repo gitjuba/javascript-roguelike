@@ -16,6 +16,12 @@
 
 ## Goal III
 
-- [x] Multiple levels
+- [x] Multiple levels (infinitely many levels!)
 - [x] Procedurally generated levels
 - [x] Procedurally generated monsters
+
+## Goal IV
+
+- [ ] Parametrized map generation
+- [ ] Different map generation algorithms
+- [ ] Wayfinding
