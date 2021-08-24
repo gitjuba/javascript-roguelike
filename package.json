@@ -9,6 +9,9 @@
     "name": "Jussi Mattas",
     "email": "jussi.mattas@gmail.com"
   },
+  "scripts": {
+    "build": "webpack --development"
+  },
   "license": "UNLICENSED",
   "devDependencies": {
     "eslint": "^7.20.0",
