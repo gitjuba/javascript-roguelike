@@ -10,7 +10,7 @@
     "email": "jussi.mattas@gmail.com"
   },
   "scripts": {
-    "build": "webpack --development"
+    "build": "webpack --mode development"
   },
   "license": "UNLICENSED",
   "devDependencies": {

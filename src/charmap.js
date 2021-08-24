@@ -1,3 +1,6 @@
+var charWidthPixels = 9
+var charHeightPixels = 14
+
 // Map char to location (row, column) in image
 var charOffsetX = 4
 var charOffsetY = 4
@@ -89,6 +92,8 @@ var charMap = {
 }
 
 module.exports = {
+  charWidthPixels,
+  charHeightPixels,
   charOffsetX,
   charOffsetY,
   charMap
