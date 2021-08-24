@@ -671,4 +671,4 @@ Monster wayfinding could also be used to make "idle animations" of monsters, the
 
 ## 2021-08-24
 
-First, let's modularize the thing using Webpack.
+First, let's modularize the thing using Webpack. Put the built bundle to `docs/`, as Github pages can be built from that subdirectory.
