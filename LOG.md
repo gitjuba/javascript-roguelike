@@ -668,3 +668,7 @@ Side note on the probabilities: I'd rather use easier-to-read weights which can 
 Planning next goal. I want to try out different map generation algorithms. And I want to write a better AI for the monsters, wayfinding in particular, so they don't lose the player around a simple corner. Wayfinding is also useful for player movement, I want to mimic ADOM's "walk" mode, perhaps also add _go to staircase_ commands. The wayfinding graph (or something equivalent) has to be added to the map generation.
 
 Monster wayfinding could also be used to make "idle animations" of monsters, they could patrol around some area or move back and forth between some locations. There could even be some faciliites in the dungeon where the monsters work! That would fit well with the resource management theme I've been throwing around. Resource management could be the _unique twist_ this game would have.
+
+## 2021-08-24
+
+First, let's modularize the thing using Webpack.

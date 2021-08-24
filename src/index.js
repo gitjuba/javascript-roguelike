@@ -1,3 +1,7 @@
+var { charOffsetX, charOffsetY, charMap } = require('./charmap')
+var { getRandomRoomPosition, generateLevel } = require('./level')
+var { rollMonster } = require('./monsters')
+
 var canvasWidthChars = 80
 var canvasHeightChars = 25
 

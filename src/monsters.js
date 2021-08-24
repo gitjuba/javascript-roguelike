@@ -1,3 +1,5 @@
+var { randInt } = require('./level')
+
 var monsterDictionary = [
   {
     name: 'small monster',
@@ -65,7 +67,6 @@ function rollMonster(level) {
   }
 }
 
-function getMonsterDictionaryFor(level) {
-  var weightSum = monsterDictionary.reduce((acc, curr) => acc + curr.spawnWeight(level), 0)
-  return monsterDictionary.sort((m1, m2) => m1.spawnWeight(level) - m2.spawnWeight(level))
+module.exports = {
+  rollMonster,
 }

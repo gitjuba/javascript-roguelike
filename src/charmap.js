@@ -87,3 +87,9 @@ var charMap = {
   y: { i: 3, j: 25 },
   z: { i: 3, j: 26 },
 }
+
+module.exports = {
+  charOffsetX,
+  charOffsetY,
+  charMap
+}
