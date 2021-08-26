@@ -16,3 +16,16 @@ var statsHeight = mapHeight
 
 var logWidth = canvasWidthChars
 var logHeight = canvasHeightChars - mapHeight
+
+module.exports = {
+  canvasWidthChars,
+  canvasHeightChars,
+  canvasWidth,
+  canvasHeight,
+  mapWidth,
+  mapHeight,
+  statsWidth,
+  statsHeight,
+  logWidth,
+  logHeight
+}

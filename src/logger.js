@@ -1,3 +1,8 @@
+var {
+  logWidth,
+  logHeight
+} = require('./layout')
+
 // "singleton"
 function Logger() {
   if (Logger.instance) {
