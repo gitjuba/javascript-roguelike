@@ -63,7 +63,7 @@ var keyDisplacement = {
 }
 
 function Game() {
-  this.resetRenderFlags = function() {
+  this.resetRenderFlags = function resetRenderFlags() {
     this.shouldRenderStats = true
     this.shouldRenderLog = true
     this.shouldRenderLevel = true
@@ -76,15 +76,15 @@ function Game() {
   this.levels = []
   this.currentLevel = 0
 
-  this.addNewLevel = function() {
+  this.addNewLevel = function addNewLevel() {
     var newLevel = new Level(this.levels.length, { down: true, up: this.levels.length > 0 })
     this.levels.push(newLevel)
     return newLevel
   }
-  this.isFirstLevel = function() {
+  this.isFirstLevel = function isFirstLevel() {
     return this.currentLevel == 0
   }
-  this.isLatestLevel = function() {
+  this.isLatestLevel = function isLatestLevel() {
     return this.currentLevel == this.levels.length - 1
   }
 
@@ -97,14 +97,14 @@ function Game() {
   this.player.setPosition(playerPosition)
   this.levels[this.currentLevel].placePlayer(this.player)
 
-  this.getStatsLines = function() {
+  this.getStatsLines = function getStatsLines() {
     return [
       'D  ' + String(this.currentLevel).padStart(5, ' '),
       'HP ' + String(this.player.hp).padStart(5, ' ')
     ]
   }
 
-  this.updateState = function(event) {
+  this.updateState = function updateState(event) {
     var dx, dy
 
     var key = event.key
@@ -252,7 +252,7 @@ function Game() {
     logger.finishLine()
   }
 
-  this.render = function() {
+  this.render = function render() {
     if (this.shouldRenderStats) {
       this.renderStats()
       this.shouldRenderStats = false
@@ -279,7 +279,7 @@ function Game() {
     }
   }
 
-  this.renderStats = function() {
+  this.renderStats = function renderStats() {
     statsRenderer.clear()
     var statsLines = this.getStatsLines()
     statsRenderer.drawText(''.padEnd(statsWidth, ' '), defaultTextColor, 0, 0)
@@ -294,7 +294,7 @@ function Game() {
     }
   }
 
-  this.renderLog = function() {
+  this.renderLog = function renderLog() {
     logRenderer.clear()
     var logger = Logger.getInstance()
     var logLines = logger.getLogLines()
@@ -305,7 +305,7 @@ function Game() {
     }
   }
 
-  this.renderLevel = function() {
+  this.renderLevel = function renderLevel() {
     levelRenderer.clear()
     var level = this.levels[this.currentLevel]
     for (var i = 0; i < mapHeight; i++) {
@@ -317,7 +317,7 @@ function Game() {
     }
   }
 
-  this.renderObjects = function() {
+  this.renderObjects = function renderObjects() {
     objectRenderer.clear()
     objectRenderer.drawColoredChar(this.player.char, this.player.color, this.player.y, this.player.x)
 
@@ -330,7 +330,7 @@ function Game() {
     }
   }
 
-  this.renderSeen = function() {
+  this.renderSeen = function renderSeen() {
     var level = this.levels[this.currentLevel]
     for (var i = 0; i < mapHeight; i++) {
       for (var j = 0; j < mapWidth; j++) {
@@ -343,7 +343,7 @@ function Game() {
     }
   }
 
-  this.renderVisible = function() {
+  this.renderVisible = function renderVisible() {
     var level = this.levels[this.currentLevel]
     for (var i = 0; i < mapHeight; i++) {
       for (var j = 0; j < mapWidth; j++) {

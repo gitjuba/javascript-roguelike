@@ -21,7 +21,7 @@ function Renderer(id, top, left, width, height) {
 
   this.context = null
 
-  this.init = function(container, charSheet) {
+  this.init = function init(container, charSheet) {
     var canvas = document.createElement('canvas')
     canvas.className = 'game-canvas'
     canvas.setAttribute('id', id)
@@ -36,11 +36,11 @@ function Renderer(id, top, left, width, height) {
     return this
   }
 
-  this.clear = function() {
+  this.clear = function clear() {
     this.context.clearRect(0, 0, canvasWidth, canvasHeight)
   }
 
-  this.drawChar = function(char, i, j) {
+  this.drawChar = function drawChar(char, i, j) {
     if (!(char in charMap)) {
       throw new Error('invalid char: ' + char)
     }
@@ -57,14 +57,14 @@ function Renderer(id, top, left, width, height) {
     )
   }
 
-  this.drawText = function(text, color, i, j) {
+  this.drawText = function drawText(text, color, i, j) {
     // negative i means count lines from bottom
     for (var k = 0; k < text.length; k++) {
       this.drawColoredChar(text[k], color, i >= 0 ? i : this.height + i, j + k)
     }
   }
 
-  this.drawTile = function(color, i, j) {
+  this.drawTile = function drawTile(color, i, j) {
     this.context.fillStyle = color
     this.context.fillRect(
       (this.left + j) * charWidthPixels,
@@ -74,7 +74,7 @@ function Renderer(id, top, left, width, height) {
     )
   }
 
-  this.clearTile = function(i, j) {
+  this.clearTile = function clearTile(i, j) {
     this.context.clearRect(
       (this.left + j) * charWidthPixels,
       (this.top + i) * charHeightPixels,
@@ -83,12 +83,12 @@ function Renderer(id, top, left, width, height) {
     )
   }
 
-  this.drawColoredChar = function(char, color, i, j) {
+  this.drawColoredChar = function drawColoredChar(char, color, i, j) {
     this.drawTile(color, i, j)
     this.drawChar(char, i, j)
   }
 
-  this.fillWithChar = function(char) {
+  this.fillWithChar = function fillWithChar(char) {
     for (var i = 0; i < this.height; i++) {
       for (var j = 0; j < this.width; j++) {
         this.drawChar(char, i, j)

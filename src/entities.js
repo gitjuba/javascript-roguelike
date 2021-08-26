@@ -10,16 +10,16 @@ function LivingEntity(char, color) {
   this.hitChance = 0
   this.hitDamage = 0
 
-  this.setPosition = function(position) {
+  this.setPosition = function setPosition(position) {
     this.x = position.x
     this.y = position.y
   }
 
-  this.isAdjacentTo = function(that) {
+  this.isAdjacentTo = function isAdjacentTo(that) {
     return Math.max(Math.abs(this.x - that.x), Math.abs(this.y - that.y)) == 1
   }
 
-  this.attack = function(that) {
+  this.attack = function attack(that) {
     if (Math.random() < this.hitChance) {
       that.hp -= this.hitDamage
       return true
@@ -28,7 +28,7 @@ function LivingEntity(char, color) {
     }
   }
 
-  this.getApproachVectorsTo = function(that) {
+  this.getApproachVectorsTo = function getApproachVectorsTo(that) {
     var dispX = that.x - this.x
     var dispY = that.y - this.y
     var dx0 = dispX != 0 ? (dispX < 0 ? -1 : 1) : 0
@@ -60,7 +60,7 @@ function Monster(char, color) {
   this.aggressive = false
   this.aggravationChance = 0.2
 
-  this.rollAggravation = function() {
+  this.rollAggravation = function rollAggravation() {
     if (this.seen && !this.aggressive && Math.random() < this.aggravationChance) {
       console.log('monster becomes agressive')
       this.aggressive = true
@@ -86,7 +86,7 @@ function Player(char, color) {
   this.visRadius = 7.5
   this.attacking = false
 
-  this.isWithinVisRadius = function(i, j) {
+  this.isWithinVisRadius = function isWithinVisRadius(i, j) {
     return (this.x - j) ** 2 + (this.y - i) ** 2 < this.visRadius ** 2
   }
 }

@@ -17,21 +17,21 @@ function Logger() {
   this.lineRegex = new RegExp(`(.{0,${this.maxLineWidth}}$|.{0,${this.maxLineWidth}}\\b)`, 'g')
 
   this.newLine = ''
-  this.appendToLine = function(msg) {
+  this.appendToLine = function appendToLine(msg) {
     if (this.newLine.length == 0) {
       this.newLine += msg
     } else {
       this.newLine += (' ' + msg)
     }
   }
-  this.finishLine = function() {
+  this.finishLine = function finishLine() {
     if (this.newLine.length > 0) {
       this.logBuffer.unshift(this.newLine)
     }
     this.newLine = ''
   }
 
-  this.getLogLines = function*() {
+  this.getLogLines = function* getLogLines() {
     var linesToDisplay = []
     var iLine = 0
     while (linesToDisplay.length < logHeight) {
@@ -59,7 +59,7 @@ function Logger() {
     }
   }
 }
-Logger.getInstance = function() {
+Logger.getInstance = function getInstance() {
   return Logger.instance || new Logger()
 }
 

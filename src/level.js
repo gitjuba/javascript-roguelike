@@ -119,7 +119,7 @@ function Level(level, mapGenParams) {
   this.wasVisibleMask = this.tileMap.map(row => row.map(() => false))
   this.isOccupied = this.tileMap.map(row => row.map(tile => (tile == '#')))
 
-  this.getRandomUnoccupiedTile = function() {
+  this.getRandomUnoccupiedTile = function getRandomUnoccupiedTile() {
     var position
     do {
       position = getRandomRoomPosition(this.map)
@@ -127,15 +127,15 @@ function Level(level, mapGenParams) {
     return position
   }
 
-  this.occupy = function(position) {
+  this.occupy = function occupy(position) {
     this.isOccupied[position.y][position.x] = true
   }
 
-  this.unoccupy = function(position) {
+  this.unoccupy = function unoccupy(position) {
     this.isOccupied[position.y][position.x] = false
   }
 
-  this.placePlayer = function(player) {
+  this.placePlayer = function placePlayer(player) {
     this.occupy(player)
     for (var i = 0; i < mapHeight; i++) {
       for (var j = 0; j < mapWidth; j++) {
@@ -151,30 +151,30 @@ function Level(level, mapGenParams) {
     }
   }
 
-  this.becameNotVisible = function(i, j) {
+  this.becameNotVisible = function becameNotVisible(i, j) {
     return this.wasVisibleMask[i][j] && !this.isVisibleMask[i][j]
   }
 
-  this.hasDownStaircase = function() {
+  this.hasDownStaircase = function hasDownStaircase() {
     return this.map.down
   }
-  this.hasUpStaircase = function() {
+  this.hasUpStaircase = function hasUpStaircase() {
     return this.map.up
   }
-  this.isDownStaircaseAt = function(position) {
+  this.isDownStaircaseAt = function isDownStaircaseAt(position) {
     return this.tileMap[position.y][position.x] == '>'
   }
-  this.isUpStaircaseAt = function(position) {
+  this.isUpStaircaseAt = function isUpStaircaseAt(position) {
     return this.tileMap[position.y][position.x] == '<'
   }
-  this.getDownStaircasePosition = function() {
+  this.getDownStaircasePosition = function getDownStaircasePosition() {
     if (this.hasDownStaircase()) {
       return this.map.down
     } else {
       throw new Error('No down staircase in level')
     }
   }
-  this.getUpStaircasePosition = function() {
+  this.getUpStaircasePosition = function getUpStaircasePosition() {
     if (this.hasUpStaircase()) {
       return this.map.up
     } else {
@@ -192,7 +192,7 @@ function Level(level, mapGenParams) {
     this.isOccupied[position.y][position.x] = true
     this.monsters.push(monster)
   }
-  this.getMonsterAt = function(x, y) {
+  this.getMonsterAt = function getMonsterAt(x, y) {
     return this.monsters.find(m => m.x == x && m.y == y && m.hp > 0)
   }
 }
