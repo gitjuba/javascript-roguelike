@@ -1,12 +1,27 @@
-var { charOffsetX, charOffsetY, charMap } = require('./charmap')
-var { getRandomRoomPosition, generateLevel } = require('./level')
-var { rollMonster } = require('./monsters')
+var Logger = require('./logger')
+var Renderer = require('./renderer')
+var Level = require('./level')
+var { Player } = require('./entities')
 
-var canvasWidthChars = 80
-var canvasHeightChars = 25
+var {
+  mapWidth,
+  mapHeight,
+  statsWidth,
+  statsHeight,
+  logWidth,
+  logHeight
+} = require('./layout')
 
-var charWidthPixels = 9
-var charHeightPixels = 14
+var defaultTextColor = '#aaa'
+
+function createCanvasContainer() {
+  var div = document.createElement('div')
+  div.className = 'container'
+  document.body.appendChild(div)
+  return div
+}
+
+var container = createCanvasContainer()
 
 function createCharacterSheet(imageFile) {
   var img = document.createElement('img')
@@ -20,465 +35,19 @@ function createCharacterSheet(imageFile) {
   return img
 }
 
-var charsImg = createCharacterSheet('Codepage-850_alpha.png')
+var charSheet = createCharacterSheet('Codepage-850_alpha.png')
 
-var canvasWidth = canvasWidthChars * charWidthPixels
-var canvasHeight = canvasHeightChars * charHeightPixels
-
-function createContainer() {
-  var div = document.createElement('div')
-  div.className = 'container'
-  document.body.appendChild(div)
-  return div
-}
-
-var container = createContainer()
-
-function createDrawingContext(id) {
-  var canvas = document.createElement('canvas')
-  canvas.className = 'game-canvas'
-  canvas.setAttribute('id', id)
-  canvas.setAttribute('width', canvasWidth)
-  canvas.setAttribute('height', canvasHeight)
-  canvas.style.transform = `translate(${canvasWidth / 2}px,${canvasHeight / 2}px)scale(2)`
-  container.appendChild(canvas)
-  var context = canvas.getContext('2d')
-  return context
-}
-
-function Renderer(id, top, left, width, height) {
-  this.top = top
-  this.left = left
-  this.width = width
-  this.height = height
-
-  this.context = createDrawingContext(id)
-
-  this.clear = function() {
-    this.context.clearRect(0, 0, canvasWidth, canvasHeight)
-  }
-
-  this.drawChar = function(char, i, j) {
-    if (!(char in charMap)) {
-      throw new Error('invalid char: ' + char)
-    }
-    this.context.drawImage(
-      charsImg,
-      charOffsetX + charMap[char].j * charWidthPixels,
-      charOffsetY + charMap[char].i * charHeightPixels,
-      charWidthPixels,
-      charHeightPixels,
-      (this.left + j) * charWidthPixels,
-      (this.top + i) * charHeightPixels,
-      charWidthPixels,
-      charHeightPixels
-    )
-  }
-
-  this.drawText = function(text, color, i, j) {
-    // negative i means count lines from bottom
-    for (var k = 0; k < text.length; k++) {
-      this.drawColoredChar(text[k], color, i >= 0 ? i : this.height + i, j + k)
-    }
-  }
-
-  this.drawTile = function(color, i, j) {
-    this.context.fillStyle = color
-    this.context.fillRect(
-      (this.left + j) * charWidthPixels,
-      (this.top + i) * charHeightPixels,
-      charWidthPixels,
-      charHeightPixels
-    )
-  }
-
-  this.clearTile = function(i, j) {
-    this.context.clearRect(
-      (this.left + j) * charWidthPixels,
-      (this.top + i) * charHeightPixels,
-      charWidthPixels,
-      charHeightPixels
-    )
-  }
-
-  this.drawColoredChar = function(char, color, i, j) {
-    this.drawTile(color, i, j)
-    this.drawChar(char, i, j)
-  }
-
-  this.fillWithChar = function(char) {
-    for (var i = 0; i < this.height; i++) {
-      for (var j = 0; j < this.width; j++) {
-        this.drawChar(char, i, j)
-      }
-    }
-  }
-}
-
-// "singleton"
-function Logger() {
-  if (Logger.instance) {
-    throw new Error('Use Logger.getInstance')
-  }
-  Logger.instance = this
-  this.logBuffer = [
-    'Welcome!',
-    'Very long line with monsters attacking and all sorts of crazy stuff going on so that this has to be split into multiple lines for sure'
-  ]
-  this.maxLineWidth = logWidth - 2 // '> ' prefix
-  this.lineRegex = new RegExp(`(.{0,${this.maxLineWidth}}$|.{0,${this.maxLineWidth}}\\b)`, 'g')
-
-  this.newLine = ''
-  this.appendToLine = function(msg) {
-    if (this.newLine.length == 0) {
-      this.newLine += msg
-    } else {
-      this.newLine += (' ' + msg)
-    }
-  }
-  this.finishLine = function() {
-    if (this.newLine.length > 0) {
-      this.logBuffer.unshift(this.newLine)
-    }
-    this.newLine = ''
-  }
-
-  this.getLogLines = function*() {
-    var linesToDisplay = []
-    var iLine = 0
-    while (linesToDisplay.length < logHeight) {
-      if (iLine < this.logBuffer.length) {
-        var line = this.logBuffer[iLine]
-        var split = line.match(this.lineRegex)
-          .map(part => part.trim())
-          .filter(part => part.length > 0)
-        for (var iPart = split.length - 1; iPart > 0; iPart--) {
-          var part = '  ' + split[iPart]
-          linesToDisplay.push(part)
-        }
-        var firstPart = '> ' + split[0]
-        linesToDisplay.push(firstPart)
-      } else {
-        linesToDisplay.push('  ')
-      }
-      iLine += 1
-    }
-    iLine = 0
-    while (iLine < logHeight) {
-      var line = linesToDisplay[iLine]
-      yield line.padEnd(logWidth, ' ')
-      iLine += 1
-    }
-  }
-}
-Logger.getInstance = function() {
-  return Logger.instance || new Logger()
-}
-
-var mapWidth = 70
-var mapHeight = 20
-
-function createEmptyTileMap() {
-  var tileMap = Array(mapHeight)
-  for (var i = 0; i < mapHeight; i++) {
-    tileMap[i] = Array(mapWidth)
-    for (var j = 0; j < mapWidth; j++) {
-      tileMap[i][j] = '#'
-    }
-  }
-  return tileMap
-}
-
-var defaultTileColors = {
-  '#': '#666',
-  '.': '#ddd',
-  '<': '#ddd',
-  '>': '#ddd',
-}
-var defaultTextColor = '#aaa'
-
-function carveRoom(room, level) {
-  for (var i = room.y; i < room.y + room.h; i++) {
-    for (var j = room.x; j < room.x + room.w; j++) {
-      level[i][j] = '.'
-    }
-  }
-}
-
-function LivingEntity(char, color) {
-  this.char = char
-  this.color = color
-  this.x = 0
-  this.y = 0
-
-  this.hp = 0
-  this.hitChance = 0
-  this.hitDamage = 0
-
-  this.setPosition = function(position) {
-    this.x = position.x
-    this.y = position.y
-  }
-
-  this.isAdjacentTo = function(that) {
-    return Math.max(Math.abs(this.x - that.x), Math.abs(this.y - that.y)) == 1
-  }
-
-  this.attack = function(that) {
-    if (Math.random() < this.hitChance) {
-      that.hp -= this.hitDamage
-      return true
-    } else {
-      return false
-    }
-  }
-
-  this.getApproachVectorsTo = function(that) {
-    var dispX = that.x - this.x
-    var dispY = that.y - this.y
-    var dx0 = dispX != 0 ? (dispX < 0 ? -1 : 1) : 0
-    var dy0 = dispY != 0 ? (dispY < 0 ? -1 : 1) : 0
-
-    var vectors = [{ dx: dx0, dy: dy0 }]
-
-    // If preferred direction along cardinal axis try also both diagonals around it
-    if (dx0 == 0) {
-      vectors.push({ dx: -1, dy: dy0 })
-      vectors.push({ dx: 1, dy: dy0 })
-    } else if (dy0 == 0) {
-      vectors.push({ dx: dx0, dy: -1 })
-      vectors.push({ dx: dx0, dy: 1 })
-    } else {
-      // Preferred direction is diagonal: try also both cardinal directions around it
-      vectors.push({ dx: 0, dy: dy0 })
-      vectors.push({ dx: dx0, dy: 0 })
-    }
-
-    return vectors
-  }
-}
-
-function Monster(char, color) {
-  LivingEntity.call(this, char, color)
-
-  this.seen = false
-  this.aggressive = false
-  this.aggravationChance = 0.2
-
-  this.rollAggravation = function() {
-    if (this.seen && !this.aggressive && Math.random() < this.aggravationChance) {
-      console.log('monster becomes agressive')
-      this.aggressive = true
-    }
-  }
-}
-Monster.fromSpawner = function(spawner) {
-  var monster = new Monster(spawner.char, spawner.color)
-  monster.name = spawner.name
-  monster.hp = spawner.hp()
-  monster.hitChance = spawner.hitChance()
-  monster.hitDamage = spawner.hitDamage()
-  return monster
-}
-
-function Player(char, color) {
-  LivingEntity.call(this, char, color)
-
-  this.hp = 10
-  this.hitChance = 0.5
-  this.hitDamage = 2
-
-  this.visRadius = 7.5
-  this.attacking = false
-
-  this.isWithinVisRadius = function(i, j) {
-    return (this.x - j) ** 2 + (this.y - i) ** 2 < this.visRadius ** 2
-  }
-}
-
-var visBlock = {
-  '#': 0.05,
-  '.': 0.45,
-  '<': 0.45,
-  '>': 0.45,
-}
-
-// Is (x,y) visible from (x0,y0) in tile map level
-function isVisible(x, y, x0, y0, level) {
-  var m, xj, yj, yj_, xj_, j, dj, vbj_d, vbj_u, vb_d, vb_u
-  if (Math.abs(y - y0) <= Math.abs(x - x0)) {
-    // "x-simple"
-    m = (y - y0) / (x - x0)
-    dj = x < x0 ? -1 : 1
-    vb_d = 0
-    vb_u = 0
-    for (j = 0; Math.abs(j) < Math.abs(x - x0); j += dj) {
-      xj = x0 + j
-      yj = y0 + m * j
-
-      yj_ = Math.floor(yj)
-
-      // Calculate blocked portion of visiblity to both sides
-      vbj_d = 1 - (yj - yj_)
-      vbj_u = 1 - vbj_d
-
-      if (level[yj_][xj] == '#' && vbj_d > vb_d) {
-        vb_d = vbj_d
-      }
-      if (level[yj_ + 1][xj] == '#' && vbj_u > vb_u) {
-        vb_u = vbj_u
-      }
-      if (vb_d + vb_u > 1 - visBlock[level[y][x]]) {
-        return false
-      }
-    }
-  } else {
-    // "y-simple"
-    m = (x - x0) / (y - y0)
-    dj = y < y0 ? -1 : 1
-    vb_d = 0
-    vb_u = 0
-    for (j = 0; Math.abs(j) < Math.abs(y - y0); j += dj) {
-      yj = y0 + j
-      xj = x0 + m * j
-
-      xj_ = Math.floor(xj)
-
-      vbj_d = 1 - (xj - xj_)
-      vbj_u = 1 - vbj_d
-
-      if (level[yj][xj_] == '#' && vbj_d > vb_d) {
-        vb_d = vbj_d
-      }
-      if (level[yj][xj_ + 1] == '#' && vbj_u > vb_u) {
-        vb_u = vbj_u
-      }
-      if (vb_d + vb_u > 1 - visBlock[level[y][x]]) {
-        return false
-      }
-    }
-  }
-  return true
-}
-
-function Level(level, mapGenParams) {
-  this.level = level
-
-  this.map = generateLevel(mapWidth, mapHeight, mapGenParams)
-  this.tileMap = createEmptyTileMap()
-  this.map.rooms.forEach(room => {
-    carveRoom(room, this.tileMap)
-  })
-  this.map.corridors.forEach(room => {
-    carveRoom(room, this.tileMap)
-  })
-  if (this.map.up) {
-    this.tileMap[this.map.up.y][this.map.up.x] = '<'
-  }
-  if (this.map.down) {
-    this.tileMap[this.map.down.y][this.map.down.x] = '>'
-  }
-
-  this.colorMap = defaultTileColors
-
-  this.seenMask = this.tileMap.map(row => row.map(() => false))
-  this.isVisibleMask = this.tileMap.map(row => row.map(() => false))
-  this.wasVisibleMask = this.tileMap.map(row => row.map(() => false))
-  this.isOccupied = this.tileMap.map(row => row.map(tile => (tile == '#')))
-
-  this.getRandomUnoccupiedTile = function() {
-    var position
-    do {
-      position = getRandomRoomPosition(this.map)
-    } while (this.isOccupied[position.y][position.x])
-    return position
-  }
-
-  this.occupy = function(position) {
-    this.isOccupied[position.y][position.x] = true
-  }
-
-  this.unoccupy = function(position) {
-    this.isOccupied[position.y][position.x] = false
-  }
-
-  this.placePlayer = function(player) {
-    this.occupy(player)
-    for (var i = 0; i < mapHeight; i++) {
-      for (var j = 0; j < mapWidth; j++) {
-        this.wasVisibleMask[i][j] = this.isVisibleMask[i][j]
-        if (player.isWithinVisRadius(i, j) &&
-            isVisible(j, i, player.x ,player.y, this.tileMap)) {
-          this.seenMask[i][j] = true
-          this.isVisibleMask[i][j] = true
-        } else {
-          this.isVisibleMask[i][j] = false
-        }
-      }
-    }
-  }
-
-  this.becameNotVisible = function(i, j) {
-    return this.wasVisibleMask[i][j] && !this.isVisibleMask[i][j]
-  }
-
-  this.hasDownStaircase = function() {
-    return this.map.down
-  }
-  this.hasUpStaircase = function() {
-    return this.map.up
-  }
-  this.isDownStaircaseAt = function(position) {
-    return this.tileMap[position.y][position.x] == '>'
-  }
-  this.isUpStaircaseAt = function(position) {
-    return this.tileMap[position.y][position.x] == '<'
-  }
-  this.getDownStaircasePosition = function() {
-    if (this.hasDownStaircase()) {
-      return this.map.down
-    } else {
-      throw new Error('No down staircase in level')
-    }
-  }
-  this.getUpStaircasePosition = function() {
-    if (this.hasUpStaircase()) {
-      return this.map.up
-    } else {
-      throw new Error('No up staircase in level')
-    }
-  }
-
-  this.monsters = []
-  var numMonsters = 5 + this.level
-  for (var iMonster = 0; iMonster < numMonsters; iMonster++) {
-    var monsterType = rollMonster(this.level)
-    var monster = Monster.fromSpawner(monsterType)
-    var position = this.getRandomUnoccupiedTile()
-    monster.setPosition(position)
-    this.isOccupied[position.y][position.x] = true
-    this.monsters.push(monster)
-  }
-  this.getMonsterAt = function(x, y) {
-    return this.monsters.find(m => m.x == x && m.y == y && m.hp > 0)
-  }
-}
-
-var statsWidth = canvasWidthChars - mapWidth
-var statsHeight = mapHeight
 var statsRenderer = new Renderer('stats', 0,
-  mapWidth, statsWidth, statsHeight)
+  mapWidth, statsWidth, statsHeight).init(container, charSheet)
 
-var logWidth = canvasWidthChars
-var logHeight = canvasHeightChars - mapHeight
-var logRenderer = new Renderer('log', mapHeight, 0, logWidth, logHeight)
+var logRenderer = new Renderer('log', mapHeight, 0, logWidth, logHeight).init(container, charSheet)
 
-var colorRenderer = new Renderer('color', 0, 0, mapWidth, mapHeight)
-var visibleRenderer = new Renderer('visible', 0, 0, mapWidth, mapHeight)
-var levelRenderer = new Renderer('level', 0, 0, mapWidth, mapHeight)
-var objectRenderer = new Renderer('objects', 0, 0, mapWidth, mapHeight)
-var seenRenderer = new Renderer('seen', 0, 0, mapWidth, mapHeight)
-var debugRenderer = new Renderer('debug', 0, 0, mapWidth, mapHeight)
+var colorRenderer = new Renderer('color', 0, 0, mapWidth, mapHeight).init(container, charSheet)
+var visibleRenderer = new Renderer('visible', 0, 0, mapWidth, mapHeight).init(container, charSheet)
+var levelRenderer = new Renderer('level', 0, 0, mapWidth, mapHeight).init(container, charSheet)
+var objectRenderer = new Renderer('objects', 0, 0, mapWidth, mapHeight).init(container, charSheet)
+var seenRenderer = new Renderer('seen', 0, 0, mapWidth, mapHeight).init(container, charSheet)
+var debugRenderer = new Renderer('debug', 0, 0, mapWidth, mapHeight).init(container, charSheet)
 
 var movementKeys = 'uiojklm,.'
 var keyDisplacement = {
@@ -545,6 +114,7 @@ function Game() {
     var playerTurnDone = false
 
     var logger = Logger.getInstance()
+    // console.log(logger)
     this.shouldRenderLog = true
 
     if (this.player.hp <= 0) {

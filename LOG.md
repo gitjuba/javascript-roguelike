@@ -672,3 +672,11 @@ Monster wayfinding could also be used to make "idle animations" of monsters, the
 ## 2021-08-24
 
 First, let's modularize the thing using Webpack. Put the built bundle to `docs/`, as Github pages can be built from that subdirectory.
+
+## 2021-08-25/26
+
+Writing the game code into a more modular form requires me to look at the relationships between the different entities. For example, starting the main game loop requires all assets to be loaded (in this case, only the character sheet).
+
+- [ ] Wire up Webpack dev server
+- [ ] Figure out how to debug a Webpack build with VSCode.
+- [ ] Give names to functions (e.g. `this.setChar = function setChar(char) { /* ... */ }` in a constructor) for better stack traces to ease debugging

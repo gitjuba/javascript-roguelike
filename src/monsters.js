@@ -1,4 +1,4 @@
-var { randInt } = require('./level')
+var { randInt } = require('./map-generator')
 
 var monsterDictionary = [
   {
