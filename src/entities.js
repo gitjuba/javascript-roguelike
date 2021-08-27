@@ -1,5 +1,3 @@
-var { randInt } = require('./map-generator')
-
 function LivingEntity(char, color) {
   this.char = char
   this.color = color

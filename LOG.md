@@ -673,7 +673,7 @@ Monster wayfinding could also be used to make "idle animations" of monsters, the
 
 First, let's modularize the thing using Webpack. Put the built bundle to `docs/`, as Github pages can be built from that subdirectory.
 
-## 2021-08-25/26
+## 2021-08-25/26/27
 
 Writing the game code into a more modular form requires me to look at the relationships between the different entities. For example, starting the main game loop requires all assets to be loaded (in this case, only the character sheet).
 
@@ -682,4 +682,24 @@ Writing the game code into a more modular form requires me to look at the relati
 - [x] Figure out how to debug a Webpack build with VSCode.
   - Following [this advice](https://stackoverflow.com/questions/46438471/how-to-use-vs-code-debugger-with-webpack-dev-server-breakpoints-ignored), add `context: path.resolve(__dirname, 'src')` to Webpack config, change entrypoint to `./index.js`, and in VSCode `launch.json`, change the port on the URL to match the dev server port, and add `/src` suffix to `webRoot`.
   - Seems to work.
-- [ ] Give names to functions (e.g. `this.setChar = function setChar(char) { /* ... */ }` in a constructor) for better stack traces to ease debugging
+- [x] Give names to functions (e.g. `this.setChar = function setChar(char) { /* ... */ }` in a constructor) for better stack traces to ease debugging
+
+Now then, map generation.
+
+- The result of map generation is the tile map.
+- Not all map generation algorithms generate actual "rooms" so they can't (always) be the result.
+- On the other hand, a room is a good unit to hold some special dungeon features. And a list of features is anyway useful for a lot of things, such as wayfinding.
+
+Browsed through some dungeon generation resources, perhaps it's most interesting to try building my own algorithms.
+
+Build a testing pipeline for generated maps. Note that it's not convenient to test in the Node REPL, because changes in the source code take effect only when restarting the REPL. Does it make sense to create a `test` folder alongside `src` for the tests? Nah.
+
+Refactor the map generation code so that I can generate maps from the command line, view their tile maps and push them as playable levels in the game. The idea to use multiple mapgen algorithms directly implies the need for an abstract map generator "class" (what do I call them in JS? "object type"?).
+
+Staircases should be placed outside the dungeon generation, in the `Level` constructor, as dungeon features. In room based maps, the staircases are placed in rooms. In non-room based, just use any unoccupied tile.
+
+How to sample an unoccupied tile from the `isOccupied` mask? I don't want to resort to repeatedly (blindly) picking positions. Well, I guess it'll do for now, it's used only in sampling the monster positions.
+
+Add a debug mode to the game: Instead of generating a random dungeon level, load the level from a given file. Show the whole level, including all monsters (possibly also their hit points and other stats).
+
+_Side note_: _Ctrl-B_ to hide side bar in VSCode. How to go to next syntax error? _F8_.

@@ -1,10 +1,10 @@
-var { randInt } = require('./map-generator')
+var { randInt } = require('./utils')
 
 var monsterDictionary = [
   {
     name: 'small monster',
     char: 'g',
-    color: 'red',
+    color: '#f00',
     spawnWeight: level => 1 / (level + 1),
     hp: level => [1, 1],
     hitChance: level => [10, 20],
@@ -13,7 +13,7 @@ var monsterDictionary = [
   {
     name: 'monster',
     char: 'g',
-    color: 'darkred',
+    color: '#a00',
     spawnWeight: level => 1.0,
     hp: level => [1, 1 + Math.floor(level / 2)],
     hitChance: level => [10 + level, 20 + 2 * level],
@@ -22,7 +22,7 @@ var monsterDictionary = [
   {
     name: 'large monster',
     char: 'G',
-    color: 'brown',
+    color: '#a50',
     spawnWeight: level => level / 20,
     hp: level => [5, 5 + level],
     hitChance: level => [10 + level, 20 + 2 * level],
@@ -31,7 +31,7 @@ var monsterDictionary = [
   {
     name: 'huge monster',
     char: 'G',
-    color: 'darkbrown',
+    color: '#840',
     spawnWeight: level => level / 500,
     hp: level => [10, 10 + level],
     hitChance: level => [20 + level, 30 + 2 * level],

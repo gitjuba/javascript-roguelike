@@ -1,26 +1,8 @@
-var { generateLevel, getRandomRoomPosition } = require('./map-generator')
+var RandomRoomsMapGenerator = require('./mapgen/random-rooms-map-generator')
 var { mapWidth, mapHeight } = require('./layout')
 var { rollMonster } = require('./monsters')
 var { Monster } = require('./entities')
-
-function createEmptyTileMap() {
-  var tileMap = Array(mapHeight)
-  for (var i = 0; i < mapHeight; i++) {
-    tileMap[i] = Array(mapWidth)
-    for (var j = 0; j < mapWidth; j++) {
-      tileMap[i][j] = '#'
-    }
-  }
-  return tileMap
-}
-
-function carveRoom(room, level) {
-  for (var i = room.y; i < room.y + room.h; i++) {
-    for (var j = room.x; j < room.x + room.w; j++) {
-      level[i][j] = '.'
-    }
-  }
-}
+const { randInt } = require('./utils')
 
 var defaultTileColors = {
   '#': '#666',
@@ -94,23 +76,18 @@ function isVisible(x, y, x0, y0, level) {
   return true
 }
 
-function Level(level, mapGenParams) {
+function Level(level) {
   this.level = level
 
-  this.map = generateLevel(mapWidth, mapHeight, mapGenParams)
-  this.tileMap = createEmptyTileMap()
-  this.map.rooms.forEach(room => {
-    carveRoom(room, this.tileMap)
-  })
-  this.map.corridors.forEach(room => {
-    carveRoom(room, this.tileMap)
-  })
-  if (this.map.up) {
-    this.tileMap[this.map.up.y][this.map.up.x] = '<'
+  var generator = new RandomRoomsMapGenerator(level)
+  generator.generate()
+  if (level > 0) {
+    generator.placeUpStaircase()
   }
-  if (this.map.down) {
-    this.tileMap[this.map.down.y][this.map.down.x] = '>'
-  }
+  generator.placeDownStaircase()
+
+  this.map = generator.getFeatures()
+  this.tileMap = generator.getTileMap()
 
   this.colorMap = defaultTileColors
 
@@ -122,7 +99,7 @@ function Level(level, mapGenParams) {
   this.getRandomUnoccupiedTile = function getRandomUnoccupiedTile() {
     var position
     do {
-      position = getRandomRoomPosition(this.map)
+      position = { x: randInt(1, mapWidth - 2), y: randInt(1, mapHeight - 2) }
     } while (this.isOccupied[position.y][position.x])
     return position
   }
