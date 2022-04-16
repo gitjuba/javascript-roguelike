@@ -22,6 +22,6 @@
 
 ## Goal IV
 
-- [ ] Parametrized map generation
 - [ ] Different map generation algorithms
 - [ ] Wayfinding
+- [ ] Map features

@@ -703,3 +703,41 @@ How to sample an unoccupied tile from the `isOccupied` mask? I don't want to res
 Add a debug mode to the game: Instead of generating a random dungeon level, load the level from a given file. Show the whole level, including all monsters (possibly also their hit points and other stats).
 
 _Side note_: _Ctrl-B_ to hide side bar in VSCode. How to go to next syntax error? _F8_.
+
+## 2021-08-28
+
+How could the map generation be parametrized? In terms of the dungeon level, for example. The level layout itself perhaps need not really change in deeper levels. The available feature sets could very well depend on the level though. Change the goal posts for this goal a little: Remove parametrized map generation and add map features.
+
+Some interesting map features:
+
+- Underground rivers
+- _Prefabs_, i.e. small hand-made dungeon elements such as temples, vaults, mazes
+- Crumbled sections of a level (irregular non-room based layout in a part of the level)
+  - This could be done mixing two different map generation algorithms on one level
+- Friendly NPCs (shopkeepers, healers, ...)
+  - Healers could be used as a means to refill HP before an item system is made
+
+## 2021-09-04
+
+The _Binary Space Partition_ map generation algorithm is quite interesting. The partitions form a binary tree in a natural way, and I guess the idea is to connect "leaf rooms" (rooms created in leaf partitions) which have the same parent partition, and then connect one of the leaf rooms to one of their "cousins" etc. So let's make a proper data structure to handle this. Do I need an object type for the data structure itself, or is it enough to have the nodes of the structure? A node would have pointers to its parent and children.
+
+And for there to be some benefit in using this data structure, the algorithm for generating the partitions has to be recursive. That is, the _split_ function has to be a method of the node class (or just a function which takes as argument a node).
+
+But if I don't have a "container" for the nodes, where do they "live"? In some scope, not garbage collected, I guess, but that's not very clean... Could be pushed to a global array?
+
+## 2021-09-05
+
+Some partitions in the BSP algorithm could be left without a room (some may be too small), or they could be left unsplit. Partitions without a room could be used to house dungeon features, prefabs etc.
+
+Did a first version of BSP. The generated levels look very boring, the rooms are often in rows. Let's try to prefer doing horizontal splits in "horizontal" (i.e. width > height) partitions, and vice versa. For example, split vertically if `Math.random() < height / (width + height)`.
+
+A lot nicer level layouts. Perhaps I should also stop splitting a bit earlier, there are too many rooms, and the partition dimensions are too often close to the minimun room dimensions. I can tune the parameters later, now let's carve the connecting corridors. What's the logic there?
+
+- Loop over leaf nodes, connect each one with its sibling
+  - During this loop, mark each connected node so they don't get connected twice.
+  - If a leaf node does not have siblings with rooms, consider it connected (it will be connected to its cousins in the next step)
+- Loop over parents of leaf nodes, connect each one with its sibling
+  - Non-leaf nodes don't have rooms, so what does this mean?
+  - For each such pair of a parent node and its sibling, find two random (leaf) children of both and connect them.
+  - But if I choose the descendants at random, there is bound to be a lot of overlapping corridors in the level...
+
