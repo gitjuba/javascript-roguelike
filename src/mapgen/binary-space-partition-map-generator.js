@@ -1,4 +1,5 @@
 var MapGenerator = require('./abstract-map-generator')
+var { Room } = require('./mapgen-commons')
 var { randFloat, randInt } = require('../utils')
 
 var params = {
@@ -28,12 +29,18 @@ function Node(top, left, width, height) {
   this.firstChild = null
   this.secondChild = null
 
+  this.room = null
+
   this.isLeafNode = function isLeafNode() {
     return this.firstChild == null && this.secondChild == null
   }
 
   this.canContainRoom = function canContainRoom() {
     return this.width >= params.minRoomWidth + 2 && this.height >= params.minRoomHeight + 2
+  }
+
+  this.hasRoom = function hasRoom() {
+    return this.room != null
   }
 
   this.clone = function clone() {
@@ -125,9 +132,28 @@ function BinarySpacePartitionMapGenerator(level) {
         var roomLeft = randInt(node.left + 1, node.left + node.width - 1 - (roomWidth + 1))
         var roomTop = randInt(node.top + 1, node.top + node.height - 1 - (roomHeight + 1))
 
-        this.carveRoom({ top: roomTop, left: roomLeft, width: roomWidth, height: roomHeight })
+        node.room = new Room(roomTop, roomLeft, roomWidth, roomHeight)
+
+        this.carveRoom(node.room)
       }
     })
+
+    function connectChildren(node) {
+      if (!node.isLeafNode()) {
+        if (node.firstChild.isLeafNode() && node.secondChild.isLeafNode()) {
+          if (node.firstChild.hasRoom() && node.secondChild.hasRoom()) {
+            console.log('connecting leaf nodes')
+          } else {
+            console.log('leaf siblings, one of which has no room')
+          }
+        } else {
+          connectChildren(node.firstChild)
+          connectChildren(node.secondChild)
+        }
+      }
+    }
+
+    connectChildren(nodes[0])
   }
 
   this.carveRoom = function carveRoom(room) {

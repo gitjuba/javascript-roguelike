@@ -1,4 +1,5 @@
 var MapGenerator = require('./abstract-map-generator')
+var { Room } = require('./mapgen-commons')
 
 var { randInt } = require('../utils')
 
@@ -11,54 +12,6 @@ var params = {
   maxNumberOfRooms: 10,
   targetMapFillRatio: 0.33,
   maxFailuresToAddRoom: 100
-}
-
-function Room(top, left, width, height) {
-  this.top = top
-  this.left = left
-  this.width = width
-  this.height = height
-
-  this.connected = false
-
-  this.area = function area() {
-    return this.width * this.height
-  }
-
-  this.getRandomPosition = function getRandomPosition() {
-    return {
-      x: randInt(this.left, this.left + this.width - 1),
-      y: randInt(this.top, this.top + this.height - 1)
-    }
-  }
-
-  this.overlapsX = function overlapsX(that) {
-    return (
-      that.left - this.width <= this.left &&
-      this.left <= that.left + that.width
-    )
-  }
-
-  this.overlapsY = function overlapsY(that) {
-    return (
-      that.top - this.height <= this.top &&
-      this.top <= that.top + that.height
-    )
-  }
-
-  this.overlaps = function overlaps(that) {
-    return this.overlapsX(that) && this.overlapsY(that)
-  }
-
-  this.distanceTo = function distanceTo(that) {
-    if (this.overlapsX(that)) {
-
-    } else if (this.overlapsY(that)) {
-
-    } else {
-
-    }
-  }
 }
 
 function RandomRoomsMapGenerator(level) {
