@@ -741,3 +741,57 @@ A lot nicer level layouts. Perhaps I should also stop splitting a bit earlier, t
   - For each such pair of a parent node and its sibling, find two random (leaf) children of both and connect them.
   - But if I choose the descendants at random, there is bound to be a lot of overlapping corridors in the level...
 
+## 2022-04-16
+
+Now where was I? Trying to get the BSP algorithm to work. It should be debuggable in VSCode (oh btw, switched from OSS Code to VSCode -- remove all ST3 stuff like `*.sublime-*`).
+
+The algorithm seems to place rooms just fine, just the corridors are missing. Hmm, not a trivial matter... Might need to re-implement the space partition (?).
+
+Each node has either two or zero children. The _first child_ of a node (if there are any) is either the "left child" or the "upper child", depending on whether the node was split horizontally or vertically.
+
+Should probably store a flag indicating the splitting direction. Whenever we split a node, it creates a pending task to the phase of creating connecting corridors: At least one corridor has to connect two rooms on opposite sides of the splitting line...
+
+Am I making this more difficult than it should be? Just store the rooms in the space partition phase and connect the rooms using a similar algorithm as with the _random rooms_ generator?
+
+A simple way to keep track of the geometry is to store the location on screen of each node (top, left, widht, height).
+
+Enumerate all possible cases: connecting siblings which both are leaf nodes is easy, just pick a random point inside each room and connect them with a (three-segment?) corridor.
+
+```
+  o
+ / \
+o   o
+```
+
+Connecting siblings `n1` and `n2`, one of which, say `n1` (the _first child_), is a leaf node and the children of the other are also leaf nodes:
+
+- If the splitting direction of `n1` from `n2` is _different_ from the splitting direction of the children of `n2` from each other, then both children of `n2` are adjacent to `n1`. In this case, pick a point at random from the room inside `n1`, find the child of `n2` which is closest to this point, and connect `n1` to this child.
+- If the splitting directions are the same, then one and only one of the children of `n2` is adjacent to `n1`. Find the adjacent child and connect `n1` to this.
+
+Side note: Computing (Manhattan) distances of (non-overlapping) axis-aligned rectangles with top-left coordinates `(x1,y1)` and `(x2,y2)`, and widths and heights `w1`, `h1`, `w2`, `h2`: We say that the rectangles _x-overlap_ if `x1 < x2 + w2` and `x2 < x1 + w1`. If the rectangles do _not_ x-overlap, their _x-distance_ is `min(abs(x1 + w1 - x2), abs(x2 + w2 - x1))`. If they _do_ x-overlap, their x-distance is zero. Define _y-overlap_ and _y-distance_ similarly. Finally, the _distance_ between the rectangles is the sum of their x- and y-distances.
+
+```
+  o
+ / \
+o   o
+   / \
+  o   o
+```
+
+Connecting siblings `n1` and `n2`, neither of which is a leaf node, but the children of both (call them `n11`, `n12`, `n21` and `n22`) are leaf nodes:
+
+- If the splitting direction of `n1` from `n2` is different than _both_ splitting directions among their children, then both of `n11` and `n12` are adjacent to at least one of `n21` and `n22` and vice versa. Pick at random and connect.
+- If all splitting directions are the same, connect the last child of `n1` to the first child of `n2`.
+- If exactly one of the splitting directions of the children is the same as that of the parent, then this reduces to the previous case.
+
+```
+     o
+   ./ \.
+  o     o
+ / \   / \
+o   o o   o
+```
+
+Comparing the splitting direction of the parents and children is the key to the recursion logic.
+
+Hmm, not all nodes have rooms...
