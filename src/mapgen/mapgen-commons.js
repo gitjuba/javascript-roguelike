@@ -1,3 +1,5 @@
+var { randInt } = require('../utils')
+
 function Room(top, left, width, height) {
   this.top = top
   this.left = left
