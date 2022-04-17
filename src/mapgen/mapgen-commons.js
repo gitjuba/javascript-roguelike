@@ -38,7 +38,7 @@ function Room(top, left, width, height) {
   }
 
   this.xDistanceTo = function xDistanceTo(that) {
-    if (this.overlapsX(that)) {
+    if (!this.overlapsX(that)) {
       return Math.min(Math.abs(this.left + this.width - that.left), Math.abs(that.left + that.width - this.left))
     } else {
       return 0
@@ -46,7 +46,7 @@ function Room(top, left, width, height) {
   }
 
   this.yDistanceTo = function yDistanceTo(that) {
-    if (this.overlapsY(that)) {
+    if (!this.overlapsY(that)) {
       return Math.min(Math.abs(this.top + this.height - that.top), Math.abs(that.top + that.height - this.top))
     } else {
       return 0
@@ -55,6 +55,37 @@ function Room(top, left, width, height) {
 
   this.distanceTo = function distanceTo(that) {
     return this.xDistanceTo(that) + this.yDistanceTo(that)
+  }
+
+  // Two-segment corridor
+  this.getCorridorTo = function getCorridorTo(that) {
+    var pSrc = this.getRandomPosition()
+    var xSrc = pSrc.x
+    var ySrc = pSrc.y
+    var pDest = that.getRandomPosition()
+    var xDest = pDest.x
+    var yDest = pDest.y
+
+    var verticalFirst = Math.random() < 0.5
+    var xTurn, yTurn
+    if (verticalFirst) {
+      xTurn = xSrc
+      yTurn = yDest
+    } else {
+      xTurn = xDest
+      yTurn = ySrc
+    }
+
+    var firstLeg, secondLeg
+    if (verticalFirst) {
+      firstLeg = new Room(Math.min(ySrc, yDest), xSrc, 1, Math.abs(ySrc - yDest) + 1)
+      secondLeg = new Room(yDest, Math.min(xSrc, xDest), Math.abs(xSrc - xDest) + 1, 1)
+    } else {
+      firstLeg = new Room(ySrc, Math.min(xSrc, xDest), Math.abs(xSrc - xDest) + 1, 1)
+      secondLeg = new Room(Math.min(ySrc, yDest), xDest, 1, Math.abs(ySrc - yDest) + 1)
+    }
+
+    return [firstLeg, secondLeg]
   }
 }
 

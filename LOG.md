@@ -751,7 +751,7 @@ Each node has either two or zero children. The _first child_ of a node (if there
 
 Should probably store a flag indicating the splitting direction. Whenever we split a node, it creates a pending task to the phase of creating connecting corridors: At least one corridor has to connect two rooms on opposite sides of the splitting line...
 
-Am I making this more difficult than it should be? Just store the rooms in the space partition phase and connect the rooms using a similar algorithm as with the _random rooms_ generator?
+Am I making this more difficult than it should be? Just store the rooms in the space partition phase and connect the rooms using a similar algorithm as with the _random rooms_ generator? I want BSP style dungeons to be "cleaner" in the sense that there are not that many corridors crossing each other and running parallel. (On the other hand, the RR (Random Rooms) algorithm could also connect closest rooms)
 
 A simple way to keep track of the geometry is to store the location on screen of each node (top, left, widht, height).
 
@@ -795,3 +795,17 @@ o   o o   o
 Comparing the splitting direction of the parents and children is the key to the recursion logic.
 
 Hmm, not all nodes have rooms...
+
+## 2022-04-17
+
+First implement connecting leaf node siblings. Take advantage of the splitting direction. Hmm, "splitting vertically" means splitting along a _horizontal_ axis... Let's just rename the methods: we split _along the horizontal_ if we divide the node into an upper and a lower part, and analogously splitting _along the vertical_.
+
+The _Room_ class quite naturally houses everything one might want to do with axis-aligned rectangles.
+
+How to avoid `var self = this`?
+
+Not having a room in all nodes kinda makes things complicated...
+
+I guess the general rule is this: To connect a node `n1` to its sibling `n2`, find the pair of rooms `(r1, r2)` such that `r1` is among the descendants of `n1` and `r2` among the descendants of `n2`, and the pair minimizes the distance between rooms in the branches rooted at `n1` and `n2`. This approach doesn't take any advantage of knowing the split axes though, but let's just implement it to get the BSP to a working state.
+
+Works. Yay. :+1: :smiling_face: And indeed, BSP gives a lot more "sprawling" dungeons, especially if the first split happens along the horizontal.

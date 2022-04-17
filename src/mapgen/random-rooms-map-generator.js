@@ -64,31 +64,8 @@ function RandomRoomsMapGenerator(level) {
       var srcRoom = this.rooms[iSrc]
       var destRoom = this.rooms[iDest]
 
-      var pSrc = srcRoom.getRandomPosition()
-      var xSrc = pSrc.x
-      var ySrc = pSrc.y
-      var pDest = destRoom.getRandomPosition()
-      var xDest = pDest.x
-      var yDest = pDest.y
+      var [firstLeg, secondLeg] = srcRoom.getCorridorTo(destRoom)
 
-      var verticalFirst = Math.random() < 0.5
-      var xTurn, yTurn
-      if (verticalFirst) {
-        xTurn = xSrc
-        yTurn = yDest
-      } else {
-        xTurn = xDest
-        yTurn = ySrc
-      }
-
-      var firstLeg, secondLeg
-      if (verticalFirst) {
-        firstLeg = new Room(Math.min(ySrc, yDest), xSrc, 1, Math.abs(ySrc - yDest) + 1)
-        secondLeg = new Room(yDest, Math.min(xSrc, xDest), Math.abs(xSrc - xDest) + 1, 1)
-      } else {
-        firstLeg = new Room(ySrc, Math.min(xSrc, xDest), Math.abs(xSrc - xDest) + 1, 1)
-        secondLeg = new Room(Math.min(ySrc, yDest), xDest, 1, Math.abs(ySrc - yDest) + 1)
-      }
       this.corridors.push(firstLeg)
       this.corridors.push(secondLeg)
 

@@ -2,6 +2,9 @@ var MapGenerator = require('./abstract-map-generator')
 var { Room } = require('./mapgen-commons')
 var { randFloat, randInt } = require('../utils')
 
+const AXIS_HORIZONTAL = 1
+const AXIS_VERTICAL = 2
+
 var params = {
   minRoomWidth: 5,
   maxRoomWidth: 15,
@@ -26,6 +29,7 @@ function Node(top, left, width, height) {
   this.height = height
 
   this.parent = null
+  this.splitAxis = null // split axis of parent
   this.firstChild = null
   this.secondChild = null
 
@@ -47,15 +51,17 @@ function Node(top, left, width, height) {
     return new Node(this.top, this.left, this.width, this.height)
   }
 
-  this.splitVertically = function splitVertically(ratio) {
+  this.splitAlongHorizontal = function splitAlongHorizontal(ratio) {
     var upperHeight = Math.floor(ratio * this.height)
 
     var upperPart = this.clone()
+    upperPart.splitAxis = AXIS_HORIZONTAL
     upperPart.height = upperHeight
     this.firstChild = upperPart
     upperPart.parent = this
 
     var lowerPart = this.clone()
+    lowerPart.splitAxis = AXIS_HORIZONTAL
     lowerPart.top = upperPart.top + upperHeight
     lowerPart.height = this.height - upperHeight
     this.secondChild = lowerPart
@@ -64,15 +70,17 @@ function Node(top, left, width, height) {
     return [upperPart, lowerPart]
   }
 
-  this.splitHorizontally = function splitHorizontally(ratio) {
+  this.splitAlongVertical = function splitAlongVertical(ratio) {
     var leftWidth = Math.floor(ratio * this.width)
 
     var leftPart = this.clone()
+    leftPart.splitAxis = AXIS_VERTICAL
     leftPart.width = leftWidth
     this.firstChild = leftPart
     leftPart.parent = this
 
     var rightPart = this.clone()
+    rightPart.splitAxis = AXIS_VERTICAL
     rightPart.left = leftPart.left + leftWidth
     rightPart.width = this.width - leftWidth
     this.secondChild = rightPart
@@ -82,20 +90,32 @@ function Node(top, left, width, height) {
   }
 
   this.split = function split(ratio) {
-    var splitVertically
+    var splitAlongHorizontal
     if (this.width < params.partitionWidthThreshold) {
-      splitVertically = true
+      splitAlongHorizontal = true
     } else if (this.height < params.partitionHeightThreshold) {
-      splitVertically = false
+      splitAlongHorizontal = false
     } else {
-      splitVertically = Math.random() < this.height / (this.width + this.height)
+      splitAlongHorizontal = Math.random() < this.height / (this.width + this.height)
     }
 
-    if (splitVertically) {
-      return this.splitVertically(ratio)
+    if (splitAlongHorizontal) {
+      return this.splitAlongHorizontal(ratio)
     } else {
-      return this.splitHorizontally(ratio)
+      return this.splitAlongVertical(ratio)
     }
+  }
+
+  this.getDescendantRooms = function getDescendantRooms() {
+    var rooms = []
+    if (this.hasRoom()) {
+      rooms.push(this.room)
+    }
+    if (!this.isLeafNode()) {
+      rooms = rooms.concat(this.firstChild.getDescendantRooms())
+      rooms = rooms.concat(this.secondChild.getDescendantRooms())
+    }
+    return rooms
   }
 }
 
@@ -105,6 +125,8 @@ function BinarySpacePartitionMapGenerator(level) {
   this.rooms = []
   this.corridors = []
   this.features = {}
+
+  var self = this
 
   this.generate = function generate() {
     var nodes = [
@@ -138,22 +160,37 @@ function BinarySpacePartitionMapGenerator(level) {
       }
     })
 
-    function connectChildren(node) {
-      if (!node.isLeafNode()) {
-        if (node.firstChild.isLeafNode() && node.secondChild.isLeafNode()) {
-          if (node.firstChild.hasRoom() && node.secondChild.hasRoom()) {
-            console.log('connecting leaf nodes')
-          } else {
-            console.log('leaf siblings, one of which has no room')
-          }
-        } else {
-          connectChildren(node.firstChild)
-          connectChildren(node.secondChild)
-        }
+    function connectDescendants(node) {
+      if (node.isLeafNode()) {
+        return
       }
+      var firstRooms = node.firstChild.getDescendantRooms()
+      var secondRooms = node.secondChild.getDescendantRooms()
+      var minDistance = Infinity
+      var firstRoom = null
+      var secondRoom = null
+      firstRooms.forEach(room1 => {
+        secondRooms.forEach(room2 => {
+          var distance = room1.distanceTo(room2)
+          if (distance < minDistance) {
+            firstRoom = room1
+            secondRoom = room2
+            minDistance = distance
+          }
+        })
+      })
+      if (firstRoom && secondRoom) {
+        [firstLeg, secondLeg] = firstRoom.getCorridorTo(secondRoom)
+        self.corridors.push(firstLeg)
+        self.corridors.push(secondLeg)
+        self.carveRoom(firstLeg)
+        self.carveRoom(secondLeg)
+      }
+      connectDescendants(node.firstChild)
+      connectDescendants(node.secondChild)
     }
 
-    connectChildren(nodes[0])
+    connectDescendants(nodes[0])
   }
 
   this.carveRoom = function carveRoom(room) {
