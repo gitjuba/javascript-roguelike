@@ -156,7 +156,8 @@ function BinarySpacePartitionMapGenerator(level) {
 
         node.room = new Room(roomTop, roomLeft, roomWidth, roomHeight)
 
-        this.carveRoom(node.room)
+        self.rooms.push(node.room)
+        self.carveRoom(node.room)
       }
     })
 
@@ -199,6 +200,30 @@ function BinarySpacePartitionMapGenerator(level) {
         this.tileMap[i][j] = '.'
       }
     }
+  }
+
+  this.getFeatures = function getFeatures() {
+    return {
+      rooms: this.rooms,
+      corridors: this.corridors,
+      up: this.features.up,
+      down: this.features.down
+    }
+  }
+
+  this.placeStaircase = function placeStaircase(direction) {
+    var roomInd = randInt(0, this.rooms.length - 1)
+    var position = this.rooms[roomInd].getRandomPosition()
+    this.features[direction] = position
+    this.tileMap[position.y][position.x] = direction == 'up' ? '<' : '>'
+  }
+
+  this.placeDownStaircase = function placeDownStaircase() {
+    this.placeStaircase('down')
+  }
+
+  this.placeUpStaircase = function placeUpStaircase() {
+    this.placeStaircase('up')
   }
 }
 

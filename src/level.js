@@ -1,4 +1,5 @@
 var RandomRoomsMapGenerator = require('./mapgen/random-rooms-map-generator')
+var BinarySpacePartitionMapGenerator = require('./mapgen/binary-space-partition-map-generator')
 var { mapWidth, mapHeight } = require('./layout')
 var { rollMonster } = require('./monsters')
 var { Monster } = require('./entities')
@@ -79,7 +80,8 @@ function isVisible(x, y, x0, y0, level) {
 function Level(level) {
   this.level = level
 
-  var generator = new RandomRoomsMapGenerator(level)
+  // var generator = new RandomRoomsMapGenerator(level)
+  var generator = new BinarySpacePartitionMapGenerator(level)
   generator.generate()
   if (level > 0) {
     generator.placeUpStaircase()

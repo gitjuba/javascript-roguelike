@@ -33,11 +33,11 @@ function MapGenerator(level) {
   }
 
   this.placeDownStaircase = function placeDownStaircase() {
-
+    throw new Error('Use one of the child classes')
   }
 
   this.placeUpStaircase = function placeUpStaircase() {
-
+    throw new Error('Use one of the child classes')
   }
 
   // for debugging
