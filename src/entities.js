@@ -57,6 +57,7 @@ function Monster(char, color) {
   this.seen = false
   this.aggressive = false
   this.aggravationChance = 0.2
+  this.pointValue = null
 
   this.rollAggravation = function rollAggravation() {
     if (this.seen && !this.aggressive && Math.random() < this.aggravationChance) {
@@ -68,21 +69,25 @@ function Monster(char, color) {
 Monster.fromSpawner = function(spawner) {
   var monster = new Monster(spawner.char, spawner.color)
   monster.name = spawner.name
+  monster.pointValue = spawner.pointValue
   monster.hp = spawner.hp()
   monster.hitChance = spawner.hitChance()
   monster.hitDamage = spawner.hitDamage()
   return monster
 }
 
-function Player(char, color) {
+function Player(char, color, playerName) {
   LivingEntity.call(this, char, color)
 
-  this.hp = 10
+  this.hp = 1
   this.hitChance = 0.5
   this.hitDamage = 2
 
   this.visRadius = 7.5
   this.attacking = false
+
+  this.name = playerName
+  this.score = 0
 
   this.isWithinVisRadius = function isWithinVisRadius(i, j) {
     return (this.x - j) ** 2 + (this.y - i) ** 2 < this.visRadius ** 2

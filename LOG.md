@@ -809,3 +809,15 @@ Not having a room in all nodes kinda makes things complicated...
 I guess the general rule is this: To connect a node `n1` to its sibling `n2`, find the pair of rooms `(r1, r2)` such that `r1` is among the descendants of `n1` and `r2` among the descendants of `n2`, and the pair minimizes the distance between rooms in the branches rooted at `n1` and `n2`. This approach doesn't take any advantage of knowing the split axes though, but let's just implement it to get the BSP to a working state.
 
 Works. Yay. :+1: :smiling_face: And indeed, BSP gives a lot more "sprawling" dungeons, especially if the first split happens along the horizontal.
+
+I could change the RR map generator to connect rooms to their closest neighbors, so the dungeon feel would not be so different from BSP. The _corridor generation_ algorithm could in general be used to alter the feel.
+
+Another possible algorithm for generating this type of dungeons: Start by placing a room at random, pick a random point from the room and start a (non-overlapping) random walk: Pick a (cardinal) direction and number of squares to advance (from a given distribution), carve a corridor, then pick a new direction or place a room (probability of placing a room increases as the walk progresses). Try each room or corridor placement a parametrizable number of times, and if it fails, choose a new starting point for a new random walk (this could lead to dead-end corridors!). Starting points could include the existing corridors, to get branching corridors.
+
+**But**, before adding more map generation algorithms, let's do hall of fame! For this, keep track of player "score". Simplest thing that comes to mind: each kill is worth a number of points depending on the type of monster and the current dungeon level.
+
+For now use the dollar sign for player score. How to use some of the more exotic Codepage characters? I suppose I should be able to "type" those characters in VSCode...
+
+Having a (first local) HOF requires introducing game states, similarly as in my platformer project: All code written so far (all event handlers and canvas rendering logic) pertain to the main game state. In addition, we'll have (at least) a splash screen and a "You are dead" screen.
+
+Not sure if `GameState` has enough substance to be a whole class. Almost everything is in the main game loop,

@@ -20,6 +20,10 @@
 - [x] Procedurally generated levels
 - [x] Procedurally generated monsters
 
+## Goal III.V
+
+- [ ] Online Hall of Fame :grin:
+
 ## Goal IV
 
 - [ ] Different map generation algorithms

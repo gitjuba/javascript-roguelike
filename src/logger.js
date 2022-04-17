@@ -10,7 +10,6 @@ function Logger() {
   }
   Logger.instance = this
   this.logBuffer = [
-    'Welcome!',
     'Very long line with monsters attacking and all sorts of crazy stuff going on so that this has to be split into multiple lines for sure'
   ]
   this.maxLineWidth = logWidth - 2 // '> ' prefix

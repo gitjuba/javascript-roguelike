@@ -4,6 +4,8 @@ var Level = require('./level')
 var { Player } = require('./entities')
 
 var {
+  canvasWidthChars,
+  canvasHeightChars,
   mapWidth,
   mapHeight,
   statsWidth,
@@ -29,13 +31,15 @@ function createCharacterSheet(imageFile) {
   img.className = 'character-sheet'
   img.onload = function() {
     console.log('image loaded')
-    startGame()
+    splashScreen()
   }
   document.body.appendChild(img)
   return img
 }
 
 var charSheet = createCharacterSheet('Codepage-850_alpha.png')
+
+var splashRenderer = new Renderer('splash', 0, 0, canvasWidthChars, canvasHeightChars).init(container, charSheet)
 
 var statsRenderer = new Renderer('stats', 0,
   mapWidth, statsWidth, statsHeight).init(container, charSheet)
@@ -62,7 +66,7 @@ var keyDisplacement = {
   '.': { dx: 1, dy: 1 }
 }
 
-function Game() {
+function Game(gameOptions) {
   this.resetRenderFlags = function resetRenderFlags() {
     this.shouldRenderStats = true
     this.shouldRenderLog = true
@@ -73,6 +77,7 @@ function Game() {
   }
   this.resetRenderFlags()
 
+  this.isFinished = false
   this.levels = []
   this.currentLevel = 0
 
@@ -88,19 +93,25 @@ function Game() {
     return this.currentLevel == this.levels.length - 1
   }
 
+  var logger = Logger.getInstance()
+  logger.appendToLine(`Welcome, ${gameOptions.playerName}!`)
+  logger.finishLine()
+
   this.addNewLevel()
 
   seenRenderer.fillWithChar(' ')
 
-  this.player = new Player('@', 'green')
+  this.player = new Player('@', 'green', gameOptions.playerName)
   var playerPosition = this.levels[this.currentLevel].getRandomUnoccupiedTile()
   this.player.setPosition(playerPosition)
   this.levels[this.currentLevel].placePlayer(this.player)
 
   this.getStatsLines = function getStatsLines() {
     return [
+      this.player.name,
       'D  ' + String(this.currentLevel).padStart(5, ' '),
-      'HP ' + String(this.player.hp).padStart(5, ' ')
+      'HP ' + String(this.player.hp).padStart(5, ' '),
+      '$  ' + String(this.player.score).padStart(5, ' ')
     ]
   }
 
@@ -118,8 +129,8 @@ function Game() {
     this.shouldRenderLog = true
 
     if (this.player.hp <= 0) {
-      logger.appendToLine('You are dead. Refresh page to try again.')
-      logger.finishLine()
+      // logger.appendToLine('You are dead. Refresh page to try again.')
+      // logger.finishLine()
       return
     }
 
@@ -136,6 +147,8 @@ function Game() {
           }
           if (monster.hp <= 0) {
             logger.appendToLine(`The ${monster.name} is killed.`)
+            this.player.score += monster.pointValue
+            this.shouldRenderStats = true
             level.unoccupy(monster)
           }
         }
@@ -161,11 +174,9 @@ function Game() {
     } else {
       switch (key) {
         case 'a':
-          console.log('attack')
           this.player.attacking = true
           break
         case 's':
-          console.log('use stairs')
           if (level.isDownStaircaseAt(this.player)) {
             var newLevel
             if (this.isLatestLevel()) {
@@ -214,7 +225,8 @@ function Game() {
                 logger.appendToLine(`The ${monster.name} misses you.`)
               }
               if (this.player.hp <= 0) {
-                logger.appendToLine('You die.')
+                logger.appendToLine('You die. Press Enter to continue...')
+                this.isFinished = true
                 break
               }
             } else {
@@ -357,8 +369,59 @@ function Game() {
   }
 }
 
-function startGame() {
-  var game = new Game();
+var isSplashRendered = false
+var shouldRenderPlayerName = true
+var playerName = ''
+var alphabet = 'abcdefghijklmnopqrstuvxyz'
+
+function splashScreen() {
+  function renderSplashScreen() {
+    if (!isSplashRendered) {
+      splashRenderer.fillWithChar(' ')
+      splashRenderer.drawText('a roguelike game', defaultTextColor, 10, 5)
+      splashRenderer.drawText('please enter your name: ', defaultTextColor, 12, 5)
+      isSplashRendered = true
+    }
+
+    if (shouldRenderPlayerName) {
+      splashRenderer.drawText(`${playerName}_`, defaultTextColor, 12, 29)
+      shouldRenderPlayerName = false
+    }
+
+    window.requestAnimationFrame(renderSplashScreen)
+  }
+
+  function handleNameInput(e) {
+    if (alphabet.includes(e.key)) {
+      playerName += e.key
+      shouldRenderPlayerName = true
+    }
+    if (e.key == 'Backspace') {
+      playerName = playerName.slice(0, playerName.length - 1)
+      shouldRenderPlayerName = true
+    }
+  }
+
+  function handleSubmitName(e) {
+    if (e.key == 'Enter' && playerName.length > 0) {
+      window.removeEventListener('keydown', handleNameInput)
+      window.removeEventListener('keyup', handleSubmitName)
+      window.cancelAnimationFrame(renderSplashScreen)
+      startGame({
+        playerName
+      })
+    }
+  }
+
+  window.addEventListener('keydown', handleNameInput)
+  window.addEventListener('keyup', handleSubmitName)
+
+  window.requestAnimationFrame(renderSplashScreen)
+}
+
+function startGame(gameOptions) {
+  console.log('start game')
+  var game = new Game(gameOptions);
 
   function gameLoop() {
     game.render()
@@ -367,7 +430,14 @@ function startGame() {
 
   window.addEventListener('keyup', function(e) {
     game.updateState(e)
+    if (e.key == 'Enter' && game.isFinished) {
+      console.log('ending game')
+    }
   })
 
   window.requestAnimationFrame(gameLoop)
+}
+
+function hallOfFame() {
+
 }
