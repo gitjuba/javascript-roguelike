@@ -57,6 +57,10 @@ function Logger() {
       iLine += 1
     }
   }
+
+  this.clearBuffer = function clearBuffer() {
+    this.logBuffer = []
+  }
 }
 Logger.getInstance = function getInstance() {
   return Logger.instance || new Logger()

@@ -821,3 +821,17 @@ For now use the dollar sign for player score. How to use some of the more exotic
 Having a (first local) HOF requires introducing game states, similarly as in my platformer project: All code written so far (all event handlers and canvas rendering logic) pertain to the main game state. In addition, we'll have (at least) a splash screen and a "You are dead" screen.
 
 Not sure if `GameState` has enough substance to be a whole class. Almost everything is in the main game loop,
+
+# 2022-04-18
+
+Write a "fake" local HOF first, to see what kind of game state logic and possible refactoring is needed. At least I need to implement a _clear_ method on all game states, a method which fills all canvases with transparent.
+
+A real local HOF could also be nice, store it in browser local storage.
+
+The splash screen and the hall of fame are not animated screens, but I'll probably want to add some animations later on, so let's keep the `requestAnimationFrame` stuff there.
+
+Hmm, the BSP dungeons might be a bit too winding. If the first split is made along the horizontal, then the level consists of two rows of rooms, connected by a single corridor (and hardly ever any loops?)
+
+When I get to implementing wayfinding, I'll probably generate a Dijkstra map of the level, which tells me the distances between walkable points. That should enable some level diagnostics.
+
+Hmm, I've been using `cancelAnimationFrame` wrong, I've given it as argument the function which I've passed to `requestAnimationFrame` earlier. One is supposed to pass it the _handle_ (a number) returned by the request function.

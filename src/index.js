@@ -3,6 +3,8 @@ var Renderer = require('./renderer')
 var Level = require('./level')
 var { Player } = require('./entities')
 
+var GAME_VERSION = '0.0.1'
+
 var {
   canvasWidthChars,
   canvasHeightChars,
@@ -30,7 +32,6 @@ function createCharacterSheet(imageFile) {
   img.src = imageFile
   img.className = 'character-sheet'
   img.onload = function() {
-    console.log('image loaded')
     splashScreen()
   }
   document.body.appendChild(img)
@@ -52,6 +53,8 @@ var levelRenderer = new Renderer('level', 0, 0, mapWidth, mapHeight).init(contai
 var objectRenderer = new Renderer('objects', 0, 0, mapWidth, mapHeight).init(container, charSheet)
 var seenRenderer = new Renderer('seen', 0, 0, mapWidth, mapHeight).init(container, charSheet)
 var debugRenderer = new Renderer('debug', 0, 0, mapWidth, mapHeight).init(container, charSheet)
+
+var hofRenderer = new Renderer('hof', 0, 0, canvasWidthChars, canvasHeightChars).init(container, charSheet)
 
 var movementKeys = 'uiojklm,.'
 var keyDisplacement = {
@@ -125,12 +128,10 @@ function Game(gameOptions) {
     var playerTurnDone = false
 
     var logger = Logger.getInstance()
-    // console.log(logger)
     this.shouldRenderLog = true
 
     if (this.player.hp <= 0) {
-      // logger.appendToLine('You are dead. Refresh page to try again.')
-      // logger.finishLine()
+      this.shouldRenderLog = false
       return
     }
 
@@ -225,6 +226,7 @@ function Game(gameOptions) {
                 logger.appendToLine(`The ${monster.name} misses you.`)
               }
               if (this.player.hp <= 0) {
+                this.player.killedBy = `a ${monster.name}`
                 logger.appendToLine('You die. Press Enter to continue...')
                 this.isFinished = true
                 break
@@ -367,32 +369,49 @@ function Game(gameOptions) {
       }
     }
   }
+
+  this.clear = function clear() {
+    var logger = Logger.getInstance()
+    logger.clearBuffer()
+
+    statsRenderer.clear()
+    logRenderer.clear()
+    colorRenderer.clear()
+    visibleRenderer.clear()
+    levelRenderer.clear()
+    objectRenderer.clear()
+    seenRenderer.clear()
+    debugRenderer.clear()
+  }
 }
 
-var isSplashRendered = false
-var shouldRenderPlayerName = true
-var playerName = ''
 var alphabet = 'abcdefghijklmnopqrstuvxyz'
 
 function splashScreen() {
+  var shouldRenderSplash = true
+  var shouldRenderPlayerName = true
+  var playerName = ''
+
+  var splashAnimationHandle
+
   function renderSplashScreen() {
-    if (!isSplashRendered) {
+    if (shouldRenderSplash) {
       splashRenderer.fillWithChar(' ')
       splashRenderer.drawText('a roguelike game', defaultTextColor, 10, 5)
       splashRenderer.drawText('please enter your name: ', defaultTextColor, 12, 5)
-      isSplashRendered = true
+      shouldRenderSplash = false
     }
 
     if (shouldRenderPlayerName) {
-      splashRenderer.drawText(`${playerName}_`, defaultTextColor, 12, 29)
+      splashRenderer.drawText(`${playerName}_`.padEnd(16, ' '), defaultTextColor, 12, 29)
       shouldRenderPlayerName = false
     }
 
-    window.requestAnimationFrame(renderSplashScreen)
+    splashAnimationHandle = window.requestAnimationFrame(renderSplashScreen)
   }
 
   function handleNameInput(e) {
-    if (alphabet.includes(e.key)) {
+    if (alphabet.includes(e.key) && playerName.length < 15) {
       playerName += e.key
       shouldRenderPlayerName = true
     }
@@ -406,7 +425,8 @@ function splashScreen() {
     if (e.key == 'Enter' && playerName.length > 0) {
       window.removeEventListener('keydown', handleNameInput)
       window.removeEventListener('keyup', handleSubmitName)
-      window.cancelAnimationFrame(renderSplashScreen)
+      window.cancelAnimationFrame(splashAnimationHandle)
+      splashRenderer.clear()
       startGame({
         playerName
       })
@@ -416,28 +436,122 @@ function splashScreen() {
   window.addEventListener('keydown', handleNameInput)
   window.addEventListener('keyup', handleSubmitName)
 
-  window.requestAnimationFrame(renderSplashScreen)
+  splashAnimationHandle = window.requestAnimationFrame(renderSplashScreen)
 }
 
 function startGame(gameOptions) {
-  console.log('start game')
-  var game = new Game(gameOptions);
+  var gameAnimationHandle
+
+  var game = new Game(gameOptions)
 
   function gameLoop() {
     game.render()
-    window.requestAnimationFrame(gameLoop)
+    gameAnimationHandle = window.requestAnimationFrame(gameLoop)
   }
 
-  window.addEventListener('keyup', function(e) {
+  function handleGameInput(e) {
     game.updateState(e)
     if (e.key == 'Enter' && game.isFinished) {
-      console.log('ending game')
-    }
-  })
+      window.removeEventListener('keyup', handleGameInput)
+      game.clear()
+      window.cancelAnimationFrame(gameAnimationHandle)
 
-  window.requestAnimationFrame(gameLoop)
+      hallOfFame({
+        newEntry: {
+          player: game.player.name,
+          score: game.player.score,
+          version: GAME_VERSION,
+          date: new Date().toISOString().slice(0, 10),
+          dungeonLevel: game.currentLevel,
+          causeOfDeath: game.player.killedBy,
+          isNewEntry: true
+        }
+      })
+    }
+  }
+
+  window.addEventListener('keyup', handleGameInput)
+
+  gameAnimationHandle = window.requestAnimationFrame(gameLoop)
 }
 
-function hallOfFame() {
+var fakeHofEntries = [
+  { player: 'foobar', score: Math.floor(1000 * Math.random()), date: '2022-04-01', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a small monster' },
+  { player: 'foo', score: Math.floor(1000 * Math.random()), date: '2022-04-01', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a small monster' },
+  { player: 'bar', score: Math.floor(1000 * Math.random()), date: '2022-04-03', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a small monster' },
+  { player: 'baz', score: Math.floor(1000 * Math.random()), date: '2022-04-11', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a small monster' },
+  { player: 'qux', score: Math.floor(1000 * Math.random()), date: '2022-04-15', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a monster' },
+  { player: 'quux', score: Math.floor(1000 * Math.random()), date: '2022-04-15', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a huge monster' },
+  { player: 'quuz', score: Math.floor(1000 * Math.random()), date: '2022-04-15', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a monster' },
+  { player: 'corge', score: Math.floor(1000 * Math.random()), date: '2022-04-15', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a large monster' },
+  { player: 'grault', score: Math.floor(1000 * Math.random()), date: '2022-04-15', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a large monster' },
+]
 
+function hallOfFame(hofOptions) {
+  var shouldRenderHof = true
+  var hofAnimationHandle
+
+  var numHofEntries = 8
+
+  function renderHof() {
+    if (shouldRenderHof) {
+      hofRenderer.fillWithChar(' ')
+      hofRenderer.drawText(`roguelike game version ${GAME_VERSION} high scores`, defaultTextColor, 1, 1)
+      var sortedHof = fakeHofEntries
+        .filter(entry => entry.version == GAME_VERSION)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, numHofEntries)
+
+      var newEntryInd = sortedHof.findIndex(entry => entry.score < hofOptions.newEntry.score)
+      if (newEntryInd > -1) {
+        sortedHof.splice(newEntryInd, 0, hofOptions.newEntry)
+      } else if (sortedHof.length < numHofEntries) {
+        newEntryInd = sortedHof.length
+        sortedHof.push(hofOptions.newEntry)
+      }
+
+      sortedHof
+        .slice(0, numHofEntries)
+        .forEach((entry, ind) => {
+          hofRenderer.drawText(
+            `${String(ind + 1).padStart(3, ' ')} ${entry.player.padEnd(15, ' ')} ${String(entry.score).padStart(5, ' ')} ${entry.version}`,
+            entry.isNewEntry ? '#bb5' : defaultTextColor,
+            2 * ind + 4,
+            1
+          )
+          hofRenderer.drawText(
+            `killed by ${entry.causeOfDeath} on level ${entry.dungeonLevel} on ${entry.date}`,
+            entry.isNewEntry ? '#773' : '#666',
+            2 * ind + 5,
+            5
+          )
+      })
+
+      var congratsText = ''
+      if (newEntryInd > -1 && newEntryInd < numHofEntries) {
+        congratsText += 'congrats on making it to the top ' + numHofEntries
+      } else {
+        congratsText += 'unfortunately you did not make it to the top ' + numHofEntries
+      }
+      hofRenderer.drawText(congratsText, defaultTextColor, 22, 1)
+      hofRenderer.drawText('press enter to start a new game', defaultTextColor, 23, 1)
+
+      shouldRenderHof = false
+    }
+
+    hofAnimationHandle = window.requestAnimationFrame(renderHof)
+  }
+
+  function handleEnterKey(e) {
+    if (e.key == 'Enter') {
+      window.cancelAnimationFrame(hofAnimationHandle)
+      window.removeEventListener('keyup', handleEnterKey)
+      hofRenderer.clear()
+      splashScreen()
+    }
+  }
+
+  window.addEventListener('keyup', handleEnterKey)
+
+  hofAnimationHandle = window.requestAnimationFrame(renderHof)
 }
