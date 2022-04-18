@@ -199,7 +199,7 @@ Monster.fromSpawner = function(spawner) {
 function Player(char, color, playerName) {
   LivingEntity.call(this, char, color)
 
-  this.hp = 1
+  this.hp = 10
   this.hitChance = 0.5
   this.hitDamage = 2
 
