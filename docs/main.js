@@ -1,101 +1,1306 @@
-/*
- * ATTENTION: The "eval" devtool has been used (maybe by default in mode: "development").
- * This devtool is neither made for production nor for readable output files.
- * It uses "eval()" calls to create a separate source file in the browser devtools.
- * If you are trying to read the output file, select a different devtool (https://webpack.js.org/configuration/devtool/)
- * or disable the default devtool with "devtool: false".
- * If you are looking for production-ready output files, see mode: "production" (https://webpack.js.org/configuration/mode/).
- */
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./src/charmap.js":
-/*!************************!*\
-  !*** ./src/charmap.js ***!
-  \************************/
+/***/ "./charmap.js":
+/*!********************!*\
+  !*** ./charmap.js ***!
+  \********************/
 /***/ ((module) => {
 
-eval("var charWidthPixels = 9\nvar charHeightPixels = 14\n\n// Map char to location (row, column) in image\nvar charOffsetX = 4\nvar charOffsetY = 4\nvar charMap = {\n  ' ': { i: 0, j: 0 },\n  '!': { i: 1, j: 1 },\n  '\"': { i: 1, j: 2 },\n  '#': { i: 1, j: 3 }, // 2nd row, 4th column\n  $: { i: 1, j: 4 },\n  '%': { i: 1, j: 5 },\n  '&': { i: 1, j: 6 },\n  '(': { i: 1, j: 8 },\n  ')': { i: 1, j: 9 },\n  '*': { i: 1, j: 10 },\n  '+': { i: 1, j: 11 },\n  ',': { i: 1, j: 12 },\n  '-': { i: 1, j: 13 },\n  '.': { i: 1, j: 14 },\n  '/': { i: 1, j: 15 },\n  0: { i: 1, j: 16 },\n  1: { i: 1, j: 17 },\n  2: { i: 1, j: 18 },\n  3: { i: 1, j: 19 },\n  4: { i: 1, j: 20 },\n  5: { i: 1, j: 21 },\n  6: { i: 1, j: 22 },\n  7: { i: 1, j: 23 },\n  8: { i: 1, j: 24 },\n  9: { i: 1, j: 25 },\n  ':': { i: 1, j: 26 },\n  ';': { i: 1, j: 27 },\n  '<': { i: 1, j: 28 },\n  '=': { i: 1, j: 29 },\n  '>': { i: 1, j: 30 },\n  '?': { i: 1, j: 31 },\n  '@': { i: 2, j: 0 },\n  A: { i: 2, j: 1 },\n  B: { i: 2, j: 2 },\n  C: { i: 2, j: 3 },\n  D: { i: 2, j: 4 },\n  E: { i: 2, j: 5 },\n  F: { i: 2, j: 6 },\n  G: { i: 2, j: 7 },\n  H: { i: 2, j: 8 },\n  I: { i: 2, j: 9 },\n  J: { i: 2, j: 10 },\n  K: { i: 2, j: 11 },\n  L: { i: 2, j: 12 },\n  M: { i: 2, j: 13 },\n  N: { i: 2, j: 14 },\n  O: { i: 2, j: 15 },\n  P: { i: 2, j: 16 },\n  Q: { i: 2, j: 17 },\n  R: { i: 2, j: 18 },\n  S: { i: 2, j: 19 },\n  T: { i: 2, j: 20 },\n  U: { i: 2, j: 21 },\n  V: { i: 2, j: 22 },\n  W: { i: 2, j: 23 },\n  X: { i: 2, j: 24 },\n  Y: { i: 2, j: 25 },\n  Z: { i: 2, j: 26 },\n  a: { i: 3, j: 1 },\n  b: { i: 3, j: 2 },\n  c: { i: 3, j: 3 },\n  d: { i: 3, j: 4 },\n  e: { i: 3, j: 5 },\n  f: { i: 3, j: 6 },\n  g: { i: 3, j: 7 },\n  h: { i: 3, j: 8 },\n  i: { i: 3, j: 9 },\n  j: { i: 3, j: 10 },\n  k: { i: 3, j: 11 },\n  l: { i: 3, j: 12 },\n  m: { i: 3, j: 13 },\n  n: { i: 3, j: 14 },\n  o: { i: 3, j: 15 },\n  p: { i: 3, j: 16 },\n  q: { i: 3, j: 17 },\n  r: { i: 3, j: 18 },\n  s: { i: 3, j: 19 },\n  t: { i: 3, j: 20 },\n  u: { i: 3, j: 21 },\n  v: { i: 3, j: 22 },\n  w: { i: 3, j: 23 },\n  x: { i: 3, j: 24 },\n  y: { i: 3, j: 25 },\n  z: { i: 3, j: 26 },\n}\n\nmodule.exports = {\n  charWidthPixels,\n  charHeightPixels,\n  charOffsetX,\n  charOffsetY,\n  charMap\n}\n\n\n//# sourceURL=webpack://javascript-roguelike/./src/charmap.js?");
+var charWidthPixels = 9
+var charHeightPixels = 14
+
+// Map char to location (row, column) in image
+var charOffsetX = 4
+var charOffsetY = 4
+var charMap = {
+  ' ': { i: 0, j: 0 },
+  '!': { i: 1, j: 1 },
+  '"': { i: 1, j: 2 },
+  '#': { i: 1, j: 3 }, // 2nd row, 4th column
+  $: { i: 1, j: 4 },
+  '%': { i: 1, j: 5 },
+  '&': { i: 1, j: 6 },
+  '(': { i: 1, j: 8 },
+  ')': { i: 1, j: 9 },
+  '*': { i: 1, j: 10 },
+  '+': { i: 1, j: 11 },
+  ',': { i: 1, j: 12 },
+  '-': { i: 1, j: 13 },
+  '.': { i: 1, j: 14 },
+  '/': { i: 1, j: 15 },
+  0: { i: 1, j: 16 },
+  1: { i: 1, j: 17 },
+  2: { i: 1, j: 18 },
+  3: { i: 1, j: 19 },
+  4: { i: 1, j: 20 },
+  5: { i: 1, j: 21 },
+  6: { i: 1, j: 22 },
+  7: { i: 1, j: 23 },
+  8: { i: 1, j: 24 },
+  9: { i: 1, j: 25 },
+  ':': { i: 1, j: 26 },
+  ';': { i: 1, j: 27 },
+  '<': { i: 1, j: 28 },
+  '=': { i: 1, j: 29 },
+  '>': { i: 1, j: 30 },
+  '?': { i: 1, j: 31 },
+  '@': { i: 2, j: 0 },
+  A: { i: 2, j: 1 },
+  B: { i: 2, j: 2 },
+  C: { i: 2, j: 3 },
+  D: { i: 2, j: 4 },
+  E: { i: 2, j: 5 },
+  F: { i: 2, j: 6 },
+  G: { i: 2, j: 7 },
+  H: { i: 2, j: 8 },
+  I: { i: 2, j: 9 },
+  J: { i: 2, j: 10 },
+  K: { i: 2, j: 11 },
+  L: { i: 2, j: 12 },
+  M: { i: 2, j: 13 },
+  N: { i: 2, j: 14 },
+  O: { i: 2, j: 15 },
+  P: { i: 2, j: 16 },
+  Q: { i: 2, j: 17 },
+  R: { i: 2, j: 18 },
+  S: { i: 2, j: 19 },
+  T: { i: 2, j: 20 },
+  U: { i: 2, j: 21 },
+  V: { i: 2, j: 22 },
+  W: { i: 2, j: 23 },
+  X: { i: 2, j: 24 },
+  Y: { i: 2, j: 25 },
+  Z: { i: 2, j: 26 },
+  '_': { i: 2, j: 31 },
+  a: { i: 3, j: 1 },
+  b: { i: 3, j: 2 },
+  c: { i: 3, j: 3 },
+  d: { i: 3, j: 4 },
+  e: { i: 3, j: 5 },
+  f: { i: 3, j: 6 },
+  g: { i: 3, j: 7 },
+  h: { i: 3, j: 8 },
+  i: { i: 3, j: 9 },
+  j: { i: 3, j: 10 },
+  k: { i: 3, j: 11 },
+  l: { i: 3, j: 12 },
+  m: { i: 3, j: 13 },
+  n: { i: 3, j: 14 },
+  o: { i: 3, j: 15 },
+  p: { i: 3, j: 16 },
+  q: { i: 3, j: 17 },
+  r: { i: 3, j: 18 },
+  s: { i: 3, j: 19 },
+  t: { i: 3, j: 20 },
+  u: { i: 3, j: 21 },
+  v: { i: 3, j: 22 },
+  w: { i: 3, j: 23 },
+  x: { i: 3, j: 24 },
+  y: { i: 3, j: 25 },
+  z: { i: 3, j: 26 },
+}
+
+module.exports = {
+  charWidthPixels,
+  charHeightPixels,
+  charOffsetX,
+  charOffsetY,
+  charMap
+}
+
 
 /***/ }),
 
-/***/ "./src/entities.js":
-/*!*************************!*\
-  !*** ./src/entities.js ***!
-  \*************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-eval("var { randInt } = __webpack_require__(/*! ./map-generator */ \"./src/map-generator.js\")\n\nfunction LivingEntity(char, color) {\n  this.char = char\n  this.color = color\n  this.x = 0\n  this.y = 0\n\n  this.hp = 0\n  this.hitChance = 0\n  this.hitDamage = 0\n\n  this.setPosition = function(position) {\n    this.x = position.x\n    this.y = position.y\n  }\n\n  this.isAdjacentTo = function(that) {\n    return Math.max(Math.abs(this.x - that.x), Math.abs(this.y - that.y)) == 1\n  }\n\n  this.attack = function(that) {\n    if (Math.random() < this.hitChance) {\n      that.hp -= this.hitDamage\n      return true\n    } else {\n      return false\n    }\n  }\n\n  this.getApproachVectorsTo = function(that) {\n    var dispX = that.x - this.x\n    var dispY = that.y - this.y\n    var dx0 = dispX != 0 ? (dispX < 0 ? -1 : 1) : 0\n    var dy0 = dispY != 0 ? (dispY < 0 ? -1 : 1) : 0\n\n    var vectors = [{ dx: dx0, dy: dy0 }]\n\n    // If preferred direction along cardinal axis try also both diagonals around it\n    if (dx0 == 0) {\n      vectors.push({ dx: -1, dy: dy0 })\n      vectors.push({ dx: 1, dy: dy0 })\n    } else if (dy0 == 0) {\n      vectors.push({ dx: dx0, dy: -1 })\n      vectors.push({ dx: dx0, dy: 1 })\n    } else {\n      // Preferred direction is diagonal: try also both cardinal directions around it\n      vectors.push({ dx: 0, dy: dy0 })\n      vectors.push({ dx: dx0, dy: 0 })\n    }\n\n    return vectors\n  }\n}\n\nfunction Monster(char, color) {\n  LivingEntity.call(this, char, color)\n\n  this.seen = false\n  this.aggressive = false\n  this.aggravationChance = 0.2\n\n  this.rollAggravation = function() {\n    if (this.seen && !this.aggressive && Math.random() < this.aggravationChance) {\n      console.log('monster becomes agressive')\n      this.aggressive = true\n    }\n  }\n}\nMonster.fromSpawner = function(spawner) {\n  var monster = new Monster(spawner.char, spawner.color)\n  monster.name = spawner.name\n  monster.hp = spawner.hp()\n  monster.hitChance = spawner.hitChance()\n  monster.hitDamage = spawner.hitDamage()\n  return monster\n}\n\nfunction Player(char, color) {\n  LivingEntity.call(this, char, color)\n\n  this.hp = 10\n  this.hitChance = 0.5\n  this.hitDamage = 2\n\n  this.visRadius = 7.5\n  this.attacking = false\n\n  this.isWithinVisRadius = function(i, j) {\n    return (this.x - j) ** 2 + (this.y - i) ** 2 < this.visRadius ** 2\n  }\n}\n\nmodule.exports = {\n  Monster,\n  Player\n}\n\n\n//# sourceURL=webpack://javascript-roguelike/./src/entities.js?");
-
-/***/ }),
-
-/***/ "./src/index.js":
-/*!**********************!*\
-  !*** ./src/index.js ***!
-  \**********************/
-/***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
-
-eval("var Logger = __webpack_require__(/*! ./logger */ \"./src/logger.js\")\nvar Renderer = __webpack_require__(/*! ./renderer */ \"./src/renderer.js\")\nvar Level = __webpack_require__(/*! ./level */ \"./src/level.js\")\nvar { Player } = __webpack_require__(/*! ./entities */ \"./src/entities.js\")\n\nvar {\n  mapWidth,\n  mapHeight,\n  statsWidth,\n  statsHeight,\n  logWidth,\n  logHeight\n} = __webpack_require__(/*! ./layout */ \"./src/layout.js\")\n\nvar defaultTextColor = '#aaa'\n\nfunction createCanvasContainer() {\n  var div = document.createElement('div')\n  div.className = 'container'\n  document.body.appendChild(div)\n  return div\n}\n\nvar container = createCanvasContainer()\n\nfunction createCharacterSheet(imageFile) {\n  var img = document.createElement('img')\n  img.src = imageFile\n  img.className = 'character-sheet'\n  img.onload = function() {\n    console.log('image loaded')\n    startGame()\n  }\n  document.body.appendChild(img)\n  return img\n}\n\nvar charSheet = createCharacterSheet('Codepage-850_alpha.png')\n\nvar statsRenderer = new Renderer('stats', 0,\n  mapWidth, statsWidth, statsHeight).init(container, charSheet)\n\nvar logRenderer = new Renderer('log', mapHeight, 0, logWidth, logHeight).init(container, charSheet)\n\nvar colorRenderer = new Renderer('color', 0, 0, mapWidth, mapHeight).init(container, charSheet)\nvar visibleRenderer = new Renderer('visible', 0, 0, mapWidth, mapHeight).init(container, charSheet)\nvar levelRenderer = new Renderer('level', 0, 0, mapWidth, mapHeight).init(container, charSheet)\nvar objectRenderer = new Renderer('objects', 0, 0, mapWidth, mapHeight).init(container, charSheet)\nvar seenRenderer = new Renderer('seen', 0, 0, mapWidth, mapHeight).init(container, charSheet)\nvar debugRenderer = new Renderer('debug', 0, 0, mapWidth, mapHeight).init(container, charSheet)\n\nvar movementKeys = 'uiojklm,.'\nvar keyDisplacement = {\n  u: { dx: -1, dy: -1 },\n  i: { dx: 0, dy: -1 },\n  o: { dx: 1, dy: -1 },\n  j: { dx: -1, dy: 0 },\n  k: { dx: 0, dy: 0 },\n  l: { dx: 1, dy: 0 },\n  m: { dx: -1, dy: 1 },\n  ',': { dx: 0, dy: 1 },\n  '.': { dx: 1, dy: 1 }\n}\n\nfunction Game() {\n  this.resetRenderFlags = function() {\n    this.shouldRenderStats = true\n    this.shouldRenderLog = true\n    this.shouldRenderLevel = true\n    this.shouldRenderObjects = true\n    this.shouldRenderSeen = true\n    this.shouldRenderVisible = true\n  }\n  this.resetRenderFlags()\n\n  this.levels = []\n  this.currentLevel = 0\n\n  this.addNewLevel = function() {\n    var newLevel = new Level(this.levels.length, { down: true, up: this.levels.length > 0 })\n    this.levels.push(newLevel)\n    return newLevel\n  }\n  this.isFirstLevel = function() {\n    return this.currentLevel == 0\n  }\n  this.isLatestLevel = function() {\n    return this.currentLevel == this.levels.length - 1\n  }\n\n  this.addNewLevel()\n\n  seenRenderer.fillWithChar(' ')\n\n  this.player = new Player('@', 'green')\n  var playerPosition = this.levels[this.currentLevel].getRandomUnoccupiedTile()\n  this.player.setPosition(playerPosition)\n  this.levels[this.currentLevel].placePlayer(this.player)\n\n  this.getStatsLines = function() {\n    return [\n      'D  ' + String(this.currentLevel).padStart(5, ' '),\n      'HP ' + String(this.player.hp).padStart(5, ' ')\n    ]\n  }\n\n  this.updateState = function(event) {\n    var dx, dy\n\n    var key = event.key\n\n    var level = this.levels[this.currentLevel]\n\n    var playerTurnDone = false\n\n    var logger = Logger.getInstance()\n    // console.log(logger)\n    this.shouldRenderLog = true\n\n    if (this.player.hp <= 0) {\n      logger.appendToLine('You are dead. Refresh page to try again.')\n      logger.finishLine()\n      return\n    }\n\n    if (movementKeys.includes(key)) {\n      ({ dx, dy } = keyDisplacement[key])\n      if (this.player.attacking) {\n        var monster = level.getMonsterAt(this.player.x + dx, this.player.y + dy)\n        if (monster) {\n          var success = this.player.attack(monster)\n          if (success) {\n            logger.appendToLine(`You hit the ${monster.name}.`)\n          } else {\n            logger.appendToLine(`You miss the ${monster.name}.`)\n          }\n          if (monster.hp <= 0) {\n            logger.appendToLine(`The ${monster.name} is killed.`)\n            level.unoccupy(monster)\n          }\n        }\n        this.player.attacking = false\n        this.shouldRenderObjects = true\n        playerTurnDone = true\n      } else {\n        if (dx == 0 && dy == 0) {\n          playerTurnDone = true\n        } else if (!level.isOccupied[this.player.y + dy][this.player.x + dx]) {\n          level.unoccupy(this.player)\n          this.player.x += dx\n          this.player.y += dy\n          level.placePlayer(this.player)\n          this.shouldRenderSeen = true\n          this.shouldRenderVisible = true\n          playerTurnDone = true\n        } else {\n          // Moving against occupied space, turn not done\n        }\n        this.shouldRenderObjects = true\n      }\n    } else {\n      switch (key) {\n        case 'a':\n          console.log('attack')\n          this.player.attacking = true\n          break\n        case 's':\n          console.log('use stairs')\n          if (level.isDownStaircaseAt(this.player)) {\n            var newLevel\n            if (this.isLatestLevel()) {\n              newLevel = this.addNewLevel()\n            } else {\n              newLevel = this.levels[this.currentLevel + 1]\n            }\n            logger.appendToLine('You descend the staircase.')\n            this.currentLevel += 1\n            this.resetRenderFlags()\n            this.player.setPosition(newLevel.getUpStaircasePosition())\n            newLevel.placePlayer(this.player)\n          } else if (level.isUpStaircaseAt(this.player)) {\n            var newLevel = this.levels[this.currentLevel - 1]\n            logger.appendToLine('You ascend the staircase.')\n            this.currentLevel -= 1\n            this.resetRenderFlags()\n            this.player.setPosition(newLevel.getDownStaircasePosition())\n            newLevel.placePlayer(this.player)\n          }\n          break\n        default:\n          console.log('unknown command: ' + key)\n      }\n    }\n\n    if (playerTurnDone) {\n      for (var iMonster = 0; iMonster < level.monsters.length; iMonster++) {\n        var monster = level.monsters[iMonster]\n        if (monster.hp > 0) {\n          if (!monster.seen && level.isVisibleMask[monster.y][monster.x]) {\n            monster.seen = true\n          } else if (monster.seen && !level.isVisibleMask[monster.y][monster.x]) {\n            monster.seen = false\n          }\n          monster.rollAggravation()\n          if (monster.aggressive && monster.seen) {\n            if (monster.isAdjacentTo(this.player)) {\n              dx = 0\n              dy = 0\n              var success = monster.attack(this.player)\n              if (success) {\n                logger.appendToLine(`The ${monster.name} hits you.`)\n                this.shouldRenderStats = true\n              } else {\n                logger.appendToLine(`The ${monster.name} misses you.`)\n              }\n              if (this.player.hp <= 0) {\n                logger.appendToLine('You die.')\n                break\n              }\n            } else {\n              var vectors = monster.getApproachVectorsTo(this.player)\n              var vectorFound = false\n              for (var v of vectors) {\n                if (!level.isOccupied[monster.y + v.dy][monster.x + v.dx]) {\n                  dx = v.dx\n                  dy = v.dy\n                  vectorFound = true\n                  break\n                }\n              }\n              if (!vectorFound) {\n                dx = 0\n                dy = 0\n              }\n            }\n          } else {\n            var dirInd = Math.floor(9 * Math.random())\n            var dir = movementKeys[dirInd]\n            ;({ dx, dy } = keyDisplacement[dir])\n            if (level.isOccupied[monster.y + dy][monster.x + dx]) {\n              dx = 0\n              dy = 0\n            }\n          }\n          level.unoccupy(monster)\n          monster.x += dx\n          monster.y += dy\n          level.occupy(monster)\n        }\n      }\n    }\n    logger.finishLine()\n  }\n\n  this.render = function() {\n    if (this.shouldRenderStats) {\n      this.renderStats()\n      this.shouldRenderStats = false\n    }\n    if (this.shouldRenderLog) {\n      this.renderLog()\n      this.shouldRenderLog = false\n    }\n    if (this.shouldRenderLevel) {\n      this.renderLevel()\n      this.shouldRenderLevel = false\n    }\n    if (this.shouldRenderObjects) {\n      this.renderObjects()\n      this.shouldRenderObjects = false\n    }\n    if (this.shouldRenderSeen) {\n      this.renderSeen()\n      this.shouldRenderSeen = false\n    }\n    if (this.shouldRenderVisible) {\n      this.renderVisible()\n      this.shouldRenderVisible = false\n    }\n  }\n\n  this.renderStats = function() {\n    statsRenderer.clear()\n    var statsLines = this.getStatsLines()\n    statsRenderer.drawText(''.padEnd(statsWidth, ' '), defaultTextColor, 0, 0)\n    var iLine = 1\n    for (var line of statsLines) {\n      statsRenderer.drawText(line.padEnd(statsWidth, ' '), defaultTextColor, iLine, 0)\n      iLine += 1\n    }\n    while (iLine < statsHeight) {\n      statsRenderer.drawText(''.padEnd(statsWidth, ' '), defaultTextColor, iLine, 0)\n      iLine += 1\n    }\n  }\n\n  this.renderLog = function() {\n    logRenderer.clear()\n    var logger = Logger.getInstance()\n    var logLines = logger.getLogLines()\n    var iLine = 1\n    for (var line of logLines) {\n      logRenderer.drawText(line, defaultTextColor, -iLine, 0)\n      iLine += 1\n    }\n  }\n\n  this.renderLevel = function() {\n    levelRenderer.clear()\n    var level = this.levels[this.currentLevel]\n    for (var i = 0; i < mapHeight; i++) {\n      for (var j = 0; j < mapWidth; j++) {\n        var tile = level.tileMap[i][j]\n        colorRenderer.drawTile(level.colorMap[tile], i, j)\n        levelRenderer.drawChar(tile, i, j)\n      }\n    }\n  }\n\n  this.renderObjects = function() {\n    objectRenderer.clear()\n    objectRenderer.drawColoredChar(this.player.char, this.player.color, this.player.y, this.player.x)\n\n    var level = this.levels[this.currentLevel]\n    for (var iMonster = 0; iMonster < level.monsters.length; iMonster++) {\n      var monster = level.monsters[iMonster]\n      if (monster.hp > 0 && level.isVisibleMask[monster.y][monster.x]) {\n        objectRenderer.drawColoredChar(monster.char, monster.color, monster.y, monster.x)\n      }\n    }\n  }\n\n  this.renderSeen = function() {\n    var level = this.levels[this.currentLevel]\n    for (var i = 0; i < mapHeight; i++) {\n      for (var j = 0; j < mapWidth; j++) {\n        if (level.seenMask[i][j]) {\n          seenRenderer.clearTile(i, j)\n        } else {\n          seenRenderer.drawChar(' ', i, j)\n        }\n      }\n    }\n  }\n\n  this.renderVisible = function() {\n    var level = this.levels[this.currentLevel]\n    for (var i = 0; i < mapHeight; i++) {\n      for (var j = 0; j < mapWidth; j++) {\n        if (level.isVisibleMask[i][j]) {\n          visibleRenderer.clearTile(i, j)\n        } else if (level.becameNotVisible(i, j)) {\n          visibleRenderer.drawTile('rgba(0, 0, 0, 0.2)', i, j)\n        }\n      }\n    }\n  }\n}\n\nfunction startGame() {\n  var game = new Game();\n\n  function gameLoop() {\n    game.render()\n    window.requestAnimationFrame(gameLoop)\n  }\n\n  window.addEventListener('keyup', function(e) {\n    game.updateState(e)\n  })\n\n  window.requestAnimationFrame(gameLoop)\n}\n\n\n//# sourceURL=webpack://javascript-roguelike/./src/index.js?");
-
-/***/ }),
-
-/***/ "./src/layout.js":
-/*!***********************!*\
-  !*** ./src/layout.js ***!
-  \***********************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-eval("var { charWidthPixels, charHeightPixels } = __webpack_require__(/*! ./charmap */ \"./src/charmap.js\")\n\n// constants related to game dimensions and layout on screen\n\nvar canvasWidthChars = 80\nvar canvasHeightChars = 25\n\nvar canvasWidth = canvasWidthChars * charWidthPixels\nvar canvasHeight = canvasHeightChars * charHeightPixels\n\nvar mapWidth = 70\nvar mapHeight = 20\n\nvar statsWidth = canvasWidthChars - mapWidth\nvar statsHeight = mapHeight\n\nvar logWidth = canvasWidthChars\nvar logHeight = canvasHeightChars - mapHeight\n\nmodule.exports = {\n  canvasWidthChars,\n  canvasHeightChars,\n  canvasWidth,\n  canvasHeight,\n  mapWidth,\n  mapHeight,\n  statsWidth,\n  statsHeight,\n  logWidth,\n  logHeight\n}\n\n\n//# sourceURL=webpack://javascript-roguelike/./src/layout.js?");
-
-/***/ }),
-
-/***/ "./src/level.js":
-/*!**********************!*\
-  !*** ./src/level.js ***!
-  \**********************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-eval("var { generateLevel, getRandomRoomPosition } = __webpack_require__(/*! ./map-generator */ \"./src/map-generator.js\")\nvar { mapWidth, mapHeight } = __webpack_require__(/*! ./layout */ \"./src/layout.js\")\nvar { rollMonster } = __webpack_require__(/*! ./monsters */ \"./src/monsters.js\")\nvar { Monster } = __webpack_require__(/*! ./entities */ \"./src/entities.js\")\n\nfunction createEmptyTileMap() {\n  var tileMap = Array(mapHeight)\n  for (var i = 0; i < mapHeight; i++) {\n    tileMap[i] = Array(mapWidth)\n    for (var j = 0; j < mapWidth; j++) {\n      tileMap[i][j] = '#'\n    }\n  }\n  return tileMap\n}\n\nfunction carveRoom(room, level) {\n  for (var i = room.y; i < room.y + room.h; i++) {\n    for (var j = room.x; j < room.x + room.w; j++) {\n      level[i][j] = '.'\n    }\n  }\n}\n\nvar defaultTileColors = {\n  '#': '#666',\n  '.': '#ddd',\n  '<': '#ddd',\n  '>': '#ddd',\n}\n\nvar visBlock = {\n  '#': 0.05,\n  '.': 0.45,\n  '<': 0.45,\n  '>': 0.45,\n}\n\n// Is (x,y) visible from (x0,y0) in tile map level\nfunction isVisible(x, y, x0, y0, level) {\n  var m, xj, yj, yj_, xj_, j, dj, vbj_d, vbj_u, vb_d, vb_u\n  if (Math.abs(y - y0) <= Math.abs(x - x0)) {\n    // \"x-simple\"\n    m = (y - y0) / (x - x0)\n    dj = x < x0 ? -1 : 1\n    vb_d = 0\n    vb_u = 0\n    for (j = 0; Math.abs(j) < Math.abs(x - x0); j += dj) {\n      xj = x0 + j\n      yj = y0 + m * j\n\n      yj_ = Math.floor(yj)\n\n      // Calculate blocked portion of visiblity to both sides\n      vbj_d = 1 - (yj - yj_)\n      vbj_u = 1 - vbj_d\n\n      if (level[yj_][xj] == '#' && vbj_d > vb_d) {\n        vb_d = vbj_d\n      }\n      if (level[yj_ + 1][xj] == '#' && vbj_u > vb_u) {\n        vb_u = vbj_u\n      }\n      if (vb_d + vb_u > 1 - visBlock[level[y][x]]) {\n        return false\n      }\n    }\n  } else {\n    // \"y-simple\"\n    m = (x - x0) / (y - y0)\n    dj = y < y0 ? -1 : 1\n    vb_d = 0\n    vb_u = 0\n    for (j = 0; Math.abs(j) < Math.abs(y - y0); j += dj) {\n      yj = y0 + j\n      xj = x0 + m * j\n\n      xj_ = Math.floor(xj)\n\n      vbj_d = 1 - (xj - xj_)\n      vbj_u = 1 - vbj_d\n\n      if (level[yj][xj_] == '#' && vbj_d > vb_d) {\n        vb_d = vbj_d\n      }\n      if (level[yj][xj_ + 1] == '#' && vbj_u > vb_u) {\n        vb_u = vbj_u\n      }\n      if (vb_d + vb_u > 1 - visBlock[level[y][x]]) {\n        return false\n      }\n    }\n  }\n  return true\n}\n\nfunction Level(level, mapGenParams) {\n  this.level = level\n\n  this.map = generateLevel(mapWidth, mapHeight, mapGenParams)\n  this.tileMap = createEmptyTileMap()\n  this.map.rooms.forEach(room => {\n    carveRoom(room, this.tileMap)\n  })\n  this.map.corridors.forEach(room => {\n    carveRoom(room, this.tileMap)\n  })\n  if (this.map.up) {\n    this.tileMap[this.map.up.y][this.map.up.x] = '<'\n  }\n  if (this.map.down) {\n    this.tileMap[this.map.down.y][this.map.down.x] = '>'\n  }\n\n  this.colorMap = defaultTileColors\n\n  this.seenMask = this.tileMap.map(row => row.map(() => false))\n  this.isVisibleMask = this.tileMap.map(row => row.map(() => false))\n  this.wasVisibleMask = this.tileMap.map(row => row.map(() => false))\n  this.isOccupied = this.tileMap.map(row => row.map(tile => (tile == '#')))\n\n  this.getRandomUnoccupiedTile = function() {\n    var position\n    do {\n      position = getRandomRoomPosition(this.map)\n    } while (this.isOccupied[position.y][position.x])\n    return position\n  }\n\n  this.occupy = function(position) {\n    this.isOccupied[position.y][position.x] = true\n  }\n\n  this.unoccupy = function(position) {\n    this.isOccupied[position.y][position.x] = false\n  }\n\n  this.placePlayer = function(player) {\n    this.occupy(player)\n    for (var i = 0; i < mapHeight; i++) {\n      for (var j = 0; j < mapWidth; j++) {\n        this.wasVisibleMask[i][j] = this.isVisibleMask[i][j]\n        if (player.isWithinVisRadius(i, j) &&\n            isVisible(j, i, player.x ,player.y, this.tileMap)) {\n          this.seenMask[i][j] = true\n          this.isVisibleMask[i][j] = true\n        } else {\n          this.isVisibleMask[i][j] = false\n        }\n      }\n    }\n  }\n\n  this.becameNotVisible = function(i, j) {\n    return this.wasVisibleMask[i][j] && !this.isVisibleMask[i][j]\n  }\n\n  this.hasDownStaircase = function() {\n    return this.map.down\n  }\n  this.hasUpStaircase = function() {\n    return this.map.up\n  }\n  this.isDownStaircaseAt = function(position) {\n    return this.tileMap[position.y][position.x] == '>'\n  }\n  this.isUpStaircaseAt = function(position) {\n    return this.tileMap[position.y][position.x] == '<'\n  }\n  this.getDownStaircasePosition = function() {\n    if (this.hasDownStaircase()) {\n      return this.map.down\n    } else {\n      throw new Error('No down staircase in level')\n    }\n  }\n  this.getUpStaircasePosition = function() {\n    if (this.hasUpStaircase()) {\n      return this.map.up\n    } else {\n      throw new Error('No up staircase in level')\n    }\n  }\n\n  this.monsters = []\n  var numMonsters = 5 + this.level\n  for (var iMonster = 0; iMonster < numMonsters; iMonster++) {\n    var monsterType = rollMonster(this.level)\n    var monster = Monster.fromSpawner(monsterType)\n    var position = this.getRandomUnoccupiedTile()\n    monster.setPosition(position)\n    this.isOccupied[position.y][position.x] = true\n    this.monsters.push(monster)\n  }\n  this.getMonsterAt = function(x, y) {\n    return this.monsters.find(m => m.x == x && m.y == y && m.hp > 0)\n  }\n}\n\nmodule.exports = Level\n\n\n//# sourceURL=webpack://javascript-roguelike/./src/level.js?");
-
-/***/ }),
-
-/***/ "./src/logger.js":
-/*!***********************!*\
-  !*** ./src/logger.js ***!
-  \***********************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-eval("var {\n  logWidth,\n  logHeight\n} = __webpack_require__(/*! ./layout */ \"./src/layout.js\")\n\n// \"singleton\"\nfunction Logger() {\n  if (Logger.instance) {\n    throw new Error('Use Logger.getInstance')\n  }\n  Logger.instance = this\n  this.logBuffer = [\n    'Welcome!',\n    'Very long line with monsters attacking and all sorts of crazy stuff going on so that this has to be split into multiple lines for sure'\n  ]\n  this.maxLineWidth = logWidth - 2 // '> ' prefix\n  this.lineRegex = new RegExp(`(.{0,${this.maxLineWidth}}$|.{0,${this.maxLineWidth}}\\\\b)`, 'g')\n\n  this.newLine = ''\n  this.appendToLine = function(msg) {\n    if (this.newLine.length == 0) {\n      this.newLine += msg\n    } else {\n      this.newLine += (' ' + msg)\n    }\n  }\n  this.finishLine = function() {\n    if (this.newLine.length > 0) {\n      this.logBuffer.unshift(this.newLine)\n    }\n    this.newLine = ''\n  }\n\n  this.getLogLines = function*() {\n    var linesToDisplay = []\n    var iLine = 0\n    while (linesToDisplay.length < logHeight) {\n      if (iLine < this.logBuffer.length) {\n        var line = this.logBuffer[iLine]\n        var split = line.match(this.lineRegex)\n          .map(part => part.trim())\n          .filter(part => part.length > 0)\n        for (var iPart = split.length - 1; iPart > 0; iPart--) {\n          var part = '  ' + split[iPart]\n          linesToDisplay.push(part)\n        }\n        var firstPart = '> ' + split[0]\n        linesToDisplay.push(firstPart)\n      } else {\n        linesToDisplay.push('  ')\n      }\n      iLine += 1\n    }\n    iLine = 0\n    while (iLine < logHeight) {\n      var line = linesToDisplay[iLine]\n      yield line.padEnd(logWidth, ' ')\n      iLine += 1\n    }\n  }\n}\nLogger.getInstance = function() {\n  return Logger.instance || new Logger()\n}\n\nmodule.exports = Logger\n\n\n//# sourceURL=webpack://javascript-roguelike/./src/logger.js?");
-
-/***/ }),
-
-/***/ "./src/map-generator.js":
-/*!******************************!*\
-  !*** ./src/map-generator.js ***!
-  \******************************/
+/***/ "./entities.js":
+/*!*********************!*\
+  !*** ./entities.js ***!
+  \*********************/
 /***/ ((module) => {
 
-eval("function randInt(n0, n1) {\n  return n0 + Math.floor((n1 - n0 + 1) * Math.random())\n}\n\nfunction overlapRooms(r1, r2) {\n  return (\n    r2.x - r1.w <= r1.x &&\n    r1.x <= r2.x + r2.w &&\n    r2.y - r1.h <= r1.y &&\n    r1.y <= r2.y + r2.h\n  )\n}\n\nfunction getRandomRoomPosition(level) {\n  var iRoom = randInt(0, level.rooms.length - 1)\n  var room = level.rooms[iRoom]\n  var x = randInt(room.x, room.x + room.w - 1)\n  var y = randInt(room.y, room.y + room.h - 1)\n  return { x, y }\n}\n\n// eslint-disable-next-line no-unused-vars\nfunction generateLevel(mapWidth, mapHeight, features) {\n  var mapArea = mapWidth * mapHeight\n\n  var rooms = []\n\n  // Minimum and maximum room width and height\n  var w0 = 5\n  var w1 = 15\n\n  var h0 = 3\n  var h1 = 7\n\n  var roomArea = 0\n  var failures = 0\n\n  // Random integer from {n0, ..., n1} (uniform)\n  /* eslint-disable-next-line no-constant-condition */\n  while (true) {\n    var w = randInt(w0, w1)\n    var h = randInt(h0, h1)\n    // Last index mapWidth - 1, room width + 1 tile wall\n    var x = randInt(1, mapWidth - 1 - (w + 1))\n    var y = randInt(1, mapHeight - 1 - (h + 1))\n    let overlap = false\n    for (var iRoom = 0; iRoom < rooms.length; iRoom++) {\n      var room = rooms[iRoom]\n      if (overlapRooms(room, { x, y, w, h })) {\n        overlap = true\n        break\n      }\n    }\n    if (overlap) {\n      failures += 1\n      if (failures > 100) {\n        break\n      }\n      continue\n    }\n    // console.log('placing room, w=' + w + ', h=' + h + ', x=' + x + ', y=' + y)\n    rooms.push({\n      x,\n      y,\n      w,\n      h,\n      c: false, // connected\n    })\n    roomArea += w * h\n    /*\n    console.log(\n      'placed ' +\n        rooms.length +\n        ' rooms with area ' +\n        roomArea +\n        ' of ' +\n        mapArea\n    )\n    */\n    if (roomArea / mapArea > 0.33 || rooms.length > 10) {\n      break\n    }\n  }\n\n  var corridors = []\n  var corridorsAsRooms = []\n\n  // Start placing connectiong with rooms 0 and 1\n  var j = 0,\n    k = 1\n\n  while (j < rooms.length && k < rooms.length) {\n    var room_j = rooms[j]\n    var room_k = rooms[k]\n    // console.log('corridor between ' + j + ' and ' + k)\n\n    // Pick two points within these rooms at random\n    var xj = randInt(room_j.x, room_j.x + room_j.w - 1)\n    var yj = randInt(room_j.y, room_j.y + room_j.h - 1)\n\n    var xk = randInt(room_k.x, room_k.x + room_k.w - 1)\n    var yk = randInt(room_k.y, room_k.y + room_k.h - 1)\n\n    // Starting direction of corridor at random\n    var dir = randInt(0, 1)\n    var xjk, yjk\n    if (dir) {\n      // vertically from room j\n      xjk = xj\n      yjk = yk\n    } else {\n      // horizontally from room j\n      xjk = xk\n      yjk = yj\n    }\n\n    var c = {\n      xj,\n      yj,\n      xjk,\n      yjk,\n      xk,\n      yk,\n    }\n    corridors.push(c)\n\n    // Corridor as two (single tile wide) rooms\n    var c1, c2\n    if (dir) {\n      c1 = {\n        x: xj,\n        y: Math.min(yj, yk),\n        w: 1,\n        h: Math.abs(yj - yk) + 1,\n      }\n      c2 = {\n        x: Math.min(xj, xk),\n        y: yk,\n        w: Math.abs(xj - xk) + 1,\n        h: 1,\n      }\n    } else {\n      c1 = {\n        x: Math.min(xj, xk),\n        y: yj,\n        w: Math.abs(xj - xk) + 1,\n        h: 1,\n      }\n      c2 = {\n        x: xk,\n        y: Math.min(yj, yk),\n        w: 1,\n        h: Math.abs(yj - yk) + 1,\n      }\n    }\n\n    corridorsAsRooms.push(c1)\n    corridorsAsRooms.push(c2)\n\n    // Loop over unconnected rooms, see if new corridor overlaps them\n    rooms[j].connected = true\n    rooms[k].connected = true\n\n    for (var i = 0; i < rooms.length; i++) {\n      var r = rooms[i]\n      if (r.connected) {\n        // console.log('room ' + i + ' already connected')\n        continue\n      }\n      let overlap = overlapRooms(r, c1) || overlapRooms(r, c2)\n\n      if (overlap) {\n        /*\n        console.log(\n          'room ' +\n            JSON.stringify(rooms[i]) +\n            ' overlaps with corridor ' +\n            JSON.stringify(c)\n        )\n        */\n        rooms[i].connected = true\n      }\n    }\n\n    // Re-assign j and k so that j is a connected room and k non-connected\n    j = k\n    while (k < rooms.length && rooms[k].connected) {\n      k++\n    }\n  }\n\n  var levelMap = {\n    rooms,\n    corridors: corridorsAsRooms,\n  }\n\n  if (features.up) {\n    // Staircase up\n    var upPos = getRandomRoomPosition(levelMap)\n    levelMap.up = { x: upPos.x, y: upPos.y }\n  }\n  if (features.down) {\n    // Staircase down\n    var downPos = getRandomRoomPosition(levelMap)\n    levelMap.down = { x: downPos.x, y: downPos.y }\n  }\n\n  return levelMap\n}\n\nmodule.exports = {\n  generateLevel,\n  randInt,\n  getRandomRoomPosition\n}\n\n\n//# sourceURL=webpack://javascript-roguelike/./src/map-generator.js?");
+function LivingEntity(char, color) {
+  this.char = char
+  this.color = color
+  this.x = 0
+  this.y = 0
+
+  this.hp = 0
+  this.hitChance = 0
+  this.hitDamage = 0
+
+  this.setPosition = function setPosition(position) {
+    this.x = position.x
+    this.y = position.y
+  }
+
+  this.isAdjacentTo = function isAdjacentTo(that) {
+    return Math.max(Math.abs(this.x - that.x), Math.abs(this.y - that.y)) == 1
+  }
+
+  this.attack = function attack(that) {
+    if (Math.random() < this.hitChance) {
+      that.hp -= this.hitDamage
+      return true
+    } else {
+      return false
+    }
+  }
+
+  this.getApproachVectorsTo = function getApproachVectorsTo(that) {
+    var dispX = that.x - this.x
+    var dispY = that.y - this.y
+    var dx0 = dispX != 0 ? (dispX < 0 ? -1 : 1) : 0
+    var dy0 = dispY != 0 ? (dispY < 0 ? -1 : 1) : 0
+
+    var vectors = [{ dx: dx0, dy: dy0 }]
+
+    // If preferred direction along cardinal axis try also both diagonals around it
+    if (dx0 == 0) {
+      vectors.push({ dx: -1, dy: dy0 })
+      vectors.push({ dx: 1, dy: dy0 })
+    } else if (dy0 == 0) {
+      vectors.push({ dx: dx0, dy: -1 })
+      vectors.push({ dx: dx0, dy: 1 })
+    } else {
+      // Preferred direction is diagonal: try also both cardinal directions around it
+      vectors.push({ dx: 0, dy: dy0 })
+      vectors.push({ dx: dx0, dy: 0 })
+    }
+
+    return vectors
+  }
+}
+
+function Monster(char, color) {
+  LivingEntity.call(this, char, color)
+
+  this.seen = false
+  this.aggressive = false
+  this.aggravationChance = 0.2
+  this.pointValue = null
+
+  this.rollAggravation = function rollAggravation() {
+    if (this.seen && !this.aggressive && Math.random() < this.aggravationChance) {
+      console.log('monster becomes agressive')
+      this.aggressive = true
+    }
+  }
+}
+Monster.fromSpawner = function(spawner) {
+  var monster = new Monster(spawner.char, spawner.color)
+  monster.name = spawner.name
+  monster.pointValue = spawner.pointValue
+  monster.hp = spawner.hp()
+  monster.hitChance = spawner.hitChance()
+  monster.hitDamage = spawner.hitDamage()
+  return monster
+}
+
+function Player(char, color, playerName) {
+  LivingEntity.call(this, char, color)
+
+  this.hp = 1
+  this.hitChance = 0.5
+  this.hitDamage = 2
+
+  this.visRadius = 7.5
+  this.attacking = false
+
+  this.name = playerName
+  this.score = 0
+
+  this.isWithinVisRadius = function isWithinVisRadius(i, j) {
+    return (this.x - j) ** 2 + (this.y - i) ** 2 < this.visRadius ** 2
+  }
+}
+
+module.exports = {
+  Monster,
+  Player
+}
+
 
 /***/ }),
 
-/***/ "./src/monsters.js":
-/*!*************************!*\
-  !*** ./src/monsters.js ***!
-  \*************************/
+/***/ "./layout.js":
+/*!*******************!*\
+  !*** ./layout.js ***!
+  \*******************/
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-eval("var { randInt } = __webpack_require__(/*! ./map-generator */ \"./src/map-generator.js\")\n\nvar monsterDictionary = [\n  {\n    name: 'small monster',\n    char: 'g',\n    color: 'red',\n    spawnWeight: level => 1 / (level + 1),\n    hp: level => [1, 1],\n    hitChance: level => [10, 20],\n    hitDamage: level => [1, 1]\n  },\n  {\n    name: 'monster',\n    char: 'g',\n    color: 'darkred',\n    spawnWeight: level => 1.0,\n    hp: level => [1, 1 + Math.floor(level / 2)],\n    hitChance: level => [10 + level, 20 + 2 * level],\n    hitDamage: level => [1, 1 + Math.floor(level / 4)]\n  },\n  {\n    name: 'large monster',\n    char: 'G',\n    color: 'brown',\n    spawnWeight: level => level / 20,\n    hp: level => [5, 5 + level],\n    hitChance: level => [10 + level, 20 + 2 * level],\n    hitDamage: level => [2, 2 + Math.floor(level / 2)]\n  },\n  {\n    name: 'huge monster',\n    char: 'G',\n    color: 'darkbrown',\n    spawnWeight: level => level / 500,\n    hp: level => [10, 10 + level],\n    hitChance: level => [20 + level, 30 + 2 * level],\n    hitDamage: level => [4, 4 + level]\n  }\n]\n\nfunction generateSpawnerFrom(entry, level) {\n  var hpBounds = entry.hp(level)\n  var hitChanceBounds = entry.hitChance(level)\n  var hitDamageBounds = entry.hitDamage(level)\n  return {\n    name: entry.name,\n    char: entry.char,\n    color: entry.color,\n    hp: () => randInt(hpBounds[0], hpBounds[1]),\n    hitChance: () => randInt(hitChanceBounds[0], hitChanceBounds[1]) / 100,\n    hitDamage: () => randInt(hitDamageBounds[0], hitDamageBounds[1])\n  }\n}\n\nfunction rollMonster(level) {\n  var roll = Math.random()\n  var weightSum = monsterDictionary.reduce((acc, curr) => acc + curr.spawnWeight(level), 0)\n  var cumulativeWeight = 0\n  for (var i = 0; i < monsterDictionary.length; i++) {\n    var entry = monsterDictionary[i]\n    cumulativeWeight += entry.spawnWeight(level) / weightSum\n    if (roll < cumulativeWeight) {\n      var spawner = generateSpawnerFrom(entry, level)\n      return spawner\n    }\n  }\n}\n\nmodule.exports = {\n  rollMonster,\n}\n\n\n//# sourceURL=webpack://javascript-roguelike/./src/monsters.js?");
+var { charWidthPixels, charHeightPixels } = __webpack_require__(/*! ./charmap */ "./charmap.js")
+
+// constants related to game dimensions and layout on screen
+
+var canvasWidthChars = 80
+var canvasHeightChars = 25
+
+var canvasWidth = canvasWidthChars * charWidthPixels
+var canvasHeight = canvasHeightChars * charHeightPixels
+
+var mapWidth = 70
+var mapHeight = 20
+
+var statsWidth = canvasWidthChars - mapWidth
+var statsHeight = mapHeight
+
+var logWidth = canvasWidthChars
+var logHeight = canvasHeightChars - mapHeight
+
+module.exports = {
+  canvasWidthChars,
+  canvasHeightChars,
+  canvasWidth,
+  canvasHeight,
+  mapWidth,
+  mapHeight,
+  statsWidth,
+  statsHeight,
+  logWidth,
+  logHeight
+}
+
 
 /***/ }),
 
-/***/ "./src/renderer.js":
-/*!*************************!*\
-  !*** ./src/renderer.js ***!
-  \*************************/
+/***/ "./level.js":
+/*!******************!*\
+  !*** ./level.js ***!
+  \******************/
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-eval("var {\n  charOffsetX,\n  charOffsetY,\n  charWidthPixels,\n  charHeightPixels,\n  charMap\n} = __webpack_require__(/*! ./charmap */ \"./src/charmap.js\")\n\nvar {\n  canvasWidth,\n  canvasHeight\n} = __webpack_require__(/*! ./layout */ \"./src/layout.js\")\n\nfunction Renderer(id, top, left, width, height) {\n  this.id = id\n\n  this.top = top\n  this.left = left\n  this.width = width\n  this.height = height\n\n  this.context = null\n\n  this.init = function(container, charSheet) {\n    var canvas = document.createElement('canvas')\n    canvas.className = 'game-canvas'\n    canvas.setAttribute('id', id)\n    canvas.setAttribute('width', canvasWidth)\n    canvas.setAttribute('height', canvasHeight)\n    canvas.style.transform = `translate(${canvasWidth / 2}px,${canvasHeight / 2}px)scale(2)`\n    container.appendChild(canvas)\n\n    this.context = canvas.getContext('2d')\n    this.charSheet = charSheet\n\n    return this\n  }\n\n  this.clear = function() {\n    this.context.clearRect(0, 0, canvasWidth, canvasHeight)\n  }\n\n  this.drawChar = function(char, i, j) {\n    if (!(char in charMap)) {\n      throw new Error('invalid char: ' + char)\n    }\n    this.context.drawImage(\n      this.charSheet,\n      charOffsetX + charMap[char].j * charWidthPixels,\n      charOffsetY + charMap[char].i * charHeightPixels,\n      charWidthPixels,\n      charHeightPixels,\n      (this.left + j) * charWidthPixels,\n      (this.top + i) * charHeightPixels,\n      charWidthPixels,\n      charHeightPixels\n    )\n  }\n\n  this.drawText = function(text, color, i, j) {\n    // negative i means count lines from bottom\n    for (var k = 0; k < text.length; k++) {\n      this.drawColoredChar(text[k], color, i >= 0 ? i : this.height + i, j + k)\n    }\n  }\n\n  this.drawTile = function(color, i, j) {\n    this.context.fillStyle = color\n    this.context.fillRect(\n      (this.left + j) * charWidthPixels,\n      (this.top + i) * charHeightPixels,\n      charWidthPixels,\n      charHeightPixels\n    )\n  }\n\n  this.clearTile = function(i, j) {\n    this.context.clearRect(\n      (this.left + j) * charWidthPixels,\n      (this.top + i) * charHeightPixels,\n      charWidthPixels,\n      charHeightPixels\n    )\n  }\n\n  this.drawColoredChar = function(char, color, i, j) {\n    this.drawTile(color, i, j)\n    this.drawChar(char, i, j)\n  }\n\n  this.fillWithChar = function(char) {\n    for (var i = 0; i < this.height; i++) {\n      for (var j = 0; j < this.width; j++) {\n        this.drawChar(char, i, j)\n      }\n    }\n  }\n}\n\nmodule.exports = Renderer\n\n\n//# sourceURL=webpack://javascript-roguelike/./src/renderer.js?");
+var RandomRoomsMapGenerator = __webpack_require__(/*! ./mapgen/random-rooms-map-generator */ "./mapgen/random-rooms-map-generator.js")
+var BinarySpacePartitionMapGenerator = __webpack_require__(/*! ./mapgen/binary-space-partition-map-generator */ "./mapgen/binary-space-partition-map-generator.js")
+var { mapWidth, mapHeight } = __webpack_require__(/*! ./layout */ "./layout.js")
+var { rollMonster } = __webpack_require__(/*! ./monsters */ "./monsters.js")
+var { Monster } = __webpack_require__(/*! ./entities */ "./entities.js")
+const { randInt } = __webpack_require__(/*! ./utils */ "./utils.js")
+
+var defaultTileColors = {
+  '#': '#666',
+  '.': '#ddd',
+  '<': '#ddd',
+  '>': '#ddd',
+}
+
+var visBlock = {
+  '#': 0.05,
+  '.': 0.45,
+  '<': 0.45,
+  '>': 0.45,
+}
+
+// Is (x,y) visible from (x0,y0) in tile map level
+function isVisible(x, y, x0, y0, level) {
+  var m, xj, yj, yj_, xj_, j, dj, vbj_d, vbj_u, vb_d, vb_u
+  if (Math.abs(y - y0) <= Math.abs(x - x0)) {
+    // "x-simple"
+    m = (y - y0) / (x - x0)
+    dj = x < x0 ? -1 : 1
+    vb_d = 0
+    vb_u = 0
+    for (j = 0; Math.abs(j) < Math.abs(x - x0); j += dj) {
+      xj = x0 + j
+      yj = y0 + m * j
+
+      yj_ = Math.floor(yj)
+
+      // Calculate blocked portion of visiblity to both sides
+      vbj_d = 1 - (yj - yj_)
+      vbj_u = 1 - vbj_d
+
+      if (level[yj_][xj] == '#' && vbj_d > vb_d) {
+        vb_d = vbj_d
+      }
+      if (level[yj_ + 1][xj] == '#' && vbj_u > vb_u) {
+        vb_u = vbj_u
+      }
+      if (vb_d + vb_u > 1 - visBlock[level[y][x]]) {
+        return false
+      }
+    }
+  } else {
+    // "y-simple"
+    m = (x - x0) / (y - y0)
+    dj = y < y0 ? -1 : 1
+    vb_d = 0
+    vb_u = 0
+    for (j = 0; Math.abs(j) < Math.abs(y - y0); j += dj) {
+      yj = y0 + j
+      xj = x0 + m * j
+
+      xj_ = Math.floor(xj)
+
+      vbj_d = 1 - (xj - xj_)
+      vbj_u = 1 - vbj_d
+
+      if (level[yj][xj_] == '#' && vbj_d > vb_d) {
+        vb_d = vbj_d
+      }
+      if (level[yj][xj_ + 1] == '#' && vbj_u > vb_u) {
+        vb_u = vbj_u
+      }
+      if (vb_d + vb_u > 1 - visBlock[level[y][x]]) {
+        return false
+      }
+    }
+  }
+  return true
+}
+
+function Level(level) {
+  this.level = level
+
+  // var generator = new RandomRoomsMapGenerator(level)
+  var generator = new BinarySpacePartitionMapGenerator(level)
+  generator.generate()
+  if (level > 0) {
+    generator.placeUpStaircase()
+  }
+  generator.placeDownStaircase()
+
+  this.map = generator.getFeatures()
+  this.tileMap = generator.getTileMap()
+
+  this.colorMap = defaultTileColors
+
+  this.seenMask = this.tileMap.map(row => row.map(() => false))
+  this.isVisibleMask = this.tileMap.map(row => row.map(() => false))
+  this.wasVisibleMask = this.tileMap.map(row => row.map(() => false))
+  this.isOccupied = this.tileMap.map(row => row.map(tile => (tile == '#')))
+
+  this.getRandomUnoccupiedTile = function getRandomUnoccupiedTile() {
+    var position
+    do {
+      position = { x: randInt(1, mapWidth - 2), y: randInt(1, mapHeight - 2) }
+    } while (this.isOccupied[position.y][position.x])
+    return position
+  }
+
+  this.occupy = function occupy(position) {
+    this.isOccupied[position.y][position.x] = true
+  }
+
+  this.unoccupy = function unoccupy(position) {
+    this.isOccupied[position.y][position.x] = false
+  }
+
+  this.placePlayer = function placePlayer(player) {
+    this.occupy(player)
+    for (var i = 0; i < mapHeight; i++) {
+      for (var j = 0; j < mapWidth; j++) {
+        this.wasVisibleMask[i][j] = this.isVisibleMask[i][j]
+        if (player.isWithinVisRadius(i, j) &&
+            isVisible(j, i, player.x ,player.y, this.tileMap)) {
+          this.seenMask[i][j] = true
+          this.isVisibleMask[i][j] = true
+        } else {
+          this.isVisibleMask[i][j] = false
+        }
+      }
+    }
+  }
+
+  this.becameNotVisible = function becameNotVisible(i, j) {
+    return this.wasVisibleMask[i][j] && !this.isVisibleMask[i][j]
+  }
+
+  this.hasDownStaircase = function hasDownStaircase() {
+    return this.map.down
+  }
+  this.hasUpStaircase = function hasUpStaircase() {
+    return this.map.up
+  }
+  this.isDownStaircaseAt = function isDownStaircaseAt(position) {
+    return this.tileMap[position.y][position.x] == '>'
+  }
+  this.isUpStaircaseAt = function isUpStaircaseAt(position) {
+    return this.tileMap[position.y][position.x] == '<'
+  }
+  this.getDownStaircasePosition = function getDownStaircasePosition() {
+    if (this.hasDownStaircase()) {
+      return this.map.down
+    } else {
+      throw new Error('No down staircase in level')
+    }
+  }
+  this.getUpStaircasePosition = function getUpStaircasePosition() {
+    if (this.hasUpStaircase()) {
+      return this.map.up
+    } else {
+      throw new Error('No up staircase in level')
+    }
+  }
+
+  this.monsters = []
+  var numMonsters = 5 + this.level
+  for (var iMonster = 0; iMonster < numMonsters; iMonster++) {
+    var monsterType = rollMonster(this.level)
+    var monster = Monster.fromSpawner(monsterType)
+    var position = this.getRandomUnoccupiedTile()
+    monster.setPosition(position)
+    this.isOccupied[position.y][position.x] = true
+    this.monsters.push(monster)
+  }
+  this.getMonsterAt = function getMonsterAt(x, y) {
+    return this.monsters.find(m => m.x == x && m.y == y && m.hp > 0)
+  }
+}
+
+module.exports = Level
+
+
+/***/ }),
+
+/***/ "./logger.js":
+/*!*******************!*\
+  !*** ./logger.js ***!
+  \*******************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var {
+  logWidth,
+  logHeight
+} = __webpack_require__(/*! ./layout */ "./layout.js")
+
+// "singleton"
+function Logger() {
+  if (Logger.instance) {
+    throw new Error('Use Logger.getInstance')
+  }
+  Logger.instance = this
+  this.logBuffer = [
+    'Very long line with monsters attacking and all sorts of crazy stuff going on so that this has to be split into multiple lines for sure'
+  ]
+  this.maxLineWidth = logWidth - 2 // '> ' prefix
+  this.lineRegex = new RegExp(`(.{0,${this.maxLineWidth}}$|.{0,${this.maxLineWidth}}\\b)`, 'g')
+
+  this.newLine = ''
+  this.appendToLine = function appendToLine(msg) {
+    if (this.newLine.length == 0) {
+      this.newLine += msg
+    } else {
+      this.newLine += (' ' + msg)
+    }
+  }
+  this.finishLine = function finishLine() {
+    if (this.newLine.length > 0) {
+      this.logBuffer.unshift(this.newLine)
+    }
+    this.newLine = ''
+  }
+
+  this.getLogLines = function* getLogLines() {
+    var linesToDisplay = []
+    var iLine = 0
+    while (linesToDisplay.length < logHeight) {
+      if (iLine < this.logBuffer.length) {
+        var line = this.logBuffer[iLine]
+        var split = line.match(this.lineRegex)
+          .map(part => part.trim())
+          .filter(part => part.length > 0)
+        for (var iPart = split.length - 1; iPart > 0; iPart--) {
+          var part = '  ' + split[iPart]
+          linesToDisplay.push(part)
+        }
+        var firstPart = '> ' + split[0]
+        linesToDisplay.push(firstPart)
+      } else {
+        linesToDisplay.push('  ')
+      }
+      iLine += 1
+    }
+    iLine = 0
+    while (iLine < logHeight) {
+      var line = linesToDisplay[iLine]
+      yield line.padEnd(logWidth, ' ')
+      iLine += 1
+    }
+  }
+
+  this.clearBuffer = function clearBuffer() {
+    this.logBuffer = []
+  }
+}
+Logger.getInstance = function getInstance() {
+  return Logger.instance || new Logger()
+}
+
+module.exports = Logger
+
+
+/***/ }),
+
+/***/ "./mapgen/abstract-map-generator.js":
+/*!******************************************!*\
+  !*** ./mapgen/abstract-map-generator.js ***!
+  \******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var { mapWidth, mapHeight } = __webpack_require__(/*! ../layout */ "./layout.js")
+
+function createEmptyTileMap() {
+  var tileMap = Array(mapHeight)
+  for (var i = 0; i < mapHeight; i++) {
+    tileMap[i] = Array(mapWidth)
+    for (var j = 0; j < mapWidth; j++) {
+      tileMap[i][j] = '#'
+    }
+  }
+  return tileMap
+}
+
+function MapGenerator(level) {
+  this.level = level
+
+  this.mapWidth = mapWidth
+  this.mapHeight = mapHeight
+  this.mapArea = this.mapWidth * this.mapHeight
+
+  this.tileMap = createEmptyTileMap()
+
+  this.generate = function generate() {
+    throw new Error('Use one of the child classes')
+  }
+
+  this.getTileMap = function getTileMap() {
+    return this.tileMap
+  }
+
+  this.getFeatures = function getFeatures() {
+    throw new Error('Use one of the child classes')
+  }
+
+  this.placeDownStaircase = function placeDownStaircase() {
+    throw new Error('Use one of the child classes')
+  }
+
+  this.placeUpStaircase = function placeUpStaircase() {
+    throw new Error('Use one of the child classes')
+  }
+
+  // for debugging
+  this.print = function print() {
+    console.log(this.tileMap.map(row => row.join('')).join('\n'))
+  }
+}
+
+module.exports = MapGenerator
+
+
+/***/ }),
+
+/***/ "./mapgen/binary-space-partition-map-generator.js":
+/*!********************************************************!*\
+  !*** ./mapgen/binary-space-partition-map-generator.js ***!
+  \********************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var MapGenerator = __webpack_require__(/*! ./abstract-map-generator */ "./mapgen/abstract-map-generator.js")
+var { Room } = __webpack_require__(/*! ./mapgen-commons */ "./mapgen/mapgen-commons.js")
+var { randFloat, randInt } = __webpack_require__(/*! ../utils */ "./utils.js")
+
+const AXIS_HORIZONTAL = 1
+const AXIS_VERTICAL = 2
+
+var params = {
+  minRoomWidth: 5,
+  maxRoomWidth: 15,
+  minRoomHeight: 3,
+  maxRoomHeight: 7,
+
+  maxNumberOfRooms: 10,
+  targetMapFillRatio: 0.33,
+  maxFailuresToAddRoom: 100,
+
+  minSplitRatio: 0.2,
+  maxSplitRatio: 0.8,
+
+  partitionWidthThreshold: 19,
+  partitionHeightThreshold: 14
+}
+
+function Node(top, left, width, height) {
+  this.top = top
+  this.left = left
+  this.width = width
+  this.height = height
+
+  this.parent = null
+  this.splitAxis = null // split axis of parent
+  this.firstChild = null
+  this.secondChild = null
+
+  this.room = null
+
+  this.isLeafNode = function isLeafNode() {
+    return this.firstChild == null && this.secondChild == null
+  }
+
+  this.canContainRoom = function canContainRoom() {
+    return this.width >= params.minRoomWidth + 2 && this.height >= params.minRoomHeight + 2
+  }
+
+  this.hasRoom = function hasRoom() {
+    return this.room != null
+  }
+
+  this.clone = function clone() {
+    return new Node(this.top, this.left, this.width, this.height)
+  }
+
+  this.splitAlongHorizontal = function splitAlongHorizontal(ratio) {
+    var upperHeight = Math.floor(ratio * this.height)
+
+    var upperPart = this.clone()
+    upperPart.splitAxis = AXIS_HORIZONTAL
+    upperPart.height = upperHeight
+    this.firstChild = upperPart
+    upperPart.parent = this
+
+    var lowerPart = this.clone()
+    lowerPart.splitAxis = AXIS_HORIZONTAL
+    lowerPart.top = upperPart.top + upperHeight
+    lowerPart.height = this.height - upperHeight
+    this.secondChild = lowerPart
+    lowerPart.parent = this
+
+    return [upperPart, lowerPart]
+  }
+
+  this.splitAlongVertical = function splitAlongVertical(ratio) {
+    var leftWidth = Math.floor(ratio * this.width)
+
+    var leftPart = this.clone()
+    leftPart.splitAxis = AXIS_VERTICAL
+    leftPart.width = leftWidth
+    this.firstChild = leftPart
+    leftPart.parent = this
+
+    var rightPart = this.clone()
+    rightPart.splitAxis = AXIS_VERTICAL
+    rightPart.left = leftPart.left + leftWidth
+    rightPart.width = this.width - leftWidth
+    this.secondChild = rightPart
+    rightPart.parent = this
+
+    return [leftPart, rightPart]
+  }
+
+  this.split = function split(ratio) {
+    var splitAlongHorizontal
+    if (this.width < params.partitionWidthThreshold) {
+      splitAlongHorizontal = true
+    } else if (this.height < params.partitionHeightThreshold) {
+      splitAlongHorizontal = false
+    } else {
+      splitAlongHorizontal = Math.random() < this.height / (this.width + this.height)
+    }
+
+    if (splitAlongHorizontal) {
+      return this.splitAlongHorizontal(ratio)
+    } else {
+      return this.splitAlongVertical(ratio)
+    }
+  }
+
+  this.getDescendantRooms = function getDescendantRooms() {
+    var rooms = []
+    if (this.hasRoom()) {
+      rooms.push(this.room)
+    }
+    if (!this.isLeafNode()) {
+      rooms = rooms.concat(this.firstChild.getDescendantRooms())
+      rooms = rooms.concat(this.secondChild.getDescendantRooms())
+    }
+    return rooms
+  }
+}
+
+function BinarySpacePartitionMapGenerator(level) {
+  MapGenerator.call(this, level)
+
+  this.rooms = []
+  this.corridors = []
+  this.features = {}
+
+  var self = this
+
+  this.generate = function generate() {
+    var nodes = [
+      new Node(0, 0, this.mapWidth, this.mapHeight)
+    ]
+    function split(node) {
+      if (node.width < params.partitionWidthThreshold && node.height < params.partitionHeightThreshold) {
+        return
+      } else {
+        var splitRatio = randFloat(params.minSplitRatio, params.maxSplitRatio)
+        var children = node.split(splitRatio)
+        children.forEach(child => {
+          nodes.push(child)
+          split(child)
+        })
+      }
+    }
+
+    split(nodes[0])
+
+    nodes.forEach(node => {
+      if (node.isLeafNode() && node.canContainRoom()) {
+        var roomWidth = randInt(params.minRoomWidth, node.width - 2)
+        var roomHeight = randInt(params.minRoomHeight, node.height - 2)
+        var roomLeft = randInt(node.left + 1, node.left + node.width - 1 - (roomWidth + 1))
+        var roomTop = randInt(node.top + 1, node.top + node.height - 1 - (roomHeight + 1))
+
+        node.room = new Room(roomTop, roomLeft, roomWidth, roomHeight)
+
+        self.rooms.push(node.room)
+        self.carveRoom(node.room)
+      }
+    })
+
+    function connectDescendants(node) {
+      if (node.isLeafNode()) {
+        return
+      }
+      var firstRooms = node.firstChild.getDescendantRooms()
+      var secondRooms = node.secondChild.getDescendantRooms()
+      var minDistance = Infinity
+      var firstRoom = null
+      var secondRoom = null
+      firstRooms.forEach(room1 => {
+        secondRooms.forEach(room2 => {
+          var distance = room1.distanceTo(room2)
+          if (distance < minDistance) {
+            firstRoom = room1
+            secondRoom = room2
+            minDistance = distance
+          }
+        })
+      })
+      if (firstRoom && secondRoom) {
+        [firstLeg, secondLeg] = firstRoom.getCorridorTo(secondRoom)
+        self.corridors.push(firstLeg)
+        self.corridors.push(secondLeg)
+        self.carveRoom(firstLeg)
+        self.carveRoom(secondLeg)
+      }
+      connectDescendants(node.firstChild)
+      connectDescendants(node.secondChild)
+    }
+
+    connectDescendants(nodes[0])
+  }
+
+  this.carveRoom = function carveRoom(room) {
+    for (var i = room.top; i < room.top + room.height; i++) {
+      for (var j = room.left; j < room.left + room.width; j++) {
+        this.tileMap[i][j] = '.'
+      }
+    }
+  }
+
+  this.getFeatures = function getFeatures() {
+    return {
+      rooms: this.rooms,
+      corridors: this.corridors,
+      up: this.features.up,
+      down: this.features.down
+    }
+  }
+
+  this.placeStaircase = function placeStaircase(direction) {
+    var roomInd = randInt(0, this.rooms.length - 1)
+    var position = this.rooms[roomInd].getRandomPosition()
+    this.features[direction] = position
+    this.tileMap[position.y][position.x] = direction == 'up' ? '<' : '>'
+  }
+
+  this.placeDownStaircase = function placeDownStaircase() {
+    this.placeStaircase('down')
+  }
+
+  this.placeUpStaircase = function placeUpStaircase() {
+    this.placeStaircase('up')
+  }
+}
+
+module.exports = BinarySpacePartitionMapGenerator
+
+
+/***/ }),
+
+/***/ "./mapgen/mapgen-commons.js":
+/*!**********************************!*\
+  !*** ./mapgen/mapgen-commons.js ***!
+  \**********************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var { randInt } = __webpack_require__(/*! ../utils */ "./utils.js")
+
+function Room(top, left, width, height) {
+  this.top = top
+  this.left = left
+  this.width = width
+  this.height = height
+
+  this.connected = false
+
+  this.area = function area() {
+    return this.width * this.height
+  }
+
+  this.getRandomPosition = function getRandomPosition() {
+    return {
+      x: randInt(this.left, this.left + this.width - 1),
+      y: randInt(this.top, this.top + this.height - 1)
+    }
+  }
+
+  this.overlapsX = function overlapsX(that) {
+    return (
+      that.left - this.width <= this.left &&
+      this.left <= that.left + that.width
+    )
+  }
+
+  this.overlapsY = function overlapsY(that) {
+    return (
+      that.top - this.height <= this.top &&
+      this.top <= that.top + that.height
+    )
+  }
+
+  this.overlaps = function overlaps(that) {
+    return this.overlapsX(that) && this.overlapsY(that)
+  }
+
+  this.xDistanceTo = function xDistanceTo(that) {
+    if (!this.overlapsX(that)) {
+      return Math.min(Math.abs(this.left + this.width - that.left), Math.abs(that.left + that.width - this.left))
+    } else {
+      return 0
+    }
+  }
+
+  this.yDistanceTo = function yDistanceTo(that) {
+    if (!this.overlapsY(that)) {
+      return Math.min(Math.abs(this.top + this.height - that.top), Math.abs(that.top + that.height - this.top))
+    } else {
+      return 0
+    }
+  }
+
+  this.distanceTo = function distanceTo(that) {
+    return this.xDistanceTo(that) + this.yDistanceTo(that)
+  }
+
+  // Two-segment corridor
+  this.getCorridorTo = function getCorridorTo(that) {
+    var pSrc = this.getRandomPosition()
+    var xSrc = pSrc.x
+    var ySrc = pSrc.y
+    var pDest = that.getRandomPosition()
+    var xDest = pDest.x
+    var yDest = pDest.y
+
+    var verticalFirst = Math.random() < 0.5
+    var xTurn, yTurn
+    if (verticalFirst) {
+      xTurn = xSrc
+      yTurn = yDest
+    } else {
+      xTurn = xDest
+      yTurn = ySrc
+    }
+
+    var firstLeg, secondLeg
+    if (verticalFirst) {
+      firstLeg = new Room(Math.min(ySrc, yDest), xSrc, 1, Math.abs(ySrc - yDest) + 1)
+      secondLeg = new Room(yDest, Math.min(xSrc, xDest), Math.abs(xSrc - xDest) + 1, 1)
+    } else {
+      firstLeg = new Room(ySrc, Math.min(xSrc, xDest), Math.abs(xSrc - xDest) + 1, 1)
+      secondLeg = new Room(Math.min(ySrc, yDest), xDest, 1, Math.abs(ySrc - yDest) + 1)
+    }
+
+    return [firstLeg, secondLeg]
+  }
+}
+
+module.exports = {
+  Room
+}
+
+
+/***/ }),
+
+/***/ "./mapgen/random-rooms-map-generator.js":
+/*!**********************************************!*\
+  !*** ./mapgen/random-rooms-map-generator.js ***!
+  \**********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var MapGenerator = __webpack_require__(/*! ./abstract-map-generator */ "./mapgen/abstract-map-generator.js")
+var { Room } = __webpack_require__(/*! ./mapgen-commons */ "./mapgen/mapgen-commons.js")
+
+var { randInt } = __webpack_require__(/*! ../utils */ "./utils.js")
+
+var params = {
+  minRoomWidth: 5,
+  maxRoomWidth: 15,
+  minRoomHeight: 3,
+  maxRoomHeight: 7,
+
+  maxNumberOfRooms: 10,
+  targetMapFillRatio: 0.33,
+  maxFailuresToAddRoom: 100
+}
+
+function RandomRoomsMapGenerator(level) {
+  MapGenerator.call(this, level)
+
+  this.rooms = []
+  this.corridors = []
+  this.features = {}
+
+  this.generate = function generate() {
+    var addMoreRooms = true
+    var failuresToAddRoom = 0
+    var totalRoomArea = 0
+
+    while (addMoreRooms) {
+      var width = randInt(params.minRoomWidth, params.maxRoomWidth)
+      var height = randInt(params.minRoomHeight, params.maxRoomHeight)
+
+      var left = randInt(1, this.mapWidth - 1 - (width + 1))
+      var top = randInt(1, this.mapHeight - 1 - (height + 1))
+
+      var roomCandidate = new Room(top, left, width, height)
+
+      var overlapsOtherRooms = false
+      for (var iRoom = 0; iRoom < this.rooms.length; iRoom++) {
+        var room = this.rooms[iRoom]
+        if (room.overlaps(roomCandidate)) {
+          overlapsOtherRooms = true
+          break
+        }
+      }
+      if (overlapsOtherRooms) {
+        failuresToAddRoom += 1
+        if (failuresToAddRoom > params.maxFailuresToAddRoom) {
+          addMoreRooms = false
+        }
+        continue
+      }
+
+      this.rooms.push(roomCandidate)
+
+      totalRoomArea += roomCandidate.area()
+      if (totalRoomArea / this.mapArea > params.targetMapFillRatio || this.rooms.length > params.maxNumberOfRooms) {
+        addMoreRooms = false
+      }
+    }
+
+    var iSrc = 0, iDest = 1
+    while (iSrc < this.rooms.length && iDest < this.rooms.length) {
+      var srcRoom = this.rooms[iSrc]
+      var destRoom = this.rooms[iDest]
+
+      var [firstLeg, secondLeg] = srcRoom.getCorridorTo(destRoom)
+
+      this.corridors.push(firstLeg)
+      this.corridors.push(secondLeg)
+
+      srcRoom.connected = true
+      destRoom.connected = true
+
+      for (var iRoom = 0; iRoom < this.rooms.length; iRoom++) {
+        var room = this.rooms[iRoom]
+        if (room.connected) {
+          continue
+        }
+        if (room.overlaps(firstLeg) || room.overlaps(secondLeg)) {
+          room.connected = true
+        }
+      }
+
+      iSrc = iDest
+      while (iDest < this.rooms.length && this.rooms[iDest].connected) {
+        iDest += 1
+      }
+    }
+
+    this.updateTileMap()
+  }
+
+  this.carveRoom = function carveRoom(room) {
+    for (var i = room.top; i < room.top + room.height; i++) {
+      for (var j = room.left; j < room.left + room.width; j++) {
+        this.tileMap[i][j] = '.'
+      }
+    }
+  }
+
+  this.updateTileMap = function updateTileMap() {
+    this.rooms.forEach(room => {
+      this.carveRoom(room)
+    })
+    this.corridors.forEach(corridor => {
+      this.carveRoom(corridor)
+    })
+  }
+
+  this.getFeatures = function getFeatures() {
+    return {
+      rooms: this.rooms,
+      corridors: this.corridors,
+      up: this.features.up,
+      down: this.features.down
+    }
+  }
+
+  this.placeStaircase = function placeStaircase(direction) {
+    var roomInd = randInt(0, this.rooms.length - 1)
+    var position = this.rooms[roomInd].getRandomPosition()
+    this.features[direction] = position
+    this.tileMap[position.y][position.x] = direction == 'up' ? '<' : '>'
+  }
+
+  this.placeDownStaircase = function placeDownStaircase() {
+    this.placeStaircase('down')
+  }
+
+  this.placeUpStaircase = function placeUpStaircase() {
+    this.placeStaircase('up')
+  }
+}
+
+module.exports = RandomRoomsMapGenerator
+
+
+/***/ }),
+
+/***/ "./monsters.js":
+/*!*********************!*\
+  !*** ./monsters.js ***!
+  \*********************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var { randInt } = __webpack_require__(/*! ./utils */ "./utils.js")
+
+var monsterDictionary = [
+  {
+    name: 'small monster',
+    char: 'g',
+    color: '#f00',
+    pointValue: level => level * 1 + 1,
+    spawnWeight: level => 1 / (level + 1),
+    hp: level => [1, 1],
+    hitChance: level => [10, 20],
+    hitDamage: level => [1, 1]
+  },
+  {
+    name: 'monster',
+    char: 'g',
+    color: '#a00',
+    pointValue: level => level * 2 + 2,
+    spawnWeight: level => 1.0,
+    hp: level => [1, 1 + Math.floor(level / 2)],
+    hitChance: level => [10 + level, 20 + 2 * level],
+    hitDamage: level => [1, 1 + Math.floor(level / 4)]
+  },
+  {
+    name: 'large monster',
+    char: 'G',
+    color: '#a50',
+    pointValue: level => level * 3 + 3,
+    spawnWeight: level => level / 20,
+    hp: level => [5, 5 + level],
+    hitChance: level => [10 + level, 20 + 2 * level],
+    hitDamage: level => [2, 2 + Math.floor(level / 2)]
+  },
+  {
+    name: 'huge monster',
+    char: 'G',
+    color: '#840',
+    pointValue: level => level * 4 + 4,
+    spawnWeight: level => level / 500,
+    hp: level => [10, 10 + level],
+    hitChance: level => [20 + level, 30 + 2 * level],
+    hitDamage: level => [4, 4 + level]
+  }
+]
+
+function generateSpawnerFrom(entry, level) {
+  var hpBounds = entry.hp(level)
+  var hitChanceBounds = entry.hitChance(level)
+  var hitDamageBounds = entry.hitDamage(level)
+  var pointValue = entry.pointValue(level)
+  return {
+    name: entry.name,
+    char: entry.char,
+    color: entry.color,
+    pointValue,
+    hp: () => randInt(hpBounds[0], hpBounds[1]),
+    hitChance: () => randInt(hitChanceBounds[0], hitChanceBounds[1]) / 100,
+    hitDamage: () => randInt(hitDamageBounds[0], hitDamageBounds[1])
+  }
+}
+
+function rollMonster(level) {
+  var roll = Math.random()
+  var weightSum = monsterDictionary.reduce((acc, curr) => acc + curr.spawnWeight(level), 0)
+  var cumulativeWeight = 0
+  for (var i = 0; i < monsterDictionary.length; i++) {
+    var entry = monsterDictionary[i]
+    cumulativeWeight += entry.spawnWeight(level) / weightSum
+    if (roll < cumulativeWeight) {
+      var spawner = generateSpawnerFrom(entry, level)
+      return spawner
+    }
+  }
+}
+
+module.exports = {
+  rollMonster,
+}
+
+
+/***/ }),
+
+/***/ "./renderer.js":
+/*!*********************!*\
+  !*** ./renderer.js ***!
+  \*********************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var {
+  charOffsetX,
+  charOffsetY,
+  charWidthPixels,
+  charHeightPixels,
+  charMap
+} = __webpack_require__(/*! ./charmap */ "./charmap.js")
+
+var {
+  canvasWidth,
+  canvasHeight
+} = __webpack_require__(/*! ./layout */ "./layout.js")
+
+function Renderer(id, top, left, width, height) {
+  this.id = id
+
+  this.top = top
+  this.left = left
+  this.width = width
+  this.height = height
+
+  this.context = null
+
+  this.init = function init(container, charSheet) {
+    var canvas = document.createElement('canvas')
+    canvas.className = 'game-canvas'
+    canvas.setAttribute('id', id)
+    canvas.setAttribute('width', canvasWidth)
+    canvas.setAttribute('height', canvasHeight)
+    canvas.style.transform = `translate(${canvasWidth / 2}px,${canvasHeight / 2}px)scale(2)`
+    container.appendChild(canvas)
+
+    this.context = canvas.getContext('2d')
+    this.charSheet = charSheet
+
+    return this
+  }
+
+  this.clear = function clear() {
+    this.context.clearRect(0, 0, canvasWidth, canvasHeight)
+  }
+
+  this.drawChar = function drawChar(char, i, j) {
+    if (!(char in charMap)) {
+      throw new Error('invalid char: ' + char)
+    }
+    this.context.drawImage(
+      this.charSheet,
+      charOffsetX + charMap[char].j * charWidthPixels,
+      charOffsetY + charMap[char].i * charHeightPixels,
+      charWidthPixels,
+      charHeightPixels,
+      (this.left + j) * charWidthPixels,
+      (this.top + i) * charHeightPixels,
+      charWidthPixels,
+      charHeightPixels
+    )
+  }
+
+  this.drawText = function drawText(text, color, i, j) {
+    // negative i means count lines from bottom
+    for (var k = 0; k < text.length; k++) {
+      this.drawColoredChar(text[k], color, i >= 0 ? i : this.height + i, j + k)
+    }
+  }
+
+  this.drawTile = function drawTile(color, i, j) {
+    this.context.fillStyle = color
+    this.context.fillRect(
+      (this.left + j) * charWidthPixels,
+      (this.top + i) * charHeightPixels,
+      charWidthPixels,
+      charHeightPixels
+    )
+  }
+
+  this.clearTile = function clearTile(i, j) {
+    this.context.clearRect(
+      (this.left + j) * charWidthPixels,
+      (this.top + i) * charHeightPixels,
+      charWidthPixels,
+      charHeightPixels
+    )
+  }
+
+  this.drawColoredChar = function drawColoredChar(char, color, i, j) {
+    this.drawTile(color, i, j)
+    this.drawChar(char, i, j)
+  }
+
+  this.fillWithChar = function fillWithChar(char) {
+    for (var i = 0; i < this.height; i++) {
+      for (var j = 0; j < this.width; j++) {
+        this.drawChar(char, i, j)
+      }
+    }
+  }
+}
+
+module.exports = Renderer
+
+
+/***/ }),
+
+/***/ "./utils.js":
+/*!******************!*\
+  !*** ./utils.js ***!
+  \******************/
+/***/ ((module) => {
+
+function randInt(n0, n1) {
+  return n0 + Math.floor((n1 - n0 + 1) * Math.random())
+}
+
+function randFloat(f0, f1) {
+  return f0 + Math.random() * (f1 - f0)
+}
+
+function tossACoin() {
+  return Math.random() < 0.5
+}
+
+module.exports = {
+  randInt,
+  randFloat
+}
+
 
 /***/ })
 
@@ -126,11 +1331,572 @@ eval("var {\n  charOffsetX,\n  charOffsetY,\n  charWidthPixels,\n  charHeightPix
 /******/ 	}
 /******/ 	
 /************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module can't be inlined because the eval devtool is used.
-/******/ 	var __webpack_exports__ = __webpack_require__("./src/index.js");
-/******/ 	
+var __webpack_exports__ = {};
+// This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
+(() => {
+/*!******************!*\
+  !*** ./index.js ***!
+  \******************/
+var Logger = __webpack_require__(/*! ./logger */ "./logger.js")
+var Renderer = __webpack_require__(/*! ./renderer */ "./renderer.js")
+var Level = __webpack_require__(/*! ./level */ "./level.js")
+var { Player } = __webpack_require__(/*! ./entities */ "./entities.js")
+
+var GAME_VERSION = '0.0.1'
+
+var {
+  canvasWidthChars,
+  canvasHeightChars,
+  mapWidth,
+  mapHeight,
+  statsWidth,
+  statsHeight,
+  logWidth,
+  logHeight
+} = __webpack_require__(/*! ./layout */ "./layout.js")
+
+var defaultTextColor = '#aaa'
+
+function createCanvasContainer() {
+  var div = document.createElement('div')
+  div.className = 'container'
+  document.body.appendChild(div)
+  return div
+}
+
+var container = createCanvasContainer()
+
+function createCharacterSheet(imageFile) {
+  var img = document.createElement('img')
+  img.src = imageFile
+  img.className = 'character-sheet'
+  img.onload = function() {
+    splashScreen()
+  }
+  document.body.appendChild(img)
+  return img
+}
+
+var charSheet = createCharacterSheet('Codepage-850_alpha.png')
+
+var splashRenderer = new Renderer('splash', 0, 0, canvasWidthChars, canvasHeightChars).init(container, charSheet)
+
+var statsRenderer = new Renderer('stats', 0,
+  mapWidth, statsWidth, statsHeight).init(container, charSheet)
+
+var logRenderer = new Renderer('log', mapHeight, 0, logWidth, logHeight).init(container, charSheet)
+
+var colorRenderer = new Renderer('color', 0, 0, mapWidth, mapHeight).init(container, charSheet)
+var visibleRenderer = new Renderer('visible', 0, 0, mapWidth, mapHeight).init(container, charSheet)
+var levelRenderer = new Renderer('level', 0, 0, mapWidth, mapHeight).init(container, charSheet)
+var objectRenderer = new Renderer('objects', 0, 0, mapWidth, mapHeight).init(container, charSheet)
+var seenRenderer = new Renderer('seen', 0, 0, mapWidth, mapHeight).init(container, charSheet)
+var debugRenderer = new Renderer('debug', 0, 0, mapWidth, mapHeight).init(container, charSheet)
+
+var hofRenderer = new Renderer('hof', 0, 0, canvasWidthChars, canvasHeightChars).init(container, charSheet)
+
+var movementKeys = 'uiojklm,.'
+var keyDisplacement = {
+  u: { dx: -1, dy: -1 },
+  i: { dx: 0, dy: -1 },
+  o: { dx: 1, dy: -1 },
+  j: { dx: -1, dy: 0 },
+  k: { dx: 0, dy: 0 },
+  l: { dx: 1, dy: 0 },
+  m: { dx: -1, dy: 1 },
+  ',': { dx: 0, dy: 1 },
+  '.': { dx: 1, dy: 1 }
+}
+
+function Game(gameOptions) {
+  this.resetRenderFlags = function resetRenderFlags() {
+    this.shouldRenderStats = true
+    this.shouldRenderLog = true
+    this.shouldRenderLevel = true
+    this.shouldRenderObjects = true
+    this.shouldRenderSeen = true
+    this.shouldRenderVisible = true
+  }
+  this.resetRenderFlags()
+
+  this.isFinished = false
+  this.levels = []
+  this.currentLevel = 0
+
+  this.addNewLevel = function addNewLevel() {
+    var newLevel = new Level(this.levels.length, { down: true, up: this.levels.length > 0 })
+    this.levels.push(newLevel)
+    return newLevel
+  }
+  this.isFirstLevel = function isFirstLevel() {
+    return this.currentLevel == 0
+  }
+  this.isLatestLevel = function isLatestLevel() {
+    return this.currentLevel == this.levels.length - 1
+  }
+
+  var logger = Logger.getInstance()
+  logger.appendToLine(`Welcome, ${gameOptions.playerName}!`)
+  logger.finishLine()
+
+  this.addNewLevel()
+
+  seenRenderer.fillWithChar(' ')
+
+  this.player = new Player('@', 'green', gameOptions.playerName)
+  var playerPosition = this.levels[this.currentLevel].getRandomUnoccupiedTile()
+  this.player.setPosition(playerPosition)
+  this.levels[this.currentLevel].placePlayer(this.player)
+
+  this.getStatsLines = function getStatsLines() {
+    return [
+      this.player.name,
+      'D  ' + String(this.currentLevel).padStart(5, ' '),
+      'HP ' + String(this.player.hp).padStart(5, ' '),
+      '$  ' + String(this.player.score).padStart(5, ' ')
+    ]
+  }
+
+  this.updateState = function updateState(event) {
+    var dx, dy
+
+    var key = event.key
+
+    var level = this.levels[this.currentLevel]
+
+    var playerTurnDone = false
+
+    var logger = Logger.getInstance()
+    this.shouldRenderLog = true
+
+    if (this.player.hp <= 0) {
+      this.shouldRenderLog = false
+      return
+    }
+
+    if (movementKeys.includes(key)) {
+      ({ dx, dy } = keyDisplacement[key])
+      if (this.player.attacking) {
+        var monster = level.getMonsterAt(this.player.x + dx, this.player.y + dy)
+        if (monster) {
+          var success = this.player.attack(monster)
+          if (success) {
+            logger.appendToLine(`You hit the ${monster.name}.`)
+          } else {
+            logger.appendToLine(`You miss the ${monster.name}.`)
+          }
+          if (monster.hp <= 0) {
+            logger.appendToLine(`The ${monster.name} is killed.`)
+            this.player.score += monster.pointValue
+            this.shouldRenderStats = true
+            level.unoccupy(monster)
+          }
+        }
+        this.player.attacking = false
+        this.shouldRenderObjects = true
+        playerTurnDone = true
+      } else {
+        if (dx == 0 && dy == 0) {
+          playerTurnDone = true
+        } else if (!level.isOccupied[this.player.y + dy][this.player.x + dx]) {
+          level.unoccupy(this.player)
+          this.player.x += dx
+          this.player.y += dy
+          level.placePlayer(this.player)
+          this.shouldRenderSeen = true
+          this.shouldRenderVisible = true
+          playerTurnDone = true
+        } else {
+          // Moving against occupied space, turn not done
+        }
+        this.shouldRenderObjects = true
+      }
+    } else {
+      switch (key) {
+        case 'a':
+          this.player.attacking = true
+          break
+        case 's':
+          if (level.isDownStaircaseAt(this.player)) {
+            var newLevel
+            if (this.isLatestLevel()) {
+              newLevel = this.addNewLevel()
+            } else {
+              newLevel = this.levels[this.currentLevel + 1]
+            }
+            logger.appendToLine('You descend the staircase.')
+            this.currentLevel += 1
+            this.resetRenderFlags()
+            this.player.setPosition(newLevel.getUpStaircasePosition())
+            newLevel.placePlayer(this.player)
+          } else if (level.isUpStaircaseAt(this.player)) {
+            var newLevel = this.levels[this.currentLevel - 1]
+            logger.appendToLine('You ascend the staircase.')
+            this.currentLevel -= 1
+            this.resetRenderFlags()
+            this.player.setPosition(newLevel.getDownStaircasePosition())
+            newLevel.placePlayer(this.player)
+          }
+          break
+        default:
+          console.log('unknown command: ' + key)
+      }
+    }
+
+    if (playerTurnDone) {
+      for (var iMonster = 0; iMonster < level.monsters.length; iMonster++) {
+        var monster = level.monsters[iMonster]
+        if (monster.hp > 0) {
+          if (!monster.seen && level.isVisibleMask[monster.y][monster.x]) {
+            monster.seen = true
+          } else if (monster.seen && !level.isVisibleMask[monster.y][monster.x]) {
+            monster.seen = false
+          }
+          monster.rollAggravation()
+          if (monster.aggressive && monster.seen) {
+            if (monster.isAdjacentTo(this.player)) {
+              dx = 0
+              dy = 0
+              var success = monster.attack(this.player)
+              if (success) {
+                logger.appendToLine(`The ${monster.name} hits you.`)
+                this.shouldRenderStats = true
+              } else {
+                logger.appendToLine(`The ${monster.name} misses you.`)
+              }
+              if (this.player.hp <= 0) {
+                this.player.killedBy = `a ${monster.name}`
+                logger.appendToLine('You die. Press Enter to continue...')
+                this.isFinished = true
+                break
+              }
+            } else {
+              var vectors = monster.getApproachVectorsTo(this.player)
+              var vectorFound = false
+              for (var v of vectors) {
+                if (!level.isOccupied[monster.y + v.dy][monster.x + v.dx]) {
+                  dx = v.dx
+                  dy = v.dy
+                  vectorFound = true
+                  break
+                }
+              }
+              if (!vectorFound) {
+                dx = 0
+                dy = 0
+              }
+            }
+          } else {
+            var dirInd = Math.floor(9 * Math.random())
+            var dir = movementKeys[dirInd]
+            ;({ dx, dy } = keyDisplacement[dir])
+            if (level.isOccupied[monster.y + dy][monster.x + dx]) {
+              dx = 0
+              dy = 0
+            }
+          }
+          level.unoccupy(monster)
+          monster.x += dx
+          monster.y += dy
+          level.occupy(monster)
+        }
+      }
+    }
+    logger.finishLine()
+  }
+
+  this.render = function render() {
+    if (this.shouldRenderStats) {
+      this.renderStats()
+      this.shouldRenderStats = false
+    }
+    if (this.shouldRenderLog) {
+      this.renderLog()
+      this.shouldRenderLog = false
+    }
+    if (this.shouldRenderLevel) {
+      this.renderLevel()
+      this.shouldRenderLevel = false
+    }
+    if (this.shouldRenderObjects) {
+      this.renderObjects()
+      this.shouldRenderObjects = false
+    }
+    if (this.shouldRenderSeen) {
+      this.renderSeen()
+      this.shouldRenderSeen = false
+    }
+    if (this.shouldRenderVisible) {
+      this.renderVisible()
+      this.shouldRenderVisible = false
+    }
+  }
+
+  this.renderStats = function renderStats() {
+    statsRenderer.clear()
+    var statsLines = this.getStatsLines()
+    statsRenderer.drawText(''.padEnd(statsWidth, ' '), defaultTextColor, 0, 0)
+    var iLine = 1
+    for (var line of statsLines) {
+      statsRenderer.drawText(line.padEnd(statsWidth, ' '), defaultTextColor, iLine, 0)
+      iLine += 1
+    }
+    while (iLine < statsHeight) {
+      statsRenderer.drawText(''.padEnd(statsWidth, ' '), defaultTextColor, iLine, 0)
+      iLine += 1
+    }
+  }
+
+  this.renderLog = function renderLog() {
+    logRenderer.clear()
+    var logger = Logger.getInstance()
+    var logLines = logger.getLogLines()
+    var iLine = 1
+    for (var line of logLines) {
+      logRenderer.drawText(line, defaultTextColor, -iLine, 0)
+      iLine += 1
+    }
+  }
+
+  this.renderLevel = function renderLevel() {
+    levelRenderer.clear()
+    var level = this.levels[this.currentLevel]
+    for (var i = 0; i < mapHeight; i++) {
+      for (var j = 0; j < mapWidth; j++) {
+        var tile = level.tileMap[i][j]
+        colorRenderer.drawTile(level.colorMap[tile], i, j)
+        levelRenderer.drawChar(tile, i, j)
+      }
+    }
+  }
+
+  this.renderObjects = function renderObjects() {
+    objectRenderer.clear()
+    objectRenderer.drawColoredChar(this.player.char, this.player.color, this.player.y, this.player.x)
+
+    var level = this.levels[this.currentLevel]
+    for (var iMonster = 0; iMonster < level.monsters.length; iMonster++) {
+      var monster = level.monsters[iMonster]
+      if (monster.hp > 0 && level.isVisibleMask[monster.y][monster.x]) {
+        objectRenderer.drawColoredChar(monster.char, monster.color, monster.y, monster.x)
+      }
+    }
+  }
+
+  this.renderSeen = function renderSeen() {
+    var level = this.levels[this.currentLevel]
+    for (var i = 0; i < mapHeight; i++) {
+      for (var j = 0; j < mapWidth; j++) {
+        if (level.seenMask[i][j]) {
+          seenRenderer.clearTile(i, j)
+        } else {
+          seenRenderer.drawChar(' ', i, j)
+        }
+      }
+    }
+  }
+
+  this.renderVisible = function renderVisible() {
+    var level = this.levels[this.currentLevel]
+    for (var i = 0; i < mapHeight; i++) {
+      for (var j = 0; j < mapWidth; j++) {
+        if (level.isVisibleMask[i][j]) {
+          visibleRenderer.clearTile(i, j)
+        } else if (level.becameNotVisible(i, j)) {
+          visibleRenderer.drawTile('rgba(0, 0, 0, 0.2)', i, j)
+        }
+      }
+    }
+  }
+
+  this.clear = function clear() {
+    var logger = Logger.getInstance()
+    logger.clearBuffer()
+
+    statsRenderer.clear()
+    logRenderer.clear()
+    colorRenderer.clear()
+    visibleRenderer.clear()
+    levelRenderer.clear()
+    objectRenderer.clear()
+    seenRenderer.clear()
+    debugRenderer.clear()
+  }
+}
+
+var alphabet = 'abcdefghijklmnopqrstuvxyz'
+
+function splashScreen() {
+  var shouldRenderSplash = true
+  var shouldRenderPlayerName = true
+  var playerName = ''
+
+  var splashAnimationHandle
+
+  function renderSplashScreen() {
+    if (shouldRenderSplash) {
+      splashRenderer.fillWithChar(' ')
+      splashRenderer.drawText('a roguelike game', defaultTextColor, 10, 5)
+      splashRenderer.drawText('please enter your name: ', defaultTextColor, 12, 5)
+      shouldRenderSplash = false
+    }
+
+    if (shouldRenderPlayerName) {
+      splashRenderer.drawText(`${playerName}_`.padEnd(16, ' '), defaultTextColor, 12, 29)
+      shouldRenderPlayerName = false
+    }
+
+    splashAnimationHandle = window.requestAnimationFrame(renderSplashScreen)
+  }
+
+  function handleNameInput(e) {
+    if (alphabet.includes(e.key) && playerName.length < 15) {
+      playerName += e.key
+      shouldRenderPlayerName = true
+    }
+    if (e.key == 'Backspace') {
+      playerName = playerName.slice(0, playerName.length - 1)
+      shouldRenderPlayerName = true
+    }
+  }
+
+  function handleSubmitName(e) {
+    if (e.key == 'Enter' && playerName.length > 0) {
+      window.removeEventListener('keydown', handleNameInput)
+      window.removeEventListener('keyup', handleSubmitName)
+      window.cancelAnimationFrame(splashAnimationHandle)
+      splashRenderer.clear()
+      startGame({
+        playerName
+      })
+    }
+  }
+
+  window.addEventListener('keydown', handleNameInput)
+  window.addEventListener('keyup', handleSubmitName)
+
+  splashAnimationHandle = window.requestAnimationFrame(renderSplashScreen)
+}
+
+function startGame(gameOptions) {
+  var gameAnimationHandle
+
+  var game = new Game(gameOptions)
+
+  function gameLoop() {
+    game.render()
+    gameAnimationHandle = window.requestAnimationFrame(gameLoop)
+  }
+
+  function handleGameInput(e) {
+    game.updateState(e)
+    if (e.key == 'Enter' && game.isFinished) {
+      window.removeEventListener('keyup', handleGameInput)
+      game.clear()
+      window.cancelAnimationFrame(gameAnimationHandle)
+
+      hallOfFame({
+        newEntry: {
+          player: game.player.name,
+          score: game.player.score,
+          version: GAME_VERSION,
+          date: new Date().toISOString().slice(0, 10),
+          dungeonLevel: game.currentLevel,
+          causeOfDeath: game.player.killedBy,
+          isNewEntry: true
+        }
+      })
+    }
+  }
+
+  window.addEventListener('keyup', handleGameInput)
+
+  gameAnimationHandle = window.requestAnimationFrame(gameLoop)
+}
+
+var fakeHofEntries = [
+  { player: 'foobar', score: Math.floor(1000 * Math.random()), date: '2022-04-01', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a small monster' },
+  { player: 'foo', score: Math.floor(1000 * Math.random()), date: '2022-04-01', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a small monster' },
+  { player: 'bar', score: Math.floor(1000 * Math.random()), date: '2022-04-03', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a small monster' },
+  { player: 'baz', score: Math.floor(1000 * Math.random()), date: '2022-04-11', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a small monster' },
+  { player: 'qux', score: Math.floor(1000 * Math.random()), date: '2022-04-15', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a monster' },
+  { player: 'quux', score: Math.floor(1000 * Math.random()), date: '2022-04-15', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a huge monster' },
+  { player: 'quuz', score: Math.floor(1000 * Math.random()), date: '2022-04-15', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a monster' },
+  { player: 'corge', score: Math.floor(1000 * Math.random()), date: '2022-04-15', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a large monster' },
+  { player: 'grault', score: Math.floor(1000 * Math.random()), date: '2022-04-15', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a large monster' },
+]
+
+function hallOfFame(hofOptions) {
+  var shouldRenderHof = true
+  var hofAnimationHandle
+
+  var numHofEntries = 8
+
+  function renderHof() {
+    if (shouldRenderHof) {
+      hofRenderer.fillWithChar(' ')
+      hofRenderer.drawText(`roguelike game version ${GAME_VERSION} high scores`, defaultTextColor, 1, 1)
+      var sortedHof = fakeHofEntries
+        .filter(entry => entry.version == GAME_VERSION)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, numHofEntries)
+
+      var newEntryInd = sortedHof.findIndex(entry => entry.score < hofOptions.newEntry.score)
+      if (newEntryInd > -1) {
+        sortedHof.splice(newEntryInd, 0, hofOptions.newEntry)
+      } else if (sortedHof.length < numHofEntries) {
+        newEntryInd = sortedHof.length
+        sortedHof.push(hofOptions.newEntry)
+      }
+
+      sortedHof
+        .slice(0, numHofEntries)
+        .forEach((entry, ind) => {
+          hofRenderer.drawText(
+            `${String(ind + 1).padStart(3, ' ')} ${entry.player.padEnd(15, ' ')} ${String(entry.score).padStart(5, ' ')} ${entry.version}`,
+            entry.isNewEntry ? '#bb5' : defaultTextColor,
+            2 * ind + 4,
+            1
+          )
+          hofRenderer.drawText(
+            `killed by ${entry.causeOfDeath} on level ${entry.dungeonLevel} on ${entry.date}`,
+            entry.isNewEntry ? '#773' : '#666',
+            2 * ind + 5,
+            5
+          )
+      })
+
+      var congratsText = ''
+      if (newEntryInd > -1 && newEntryInd < numHofEntries) {
+        congratsText += 'congrats on making it to the top ' + numHofEntries
+      } else {
+        congratsText += 'unfortunately you did not make it to the top ' + numHofEntries
+      }
+      hofRenderer.drawText(congratsText, defaultTextColor, 22, 1)
+      hofRenderer.drawText('press enter to start a new game', defaultTextColor, 23, 1)
+
+      shouldRenderHof = false
+    }
+
+    hofAnimationHandle = window.requestAnimationFrame(renderHof)
+  }
+
+  function handleEnterKey(e) {
+    if (e.key == 'Enter') {
+      window.cancelAnimationFrame(hofAnimationHandle)
+      window.removeEventListener('keyup', handleEnterKey)
+      hofRenderer.clear()
+      splashScreen()
+    }
+  }
+
+  window.addEventListener('keyup', handleEnterKey)
+
+  hofAnimationHandle = window.requestAnimationFrame(renderHof)
+}
+
+})();
+
 /******/ })()
 ;
+//# sourceMappingURL=main.js.map
