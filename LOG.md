@@ -822,7 +822,7 @@ Having a (first local) HOF requires introducing game states, similarly as in my 
 
 Not sure if `GameState` has enough substance to be a whole class. Almost everything is in the main game loop,
 
-# 2022-04-18
+## 2022-04-18
 
 Write a "fake" local HOF first, to see what kind of game state logic and possible refactoring is needed. At least I need to implement a _clear_ method on all game states, a method which fills all canvases with transparent.
 
@@ -835,3 +835,9 @@ Hmm, the BSP dungeons might be a bit too winding. If the first split is made alo
 When I get to implementing wayfinding, I'll probably generate a Dijkstra map of the level, which tells me the distances between walkable points. That should enable some level diagnostics.
 
 Hmm, I've been using `cancelAnimationFrame` wrong, I've given it as argument the function which I've passed to `requestAnimationFrame` earlier. One is supposed to pass it the _handle_ (a number) returned by the request function.
+
+## 2022-04-19
+
+The online hall of fame should accept POST requests with new entry as payload and return the top 8 (what currently fits one screen).
+
+I'll implement it using ExpressJS and SQLite, through the NodeJS `sqlite3` library.
