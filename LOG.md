@@ -841,3 +841,13 @@ Hmm, I've been using `cancelAnimationFrame` wrong, I've given it as argument the
 The online hall of fame should accept POST requests with new entry as payload and return the top 8 (what currently fits one screen).
 
 I'll implement it using ExpressJS and SQLite, through the NodeJS `sqlite3` library.
+
+## 2022-04-21
+
+Deployed the online HOF on a server, now to wire the "frontend" :)
+
+The server should respond with the ranking. Later I'll make the high score list "paged", but for now it shows only the top eight or something. The ranking will be implemented by ordering the table first by score, second by `ROWID`. Hmm, this might not always be correct: If rows from the table are deleted, it frees the row IDs, so sometimes later entries with the same score are ranked higher.
+
+## 2022-04-22
+
+How to dump SQLite database into a SQL file? In `sqlite3`, run `.output hof.sql` and `.dump`.

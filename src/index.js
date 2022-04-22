@@ -475,52 +475,46 @@ function startGame(gameOptions) {
   gameAnimationHandle = window.requestAnimationFrame(gameLoop)
 }
 
-var fakeHofEntries = [
-  { player: 'foobar', score: Math.floor(1000 * Math.random()), date: '2022-04-01', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a small monster' },
-  { player: 'foo', score: Math.floor(1000 * Math.random()), date: '2022-04-01', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a small monster' },
-  { player: 'bar', score: Math.floor(1000 * Math.random()), date: '2022-04-03', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a small monster' },
-  { player: 'baz', score: Math.floor(1000 * Math.random()), date: '2022-04-11', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a small monster' },
-  { player: 'qux', score: Math.floor(1000 * Math.random()), date: '2022-04-15', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a monster' },
-  { player: 'quux', score: Math.floor(1000 * Math.random()), date: '2022-04-15', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a huge monster' },
-  { player: 'quuz', score: Math.floor(1000 * Math.random()), date: '2022-04-15', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a monster' },
-  { player: 'corge', score: Math.floor(1000 * Math.random()), date: '2022-04-15', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a large monster' },
-  { player: 'grault', score: Math.floor(1000 * Math.random()), date: '2022-04-15', version: '0.0.1', dungeonLevel: Math.floor(20 * Math.random()), causeOfDeath: 'a large monster' },
-]
-
 function hallOfFame(hofOptions) {
   var shouldRenderHof = true
   var hofAnimationHandle
 
   var numHofEntries = 8
+  var onlineRanking = -1
+  var onlineHof = []
+
+  var hofUrl = 'https://roguelike.wildfirecanvas.com/roguelike/hof'
+  fetch(hofUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(hofOptions.newEntry)
+  }).then(res => res.json()).then(res => {
+    onlineHof = res.hof
+    onlineRanking = res.ranking
+    shouldRenderHof = true
+  }).catch(err => {
+    console.log('error posting to HOF')
+    console.error(err)
+  })
 
   function renderHof() {
     if (shouldRenderHof) {
       hofRenderer.fillWithChar(' ')
       hofRenderer.drawText(`roguelike game version ${GAME_VERSION} high scores`, defaultTextColor, 1, 1)
-      var sortedHof = fakeHofEntries
-        .filter(entry => entry.version == GAME_VERSION)
-        .sort((a, b) => b.score - a.score)
-        .slice(0, numHofEntries)
 
-      var newEntryInd = sortedHof.findIndex(entry => entry.score < hofOptions.newEntry.score)
-      if (newEntryInd > -1) {
-        sortedHof.splice(newEntryInd, 0, hofOptions.newEntry)
-      } else if (sortedHof.length < numHofEntries) {
-        newEntryInd = sortedHof.length
-        sortedHof.push(hofOptions.newEntry)
-      }
-
-      sortedHof
+      onlineHof
         .slice(0, numHofEntries)
         .forEach((entry, ind) => {
           hofRenderer.drawText(
-            `${String(ind + 1).padStart(3, ' ')} ${entry.player.padEnd(15, ' ')} ${String(entry.score).padStart(5, ' ')} ${entry.version}`,
+            `${String(ind + 1).padStart(3, ' ')} ${entry.Player.padEnd(15, ' ')} ${String(entry.Score).padStart(5, ' ')} ${entry.Version}`,
             entry.isNewEntry ? '#bb5' : defaultTextColor,
             2 * ind + 4,
             1
           )
           hofRenderer.drawText(
-            `killed by ${entry.causeOfDeath} on level ${entry.dungeonLevel} on ${entry.date}`,
+            `killed by ${entry.CauseOfDeath} on level ${entry.DungeonLevel} on ${entry.Date}`,
             entry.isNewEntry ? '#773' : '#666',
             2 * ind + 5,
             5
@@ -528,10 +522,10 @@ function hallOfFame(hofOptions) {
       })
 
       var congratsText = ''
-      if (newEntryInd > -1 && newEntryInd < numHofEntries) {
+      if (onlineRanking > -1 && onlineRanking <= numHofEntries) {
         congratsText += 'congrats on making it to the top ' + numHofEntries
       } else {
-        congratsText += 'unfortunately you did not make it to the top ' + numHofEntries
+        congratsText += `your online ranking with score ${hofOptions.newEntry.score} is ${onlineRanking}`
       }
       hofRenderer.drawText(congratsText, defaultTextColor, 22, 1)
       hofRenderer.drawText('press enter to start a new game', defaultTextColor, 23, 1)
