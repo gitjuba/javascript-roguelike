@@ -373,12 +373,13 @@ function Level(level) {
   this.isVisibleMask = this.tileMap.map(row => row.map(() => false))
   this.wasVisibleMask = this.tileMap.map(row => row.map(() => false))
   this.isOccupied = this.tileMap.map(row => row.map(tile => (tile == '#')))
+  this.canMonsterSpawn = this.tileMap.map(row => row.map(tile => (tile == '.')))
 
   this.getRandomUnoccupiedTile = function getRandomUnoccupiedTile() {
     var position
     do {
       position = { x: randInt(1, mapWidth - 2), y: randInt(1, mapHeight - 2) }
-    } while (this.isOccupied[position.y][position.x])
+    } while (!this.canMonsterSpawn[position.y][position.x])
     return position
   }
 
