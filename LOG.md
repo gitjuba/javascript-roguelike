@@ -851,3 +851,5 @@ The server should respond with the ranking. Later I'll make the high score list 
 ## 2022-04-22
 
 How to dump SQLite database into a SQL file? In `sqlite3`, run `.output hof.sql` and `.dump`.
+
+A little annoying bug: monsters can spawn on the staircase. For that purpose we should consider stairs to be _occupied_, but player should still be able to walk to them. Let's introduce a _spawnable area_ mask. This could be used later to spawn new enemies in a level, one requirement would be distance from the player.
