@@ -853,3 +853,13 @@ The server should respond with the ranking. Later I'll make the high score list 
 How to dump SQLite database into a SQL file? In `sqlite3`, run `.output hof.sql` and `.dump`.
 
 A little annoying bug: monsters can spawn on the staircase. For that purpose we should consider stairs to be _occupied_, but player should still be able to walk to them. Let's introduce a _spawnable area_ mask. This could be used later to spawn new enemies in a level, one requirement would be distance from the player.
+
+I should set scope for the goal post "Different map generation algorithms". I have two now, that's not enough. There are two main types of dungeons: The classic room-based, and more "realistically" cavernous. Using the former, a lot of variety could be achieved with different corridor generation algorithms. In particular, the corridors should be _deliberate_, no random intersections or parallel corridors running on adjacent tile rows/columns resulting in double/triple wide hallways.
+
+Another way to introduce variety to room-based dungeons is by _corrosion_. Check out Herbert Wolverson's [video](https://www.youtube.com/watch?v=TlLIOgWYVpI) on procedural map generation techniques for examples.
+
+So a breakdown of what's remaining for the _mapgen_ goal post:
+
+- [ ] A corridor placement algorithm
+- [ ] Erosion in room-based dungeons
+- [ ] Cavernous dungeon level generation

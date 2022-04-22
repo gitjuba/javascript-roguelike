@@ -22,7 +22,7 @@
 
 ## Goal III.V
 
-- [ ] Online Hall of Fame :grin:
+- [x] Online Hall of Fame :grin:
 
 ## Goal IV
 
