@@ -351,8 +351,13 @@ function isVisible(x, y, x0, y0, level) {
 function Level(level) {
   this.level = level
 
-  // var generator = new RandomRoomsMapGenerator(level)
-  var generator = new BinarySpacePartitionMapGenerator(level)
+  var generator
+  if (Math.random() < 0.5) {
+    var generator = new RandomRoomsMapGenerator(level)
+  } else {
+    var generator = new BinarySpacePartitionMapGenerator(level)
+  }
+
   generator.generate()
   if (level > 0) {
     generator.placeUpStaircase()
