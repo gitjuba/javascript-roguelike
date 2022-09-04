@@ -4872,36 +4872,51 @@ function RandomRoomsMapGenerator(level) {
   }
 
   this.placeRandomCorridors = function placeRandomCorridors() {
-    var iSrc = 0, iDest = 1
-    while (iSrc < this.rooms.length && iDest < this.rooms.length) {
+    var iSrc = -1
+    var iDest
+    do {
+      iSrc++
+      iDest = iSrc + 1
+      while (this.rooms[iDest].connected) {
+        iDest++
+        if (iDest >= this.rooms.length) {
+          iDest = 0
+        }
+      }
       var srcRoom = this.rooms[iSrc]
       var destRoom = this.rooms[iDest]
 
-      do {
+      var corridorAttempt = 0
+      var corridorFound = false
+      var isBrushing = true
+      while (isBrushing && corridorAttempt < 10) {
         var [firstLeg, secondLeg] = srcRoom.getCorridorTo(destRoom)
-      } while (this.isBrushing(firstLeg) || this.isBrushing(secondLeg))
-
-      this.corridors.push(firstLeg)
-      this.corridors.push(secondLeg)
-
-      srcRoom.connected = true
-      destRoom.connected = true
-
-      for (var iRoom = 0; iRoom < this.rooms.length; iRoom++) {
-        var room = this.rooms[iRoom]
-        if (room.connected) {
-          continue
+        isBrushing = this.isBrushing(firstLeg) || this.isBrushing(secondLeg)
+        if (!isBrushing) {
+          corridorFound = true
+          break
         }
-        if (room.overlaps(firstLeg) || room.overlaps(secondLeg)) {
-          room.connected = true
-        }
+        corridorAttempt++
       }
 
-      iSrc = iDest
-      while (iDest < this.rooms.length && this.rooms[iDest].connected) {
-        iDest += 1
+      if (corridorFound) {
+        this.corridors.push(firstLeg)
+        this.corridors.push(secondLeg)
+
+        srcRoom.connected = true
+        destRoom.connected = true
+
+        for (var iRoom = 0; iRoom < this.rooms.length; iRoom++) {
+          var room = this.rooms[iRoom]
+          if (room.connected) {
+            continue
+          }
+          if (room.overlaps(firstLeg) || room.overlaps(secondLeg)) {
+            room.connected = true
+          }
+        }
       }
-    }
+    } while (this.rooms.some(room => !room.connected))
   }
 
   this.carveRoom = function carveRoom(room, char = '.', roomIndex = -1) {
@@ -5264,7 +5279,7 @@ module.exports = {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("055167af8e9a035e52f2")
+/******/ 		__webpack_require__.h = () => ("8aa96e743fbf08b941d5")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

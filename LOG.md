@@ -966,3 +966,9 @@ Not allowed (x-overlap with padding 1):
 The above condition can be used to verify that the tilemap allows a candidate corridor segment. But how do we decide where to choose the candidate segments? Also note that when placing a _corridor_, if it consists of more than two segments, we have to check for brushing among the segments.
 
 In the current algorithm, we choose two rooms at random, pick representative points in both rooms at random, and connect these two points using an L-shaped corridor. We choose at random whether to do a horizontal or vertical segment first. This process yields a candidate corridor, which could be checked for brushing.
+
+---
+
+Apparently it's possible that for some pairs of rooms it is not possible to find a non-brushing corridor. That's fairly easily solved by giving up on a pair of rooms after a certain number of attempts.
+
+It's still theoretically possible that some tilemaps don't allow for a non-brushing corridor layout, or (which is more likely) that laying out the corridors sequentially might lead to a situation where no more corridors are allowed. I ran the mapgen test quite many times but didn't observe such a case.
