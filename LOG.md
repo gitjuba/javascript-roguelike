@@ -863,3 +863,106 @@ So a breakdown of what's remaining for the _mapgen_ goal post:
 - [ ] A corridor placement algorithm
 - [ ] Erosion in room-based dungeons
 - [ ] Cavernous dungeon level generation
+
+## 2022-09-03
+
+Not sure if this was already the case before, but debugging the game works now, as follows:
+
+- Run `webpack-dev-server` from the command line.
+- Run the _Launch Chrome against localhost_ debug configuration from VSCode.
+- Breakpoints in the `/src` folder are in effect. :+1:
+
+I'd like to refactor the game code (once again). This time, start using the `class` keyword of JavaScript for cleaner code. But content is more important, so focus on the map generation algorithms, as planned.
+
+Side note: To hide debug console, press _Ctrl + Shift + Y_ twice: first to focus on the console, second time to hide it.
+
+### Corridor generation
+
+Starting point: rectangular rooms have been placed in the level.
+
+General notes:
+
+- Rooms and corridors should not "brush" against each other, e.g. two corridors should not go parallel to each other in adjacent rows or columns.
+  - Avoiding brushing enables placing doors!
+- Could we actually first make a skeleton of the corridor system in the dungeon level -- effectively a sort of graph -- and then carve out rooms in some nodes of the graph?
+  - Is it simpler to connect a set of points with corridors than a set of rooms?
+- How about, after placing the rooms, mark each tile on the level map with a number telling the distance to the nearest room
+  - Label all tiles within rooms `0`
+  - For all tiles adjacent to a tile labelled `k` which don't yet have a label, label them `k+1`
+  - This, in effect, would generate a Dijkstra style map (maybe not really Dijkstra...), which bears some very critical information about where on the level map the corridors can go without brushing against rooms.
+
+Possible approaches:
+
+- Favor shortest connections:
+  - Compute the "distance matrix" of the rooms, i.e. all distances between pairs of rooms
+  - Intepret the distances as being between _sets_ of rooms, only at this point each set consists of only one room.
+  - Start by connecting the two rooms which are closest to each other, i.e. find the minimum entry in the distance matrix.
+    - A single connecting corridor can be a straight line or L-shaped.
+    - It can be placed by picking a random point in each room, i.e. in the "usual" way.
+  - Refresh the distance matrix:
+    - Combine the two connected rooms into a single set, and add the corridors to the set too.
+    - Distance between two sets of rooms is the minimum of the pairwise distances.
+- Random walk!
+  - This method requires the "Dijkstra" map described above.
+  - In addition to that map, tiles in the corners of rooms are marked impassable
+  - Pick a random room and a random tile within that room.
+  - Pick a direction at random (among the four cardinal directions) and advance to that direction.
+  - If the walk enters a `1` tile, mark all adjacent `1` tiles impassable (to prevent brushing).
+  - On the next step, pick a random direction from the three "new" directions (i.e. don't backtrack).
+  - If tiles in all three new direction are impassable, then backtrack to previous tile (that is, choose as direction)
+  - When making a turn, mark the tile on the "inside" of the turn as impassable (to prevent "2D" areas in corridors).
+
+The random walk algorithm sounds tempting. Let's implement that, and also create a mechanism for the random corridor placement algorithm to avoid brushing. This is probably achieved by simply testing for brushing when placing a corridor, and if it does brush, re-run the algorithm.
+
+## 2022-09-04
+
+First tests with the random walk algo: Most of the time it fails to connect even half of the rooms. Hmm, there are some bugs, it seems tiles are not accurately marked as impassable.
+
+Also, I don't want the random walk to wander around the rooms, I want it to dig in the walls! To make this happen, whenever the walk enters (or stays in) a room, pick a random position from the edge tiles of the room (pick an edge at random, 1 through 4, and a random position depending on the edge).
+
+For this we also need to find the room index corresponding to a given point on the map. These could be marked down when placing the rooms.
+
+The starting point (and the reset point when entering a new room) needs to satisfy the condition that the random walk can enter two tiles into the wall into the given direction.
+
+Hmm, perhaps it can't be just _one_ random walk, there needs to be a mechanism to restart the walk from another room.
+
+While writing the random walk algorithm I have recognized the importance of (and also actually implemented) many utility function related to the tile map and the room layout, such as `canDigTo` and `canAdvanceTo`. These could be used as is in the random corridor placement method: just verify before placing a corridor that the course is clear.
+
+The random walk algorithm is (in its current form) quite unsatisfactory. The rooms thenselves are nice and tidy rectangles, and the more organic feel of the random walk path doesn't really fit in with that. I want to have a complex arrangement of mostly straight corridors, with intersections and stuff like that.
+
+I feel like we're about to introduce some definitions!
+
+### Corridor placement definitions
+
+A _room_ (basically a rectangle) is defined (probably somewhere above) as the quadruplet `(x, y, w, h)` where `(x, y)` are the coordinates of the top-left corner of the room (index of the top-left tile which is a part of the room), `w` is the width and `h` the height of the room. Note that the tile at `(x + w, y + h)` is not part of the room.
+
+A _corridor segment_ is a special case of room, with either width or height equal to one. A corridor segment is _vertical_ if `h > 1` and _horizontal_ if `w > 1`. The _end points_ of a corridor segment are `((x, y), (x + w, y))` for horizontal segments and `((x, y), (x, y + h))` for vertical segments.
+
+A _corridor_ is a list of corridor segments `(c_i)` with alternating horizontal and vertical segments, such that `c_i` and `c_{i+1}` intersect at their end points.
+
+Given a room layout of the dungeon level, that is, an n-tuple `(r_i)` of rooms, `r_i = (x_i, y_i, w_i, h_i)`, we first of all assume that the rooms are _disjoint_, with a spacing of at least one. That is, no two rooms overlap each other (see definitions above), and any tile which is _adjacent_ to a room `r_i` (tile `(x, y)` with either `x_i <= x < x_i + w_i` and (`y == y_i - 1` or `y == y_i + h_i`), or `y_i <= y < y_i + h_i` and (`x == x_i - 1` or `x == x_i + w_i`)), is not part of any room.
+
+To determine allowable corridor layouts, given a room layout as above, we must exclude some points, such as points adjacent to room corners, `(x_i - 1, y_i - 1)`, `(x_i + w_i, y_i - 1)`, `(x_i + w_i, y_i + h_i)` and `(x_i - 1, y_i + h_i)`.
+
+Let `A(x, y)` be shorthand for "the tile at `(x, y)` allows a corridor through it". For example, `A(x, y)` is false for the corner points of the previous paragraph.
+
+As we want to avoid "brushing" of corridors against each other and against rooms, the mapping `A` is affected by the placement of a corridor, even a single tile of it. So a tilemap _allowing a corridor (segment)_ `c` can not be defnied in terms of the tiles which are part of it allowing a corridor.
+
+How to define _brushing_? Note that we want to allow the _intersection_ of two corridors, which in effect says that a horizontal and a vertical corridor segment cannot brush against each other. A room and a corridor segment (or two corridor segments -- note that two rooms cannot _a fortiori_ brush), denoted by `r_1` and `r_2`, _brush against each other_, or `r_1` _brushes_ `r_2`, or vice versa, if either
+
+- `r_1` is a horizontal corridor segment and, either `y_1 == y_2 - 1` or `y_1 == y_2 + h_2`, and, `r_1` and `r_2` _x-overlap_ each other or `x_1 == x_2 + w_2` or `x_1 + w_1 == x_2`
+  - The latter condition could be summarized as `r_1` and `r_2` _x-overlapping with padding 1_
+- `r_2` is a vertical segment and, either `x_1 == x_2 - 1` or `x_1 == x_2 + w_2`, and `r_1` and `r_2` y-overlap with padding 1
+
+Not allowed (x-overlap with padding 1):
+
+```
+###...#
+###...#
+...####
+#######
+```
+
+The above condition can be used to verify that the tilemap allows a candidate corridor segment. But how do we decide where to choose the candidate segments? Also note that when placing a _corridor_, if it consists of more than two segments, we have to check for brushing among the segments.
+
+In the current algorithm, we choose two rooms at random, pick representative points in both rooms at random, and connect these two points using an L-shaped corridor. We choose at random whether to do a horizontal or vertical segment first. This process yields a candidate corridor, which could be checked for brushing.

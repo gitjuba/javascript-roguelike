@@ -10,6 +10,9 @@ module.exports = {
   },
   devtool: 'source-map',
   devServer: {
-    static: './docs'
+    static: './docs',
+    devMiddleware: {
+      writeToDisk: true
+    }
   }
 }

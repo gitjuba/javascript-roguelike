@@ -69,6 +69,14 @@ var keyDisplacement = {
   '.': { dx: 1, dy: 1 }
 }
 
+class GameClass {
+  constructor() {
+
+  }
+
+  resetRenderFlags() {}
+}
+
 function Game(gameOptions) {
   this.resetRenderFlags = function resetRenderFlags() {
     this.shouldRenderStats = true

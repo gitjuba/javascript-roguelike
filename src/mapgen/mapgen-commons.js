@@ -19,6 +19,25 @@ function Room(top, left, width, height) {
     }
   }
 
+  this.getRandomEdgePosition = function getRandomEdgePosition(edge) {
+    // edge: 0 north, 1 east, 2 south, 3 west
+    var pt = { x: 0, y: 0 }
+    if (edge == 0) {
+      pt.x = this.left + randInt(0, this.width - 1)
+      pt.y = this.top
+    } else if (edge == 1) {
+      pt.x = this.left + this.width - 1
+      pt.y = this.top + randInt(0, this.height - 1)
+    } else if (edge == 2) {
+      pt.x = this.left + randInt(0, this.width - 1)
+      pt.y = this.top + this.height - 1
+    } else if (edge == 3) {
+      pt.x = this.left
+      pt.y = this.top + randInt(0, this.height - 1)
+    }
+    return pt
+  }
+
   this.overlapsX = function overlapsX(that) {
     return (
       that.left - this.width <= this.left &&
