@@ -1,9 +1,10 @@
 var RandomRoomsMapGenerator = require('./mapgen/random-rooms-map-generator')
 var BinarySpacePartitionMapGenerator = require('./mapgen/binary-space-partition-map-generator')
+var RandomWalkMapGenerator = require('./mapgen/random-walk-map-generator')
 var { mapWidth, mapHeight } = require('./layout')
 var { rollMonster } = require('./monsters')
 var { Monster } = require('./entities')
-const { randInt } = require('./utils')
+var { randInt } = require('./utils')
 
 var defaultTileColors = {
   '#': '#666',
@@ -80,11 +81,13 @@ function isVisible(x, y, x0, y0, level) {
 function Level(level) {
   this.level = level
 
-  var generator
-  if (Math.random() < 0.5) {
+  var rand = Math.random()
+  if (rand < 0.5) {
     var generator = new RandomRoomsMapGenerator(level)
-  } else {
+  } else if (rand < 0.75) {
     var generator = new BinarySpacePartitionMapGenerator(level)
+  } else {
+    var generator = new RandomWalkMapGenerator(level)
   }
 
   generator.generate()

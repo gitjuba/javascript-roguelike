@@ -19,7 +19,6 @@ function RandomRoomsMapGenerator(level) {
 
   this.rooms = []
   this.corridors = []
-  this.features = {}
 
   this.generate = function generate() {
     var addMoreRooms = true
@@ -62,173 +61,6 @@ function RandomRoomsMapGenerator(level) {
     this.placeRandomCorridors()
 
     this.updateTileMap()
-
-    // this.randomWalkCorridorPlacement()
-  }
-
-  this.canAdvanceTo = function canAdvanceTo(pt, dir, steps) {
-    if (dir == 0) {
-      return pt.y > steps
-    } else if (dir == 1) {
-      return pt.x < this.mapWidth - 1 - steps
-    } else if (dir == 2) {
-      return pt.y < this.mapHeight - 1 - steps
-    } else if (dir == 3) {
-      return pt.x > steps
-    }
-  }
-
-  this.getPointInDirection = function getPointInDirection(pt, dir, steps) {
-    if (dir == 0) {
-      return { x: pt.x, y: pt.y - steps }
-    } else if (dir == 1) {
-      return { x: pt.x + steps, y: pt.y }
-    } else if (dir == 2) {
-      return { x: pt.x, y: pt.y + steps }
-    } else if (dir == 3) {
-      return { x: pt.x - steps, y: pt.y }
-    }
-  }
-
-  this.canDigTo = function canDigTo(pt, dir, steps) {
-    var canAdvance = this.canAdvanceTo(pt, dir, steps)
-    if (canAdvance) {
-      for (var i = 1; i <= steps; i++) {
-        var pt1 = this.getPointInDirection(pt, dir, i)
-        if (this.distToRooms[pt1.y][pt1.x] < 0) {
-          return false
-        }
-      }
-      return true
-    } else {
-      return false
-    }
-  }
-
-  this.randomWalkCorridorPlacement = function randomWalkCorridorPlacement() {
-    // TODO Break loop when distToRooms full
-    for (var dist = 1; dist < 10; dist++) {
-      for (var iRoom = 0; iRoom < this.rooms.length; iRoom++) {
-        var room = this.rooms[iRoom]
-        var jLeft = room.left - dist
-        var jRight = room.left + room.width - 1 + dist
-        var iTop = room.top - dist
-        var iBottom = room.top + room.height - 1 + dist
-
-        for (var i = room.top - dist; i < room.top + room.height + dist; i++) {
-          if (i > 0 && i < this.mapHeight - 1 && jLeft > 0 && this.distToRooms[i][jLeft] < 0) {
-            this.distToRooms[i][jLeft] = dist
-          }
-          if (i > 0 && i < this.mapHeight - 1 && jRight < this.mapWidth - 1 && this.distToRooms[i][jRight] < 0) {
-            this.distToRooms[i][jRight] = dist
-          }
-        }
-
-        for (var j = room.left - dist; j < room.left + room.width + dist; j++) {
-          if (j > 0 && j < this.mapWidth - 1 && iTop > 0 && this.distToRooms[iTop][j] < 0) {
-            this.distToRooms[iTop][j] = dist
-          }
-          if (j > 0 && j < this.mapWidth - 1 && iBottom < this.mapHeight - 1 && this.distToRooms[iBottom][j] < 0) {
-            this.distToRooms[iBottom][j] = dist
-          }
-        }
-
-      }
-    }
-
-    for (var iRoom = 0; iRoom < this.rooms.length; iRoom++) {
-      var room = this.rooms[iRoom]
-      this.distToRooms[room.top - 1][room.left - 1] = -1
-      this.distToRooms[room.top - 1][room.left + room.width] = -1
-      this.distToRooms[room.top + room.height][room.left - 1] = -1
-      this.distToRooms[room.top + room.height][room.left + room.width] = -1
-    }
-
-    do {
-      var startingRoom = this.rooms[randInt(0, this.rooms.length - 1)]
-      var startingEdge = randInt(0, 3)
-      var pt = startingRoom.getRandomEdgePosition(startingEdge)
-    } while (!this.canDigTo(pt, startingEdge, 2))
-
-    // var pt = startingRoom.getRandomPosition()
-    console.log('start from ' + pt.x + ', ' + pt.y)
-    this.tileMap[pt.y][pt.x] = 'x'
-    var walkLength = 0
-    var prevDist = 0
-    var prevDir = startingEdge
-    var dir = startingEdge // facing the wall
-    var turn = 0
-    var pathMarker = '.'
-    var walkedThisTurn
-    while (this.rooms.some(room => !room.connected)) {
-      if (walkLength > 10000) {
-        break
-      }
-      walkedThisTurn = false
-      if (this.canDigTo(pt, dir, 1)) {
-        walkedThisTurn = true
-        pt = this.getPointInDirection(pt, dir, 1)
-        this.tileMap[pt.y][pt.x] = pathMarker
-        if (turn != 0) {
-          // TODO: Mark "inside of turn" as impassable
-        }
-      }
-
-      if (walkedThisTurn) {
-        if (this.distToRooms[pt.y][pt.x] == 1) {
-          if (dir == 1 || dir == 3) {
-            if (this.distToRooms[pt.y + 1][pt.x] == 1) {
-              this.distToRooms[pt.y + 1][pt.x] = -1
-            }
-            if (this.distToRooms[pt.y - 1][pt.x] == 1) {
-              this.distToRooms[pt.y - 1][pt.x] = -1
-            }
-          }
-          if (dir == 0 || dir == 2) {
-            if (this.distToRooms[pt.y][pt.x + 1] == 1) {
-              this.distToRooms[pt.y][pt.x + 1] = -1
-            }
-            if (this.distToRooms[pt.y][pt.x - 1] == 1) {
-              this.distToRooms[pt.y][pt.x - 1] = -1
-            }
-          }
-        }
-
-        if (this.distToRooms[pt.y][pt.x] == 0) {
-          // force point and direction
-          turn = 0
-          var currentRoom = this.rooms[this.roomIndex[pt.y][pt.x]]
-          do {
-            dir = randInt(0, 3)
-            pt = currentRoom.getRandomEdgePosition(dir)
-          } while (!this.canDigTo(pt, dir, 2))
-          // this.tileMap[pt.y][pt.x] = 'x'
-        } else if (this.distToRooms[pt.y][pt.x] == 1) {
-          turn = 0
-        } else {
-          turn = randInt(-1, 1)
-        }
-      } else {
-        dir = prevDir // move not made
-        if (turn == -1) {
-          turn = randInt(0, 1)
-        } else if (turn == 0) {
-          turn = (randInt(0, 1) - 0.5) * 2
-        } else if (turn == 1) {
-          turn = randInt(-1, 0)
-        }
-      }
-
-      prevDir = dir
-      dir = (dir + turn) % 4
-      if (dir < 0) {
-        dir += 4
-      }
-      prevDist = this.distToRooms[pt.y][pt.x]
-      this.print()
-      console.log('')
-      walkLength++
-    }
   }
 
   this.isBrushing = function isBrushing(candidate) {
@@ -303,21 +135,17 @@ function RandomRoomsMapGenerator(level) {
     } while (this.rooms.some(room => !room.connected))
   }
 
-  this.carveRoom = function carveRoom(room, char = '.', roomIndex = -1) {
+  this.carveRoom = function carveRoom(room, char = '.') {
     for (var i = room.top; i < room.top + room.height; i++) {
       for (var j = room.left; j < room.left + room.width; j++) {
         this.tileMap[i][j] = char
-        this.distToRooms[i][j] = 0
-        if (roomIndex > -1) {
-          this.roomIndex[i][j] = roomIndex
-        }
       }
     }
   }
 
   this.updateTileMap = function updateTileMap() {
     this.rooms.forEach((room, ind) => {
-      this.carveRoom(room, '.', ind)
+      this.carveRoom(room, '.')
     })
     this.corridors.forEach((corridor) => {
       this.carveRoom(corridor)

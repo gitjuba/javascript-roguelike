@@ -3916,10 +3916,11 @@ module.exports = {
 
 var RandomRoomsMapGenerator = __webpack_require__(/*! ./mapgen/random-rooms-map-generator */ "./mapgen/random-rooms-map-generator.js")
 var BinarySpacePartitionMapGenerator = __webpack_require__(/*! ./mapgen/binary-space-partition-map-generator */ "./mapgen/binary-space-partition-map-generator.js")
+var RandomWalkMapGenerator = __webpack_require__(/*! ./mapgen/random-walk-map-generator */ "./mapgen/random-walk-map-generator.js")
 var { mapWidth, mapHeight } = __webpack_require__(/*! ./layout */ "./layout.js")
 var { rollMonster } = __webpack_require__(/*! ./monsters */ "./monsters.js")
 var { Monster } = __webpack_require__(/*! ./entities */ "./entities.js")
-const { randInt } = __webpack_require__(/*! ./utils */ "./utils.js")
+var { randInt } = __webpack_require__(/*! ./utils */ "./utils.js")
 
 var defaultTileColors = {
   '#': '#666',
@@ -3996,11 +3997,13 @@ function isVisible(x, y, x0, y0, level) {
 function Level(level) {
   this.level = level
 
-  var generator
-  if (Math.random() < 0.5) {
+  var rand = Math.random()
+  if (rand < 0.5) {
     var generator = new RandomRoomsMapGenerator(level)
-  } else {
+  } else if (rand < 0.75) {
     var generator = new BinarySpacePartitionMapGenerator(level)
+  } else {
+    var generator = new RandomWalkMapGenerator(level)
   }
 
   generator.generate()
@@ -4190,17 +4193,6 @@ module.exports = Logger
 
 var { mapWidth, mapHeight } = __webpack_require__(/*! ../layout */ "./layout.js")
 
-function createEmptyTileMap(char = '#') {
-  var tileMap = Array(mapHeight)
-  for (var i = 0; i < mapHeight; i++) {
-    tileMap[i] = Array(mapWidth)
-    for (var j = 0; j < mapWidth; j++) {
-      tileMap[i][j] = char
-    }
-  }
-  return tileMap
-}
-
 function MapGenerator(level) {
   this.level = level
 
@@ -4208,9 +4200,9 @@ function MapGenerator(level) {
   this.mapHeight = mapHeight
   this.mapArea = this.mapWidth * this.mapHeight
 
-  this.tileMap = createEmptyTileMap()
-  this.distToRooms = createEmptyTileMap(-1)
-  this.roomIndex = createEmptyTileMap(-1)
+  this.tileMap = MapGenerator.createEmptyTileMap()
+
+  this.features = {}
 
   this.generate = function generate() {
     throw new Error('Use one of the child classes')
@@ -4235,9 +4227,20 @@ function MapGenerator(level) {
   // for debugging
   this.print = function print() {
     for (var i = 0; i < this.tileMap.length; i++) {
-      console.log(this.tileMap[i].join('') + ' ' + this.distToRooms[i].map(v => v < 0 ? '.' : v).join(''))
+      console.log(this.tileMap[i].join(''))
     }
   }
+}
+
+MapGenerator.createEmptyTileMap = function createEmptyTileMap(char = '#') {
+  var tileMap = Array(mapHeight)
+  for (var i = 0; i < mapHeight; i++) {
+    tileMap[i] = Array(mapWidth)
+    for (var j = 0; j < mapWidth; j++) {
+      tileMap[i][j] = char
+    }
+  }
+  return tileMap
 }
 
 module.exports = MapGenerator
@@ -4635,7 +4638,6 @@ function RandomRoomsMapGenerator(level) {
 
   this.rooms = []
   this.corridors = []
-  this.features = {}
 
   this.generate = function generate() {
     var addMoreRooms = true
@@ -4678,173 +4680,6 @@ function RandomRoomsMapGenerator(level) {
     this.placeRandomCorridors()
 
     this.updateTileMap()
-
-    // this.randomWalkCorridorPlacement()
-  }
-
-  this.canAdvanceTo = function canAdvanceTo(pt, dir, steps) {
-    if (dir == 0) {
-      return pt.y > steps
-    } else if (dir == 1) {
-      return pt.x < this.mapWidth - 1 - steps
-    } else if (dir == 2) {
-      return pt.y < this.mapHeight - 1 - steps
-    } else if (dir == 3) {
-      return pt.x > steps
-    }
-  }
-
-  this.getPointInDirection = function getPointInDirection(pt, dir, steps) {
-    if (dir == 0) {
-      return { x: pt.x, y: pt.y - steps }
-    } else if (dir == 1) {
-      return { x: pt.x + steps, y: pt.y }
-    } else if (dir == 2) {
-      return { x: pt.x, y: pt.y + steps }
-    } else if (dir == 3) {
-      return { x: pt.x - steps, y: pt.y }
-    }
-  }
-
-  this.canDigTo = function canDigTo(pt, dir, steps) {
-    var canAdvance = this.canAdvanceTo(pt, dir, steps)
-    if (canAdvance) {
-      for (var i = 1; i <= steps; i++) {
-        var pt1 = this.getPointInDirection(pt, dir, i)
-        if (this.distToRooms[pt1.y][pt1.x] < 0) {
-          return false
-        }
-      }
-      return true
-    } else {
-      return false
-    }
-  }
-
-  this.randomWalkCorridorPlacement = function randomWalkCorridorPlacement() {
-    // TODO Break loop when distToRooms full
-    for (var dist = 1; dist < 10; dist++) {
-      for (var iRoom = 0; iRoom < this.rooms.length; iRoom++) {
-        var room = this.rooms[iRoom]
-        var jLeft = room.left - dist
-        var jRight = room.left + room.width - 1 + dist
-        var iTop = room.top - dist
-        var iBottom = room.top + room.height - 1 + dist
-
-        for (var i = room.top - dist; i < room.top + room.height + dist; i++) {
-          if (i > 0 && i < this.mapHeight - 1 && jLeft > 0 && this.distToRooms[i][jLeft] < 0) {
-            this.distToRooms[i][jLeft] = dist
-          }
-          if (i > 0 && i < this.mapHeight - 1 && jRight < this.mapWidth - 1 && this.distToRooms[i][jRight] < 0) {
-            this.distToRooms[i][jRight] = dist
-          }
-        }
-
-        for (var j = room.left - dist; j < room.left + room.width + dist; j++) {
-          if (j > 0 && j < this.mapWidth - 1 && iTop > 0 && this.distToRooms[iTop][j] < 0) {
-            this.distToRooms[iTop][j] = dist
-          }
-          if (j > 0 && j < this.mapWidth - 1 && iBottom < this.mapHeight - 1 && this.distToRooms[iBottom][j] < 0) {
-            this.distToRooms[iBottom][j] = dist
-          }
-        }
-
-      }
-    }
-
-    for (var iRoom = 0; iRoom < this.rooms.length; iRoom++) {
-      var room = this.rooms[iRoom]
-      this.distToRooms[room.top - 1][room.left - 1] = -1
-      this.distToRooms[room.top - 1][room.left + room.width] = -1
-      this.distToRooms[room.top + room.height][room.left - 1] = -1
-      this.distToRooms[room.top + room.height][room.left + room.width] = -1
-    }
-
-    do {
-      var startingRoom = this.rooms[randInt(0, this.rooms.length - 1)]
-      var startingEdge = randInt(0, 3)
-      var pt = startingRoom.getRandomEdgePosition(startingEdge)
-    } while (!this.canDigTo(pt, startingEdge, 2))
-
-    // var pt = startingRoom.getRandomPosition()
-    console.log('start from ' + pt.x + ', ' + pt.y)
-    this.tileMap[pt.y][pt.x] = 'x'
-    var walkLength = 0
-    var prevDist = 0
-    var prevDir = startingEdge
-    var dir = startingEdge // facing the wall
-    var turn = 0
-    var pathMarker = '.'
-    var walkedThisTurn
-    while (this.rooms.some(room => !room.connected)) {
-      if (walkLength > 10000) {
-        break
-      }
-      walkedThisTurn = false
-      if (this.canDigTo(pt, dir, 1)) {
-        walkedThisTurn = true
-        pt = this.getPointInDirection(pt, dir, 1)
-        this.tileMap[pt.y][pt.x] = pathMarker
-        if (turn != 0) {
-          // TODO: Mark "inside of turn" as impassable
-        }
-      }
-
-      if (walkedThisTurn) {
-        if (this.distToRooms[pt.y][pt.x] == 1) {
-          if (dir == 1 || dir == 3) {
-            if (this.distToRooms[pt.y + 1][pt.x] == 1) {
-              this.distToRooms[pt.y + 1][pt.x] = -1
-            }
-            if (this.distToRooms[pt.y - 1][pt.x] == 1) {
-              this.distToRooms[pt.y - 1][pt.x] = -1
-            }
-          }
-          if (dir == 0 || dir == 2) {
-            if (this.distToRooms[pt.y][pt.x + 1] == 1) {
-              this.distToRooms[pt.y][pt.x + 1] = -1
-            }
-            if (this.distToRooms[pt.y][pt.x - 1] == 1) {
-              this.distToRooms[pt.y][pt.x - 1] = -1
-            }
-          }
-        }
-
-        if (this.distToRooms[pt.y][pt.x] == 0) {
-          // force point and direction
-          turn = 0
-          var currentRoom = this.rooms[this.roomIndex[pt.y][pt.x]]
-          do {
-            dir = randInt(0, 3)
-            pt = currentRoom.getRandomEdgePosition(dir)
-          } while (!this.canDigTo(pt, dir, 2))
-          // this.tileMap[pt.y][pt.x] = 'x'
-        } else if (this.distToRooms[pt.y][pt.x] == 1) {
-          turn = 0
-        } else {
-          turn = randInt(-1, 1)
-        }
-      } else {
-        dir = prevDir // move not made
-        if (turn == -1) {
-          turn = randInt(0, 1)
-        } else if (turn == 0) {
-          turn = (randInt(0, 1) - 0.5) * 2
-        } else if (turn == 1) {
-          turn = randInt(-1, 0)
-        }
-      }
-
-      prevDir = dir
-      dir = (dir + turn) % 4
-      if (dir < 0) {
-        dir += 4
-      }
-      prevDist = this.distToRooms[pt.y][pt.x]
-      this.print()
-      console.log('')
-      walkLength++
-    }
   }
 
   this.isBrushing = function isBrushing(candidate) {
@@ -4919,21 +4754,17 @@ function RandomRoomsMapGenerator(level) {
     } while (this.rooms.some(room => !room.connected))
   }
 
-  this.carveRoom = function carveRoom(room, char = '.', roomIndex = -1) {
+  this.carveRoom = function carveRoom(room, char = '.') {
     for (var i = room.top; i < room.top + room.height; i++) {
       for (var j = room.left; j < room.left + room.width; j++) {
         this.tileMap[i][j] = char
-        this.distToRooms[i][j] = 0
-        if (roomIndex > -1) {
-          this.roomIndex[i][j] = roomIndex
-        }
       }
     }
   }
 
   this.updateTileMap = function updateTileMap() {
     this.rooms.forEach((room, ind) => {
-      this.carveRoom(room, '.', ind)
+      this.carveRoom(room, '.')
     })
     this.corridors.forEach((corridor) => {
       this.carveRoom(corridor)
@@ -4966,6 +4797,116 @@ function RandomRoomsMapGenerator(level) {
 }
 
 module.exports = RandomRoomsMapGenerator
+
+
+/***/ }),
+
+/***/ "./mapgen/random-walk-map-generator.js":
+/*!*********************************************!*\
+  !*** ./mapgen/random-walk-map-generator.js ***!
+  \*********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var MapGenerator = __webpack_require__(/*! ./abstract-map-generator */ "./mapgen/abstract-map-generator.js")
+
+var { randInt } = __webpack_require__(/*! ../utils */ "./utils.js")
+
+var params = {
+  minCoverageFraction: 0.4,
+  maxWalkLength: 10000
+}
+
+function RandomWalkMapGenerator(level) {
+  MapGenerator.call(this, level)
+
+  this.walkCoverage = MapGenerator.createEmptyTileMap(false);
+  var coverageUnit = 1 / (this.mapWidth * this.mapHeight)
+
+  this.generate = function generate() {
+    var pt = { x: Math.round(this.mapWidth / 2), y: Math.round(this.mapHeight / 2) }
+    this.walkCoverage[pt.y][pt.x] = true
+    var coverageFraction = coverageUnit
+    var horizontalProb = (this.mapWidth) / (this.mapWidth + this.mapHeight)
+    console.log('horizontal prob', horizontalProb)
+    function getRandomDirection() {
+      var dirHorizontal = Math.random() < horizontalProb
+      if (dirHorizontal) {
+        var dir = randInt(0, 1) * 2 + 1 // 1 or 3
+      } else {
+        var dir = randInt(0, 1) * 2
+      }
+      return dir
+    }
+    var dir = getRandomDirection()
+    var walkLength = 0
+    while (coverageFraction < params.minCoverageFraction && walkLength < params.maxWalkLength) {
+      var didMove = false
+      if (dir == 0) {
+        if (pt.y > 1) {
+          pt.y--
+          didMove = true
+        } else {
+          dir = 2 // bounce off the edge
+        }
+      } else if (dir == 1) {
+        if (pt.x < this.mapWidth - 2) {
+          pt.x++
+          didMove = true
+        } else {
+          dir = 3
+        }
+      } else if (dir == 2) {
+        if (pt.y < this.mapHeight - 2) {
+          pt.y++
+          didMove = true
+        } else {
+          dir = 0
+        }
+      } else if (dir == 3) {
+        if (pt.x > 1) {
+          pt.x--
+          didMove = true
+        } else {
+          dir = 1
+        }
+      }
+      if (!this.walkCoverage[pt.y][pt.x]) {
+        this.walkCoverage[pt.y][pt.x] = true
+        coverageFraction += coverageUnit
+      }
+      this.tileMap[pt.y][pt.x] = '.'
+      walkLength++
+
+      if (didMove) { dir = getRandomDirection() }
+    }
+    console.log(`cov ${coverageFraction}, walk ${walkLength}`)
+  }
+
+  this.placeStaircase = function placeStaircase(direction) {
+    do {
+      var pt = { x: randInt(0, this.mapWidth - 1), y: randInt(0, this.mapHeight - 1) }
+    } while (!this.walkCoverage[pt.y][pt.x])
+    this.features[direction] = pt
+    this.tileMap[pt.y][pt.x] = direction == 'up' ? '<' : '>'
+  }
+
+  this.placeDownStaircase = function placeDownStaircase() {
+    this.placeStaircase('down')
+  }
+
+  this.placeUpStaircase = function placeUpStaircase() {
+    this.placeStaircase('up')
+  }
+
+  this.getFeatures = function getFeatures() {
+    return {
+      up: this.features.up,
+      down: this.features.down
+    }
+  }
+}
+
+module.exports = RandomWalkMapGenerator
 
 
 /***/ }),
@@ -5279,7 +5220,7 @@ module.exports = {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("8aa96e743fbf08b941d5")
+/******/ 		__webpack_require__.h = () => ("373fcad0b90c7d2393c4")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

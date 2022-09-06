@@ -972,3 +972,21 @@ In the current algorithm, we choose two rooms at random, pick representative poi
 Apparently it's possible that for some pairs of rooms it is not possible to find a non-brushing corridor. That's fairly easily solved by giving up on a pair of rooms after a certain number of attempts.
 
 It's still theoretically possible that some tilemaps don't allow for a non-brushing corridor layout, or (which is more likely) that laying out the corridors sequentially might lead to a situation where no more corridors are allowed. I ran the mapgen test quite many times but didn't observe such a case.
+
+## 2022-09-06
+
+Should I re-purpose the random walk algorithm for generating dungeons, instead of corridors? Different types of dungeon levels could alterate, for example have ten room-based dungeons, then a few random walk style caverns, then back to regular room-based, etc.
+
+Yes, let's refactor (and simplify!) the random walk algorithm into a form more suitable for carving out dungeons.
+
+I imagine the random walk dungeon is conceptually very different to the previous algorithms. First of all, it is _not_ room-based. Do some parts of the game code assume that dungeon levels contain well-defined rooms? Remains to be seen, for the moment I'll just run the mapgen test to see what the levels look like.
+
+First implementation, just start at the center and do a uniform, unrestricted, unguided random walk until a given portion of the level is covered.
+
+A simple note: As the map width and height are not equal, the random walk directions can not be equally probable. A utility function to sample from a list with given probabilities would be very useful for future developments. I could imagine a "guided" random walk algorithm, which is given a starting points plus a sequence of focus points. The walk keeps track of the distance to the next focus point, and slightly favors those directions. When it has reached the focus (or gotten close enough), change focus to the next point.
+
+Pretty decent looking dungeons, unless the random walk ends up hugging the edges. Let's make it "bounce off" the edges by reversing its direction.
+
+How to place stairs in a random-walk dungeon? Here I could implement a distance map and find two points which are sufficiently far from each other. But for the first implementation, let's just pick two points at random.
+
+Delightfully, it seems that placing monsters and the player do not depend on the dungeon consisting of rooms, so the randomw walk mapgen might work already.
