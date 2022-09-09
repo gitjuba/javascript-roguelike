@@ -11,7 +11,11 @@ var params = {
 
   maxNumberOfRooms: 10,
   targetMapFillRatio: 0.33,
-  maxFailuresToAddRoom: 100
+  maxFailuresToAddRoom: 100,
+
+  erosionChance: 0.25,
+  minErodedTiles: 100,
+  maxErodedTiles: 300
 }
 
 function RandomRoomsMapGenerator(level) {
@@ -61,6 +65,23 @@ function RandomRoomsMapGenerator(level) {
     this.placeRandomCorridors()
 
     this.updateTileMap()
+
+    var addErosion = Math.random() < params.erosionChance
+    if (addErosion) {
+      var numErodedTiles = randInt(params.minErodedTiles, params.maxErodedTiles)
+      for (var i = 0; i < numErodedTiles; i++) {
+        do {
+          var pt = { x: randInt(1, this.mapWidth - 2), y: randInt(1, this.mapHeight - 2) }
+          var adjacent = [
+            { x: pt.x - 1, y: pt.y },
+            { x: pt.x, y: pt.y - 1 },
+            { x: pt.x + 1, y: pt.y },
+            { x: pt.x, y: pt.y + 1 }
+          ]
+        } while (this.tileMap[pt.y][pt.x] != '#' || adjacent.every(p => this.tileMap[p.y][p.x] == '#'))
+        this.tileMap[pt.y][pt.x] = '.'
+      }
+    }
   }
 
   this.isBrushing = function isBrushing(candidate) {
@@ -93,6 +114,7 @@ function RandomRoomsMapGenerator(level) {
     do {
       iSrc++
       iDest = iSrc + 1
+      iDest = iDest % this.rooms.length
       while (this.rooms[iDest].connected) {
         iDest++
         if (iDest >= this.rooms.length) {

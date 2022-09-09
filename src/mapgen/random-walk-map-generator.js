@@ -3,7 +3,7 @@ var MapGenerator = require('./abstract-map-generator')
 var { randInt } = require('../utils')
 
 var params = {
-  minCoverageFraction: 0.4,
+  targetMapFillRatio: 0.33,
   maxWalkLength: 10000
 }
 
@@ -30,7 +30,7 @@ function RandomWalkMapGenerator(level) {
     }
     var dir = getRandomDirection()
     var walkLength = 0
-    while (coverageFraction < params.minCoverageFraction && walkLength < params.maxWalkLength) {
+    while (coverageFraction < params.targetMapFillRatio && walkLength < params.maxWalkLength) {
       var didMove = false
       if (dir == 0) {
         if (pt.y > 1) {

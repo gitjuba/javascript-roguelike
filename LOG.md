@@ -990,3 +990,17 @@ Pretty decent looking dungeons, unless the random walk ends up hugging the edges
 How to place stairs in a random-walk dungeon? Here I could implement a distance map and find two points which are sufficiently far from each other. But for the first implementation, let's just pick two points at random.
 
 Delightfully, it seems that placing monsters and the player do not depend on the dungeon consisting of rooms, so the randomw walk mapgen might work already.
+
+## 2022-09-08
+
+Let's fine tune the random walk algo (add the focus points etc) later. One possibility to tweak it to get less edge hugging would be to reset the walk to the center, or to a random open tile whenever the walk reaches the edge. This method is also recommended in Herbert Wolverson's video. Re-watching that video, _Diffusion Limited Aggregation_ sounds interesting. [Here's](http://roguebasin.com/index.php/Diffusion-limited_aggregation) a RogueBasin article on that. Not sure I fully understand it, though. Should implement it...
+
+Next map generation feature: erosion. The starting point would be e.g. the random rooms map. First implementation idea: Pick random floor tiles, then pick a direction at random, and walk to that direction until a wall tile is hit. When that happens, change the wall to a floor tile.
+
+## 2022-09-09
+
+Hmm, or maybe not. If I understood DLA correctly, you're supposed to fire "particles" (the term used by Wolverson) at the whole map at random, and when it hits a tile which is _adjacent_ to a floor tile, turn that tile into floor.
+
+This would simulate the gathering together of randomly moving particles.
+
+Slightly eroded dungeon levels look a bit dull, but strongly eroded dungeons are quite cool. You can still make out a hint of the room layout.
