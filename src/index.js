@@ -3,7 +3,7 @@ var Renderer = require('./renderer')
 var Level = require('./level')
 var { Player } = require('./entities')
 
-var GAME_VERSION = '0.0.1'
+var GAME_VERSION = '0.0.2'
 
 var {
   canvasWidthChars,
