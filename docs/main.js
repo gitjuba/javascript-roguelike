@@ -1550,7 +1550,7 @@ var Renderer = __webpack_require__(/*! ./renderer */ "./renderer.js")
 var Level = __webpack_require__(/*! ./level */ "./level.js")
 var { Player } = __webpack_require__(/*! ./entities */ "./entities.js")
 
-var GAME_VERSION = '0.0.1'
+var GAME_VERSION = '0.0.2'
 
 var {
   canvasWidthChars,
