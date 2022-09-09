@@ -34,7 +34,7 @@ function validateBody(body) {
 app.post('/roguelike/hof', (req, res) => {
   if (validateBody(req.body)) {
     console.log(req.body)
-    db.get('SELECT COUNT(*) AS Ranking FROM RoguelikeHof WHERE Score >= ?', [req.body.score], (err, row) => {
+    db.get('SELECT COUNT(*) AS Ranking FROM RoguelikeHof WHERE Version = ? AND Score >= ?', [req.body.version, req.body.score], (err, row) => {
       if (err) {
         console.log(err)
         res.sendStatus(500)
