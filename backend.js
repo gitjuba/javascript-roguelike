@@ -57,7 +57,7 @@ app.post('/roguelike/hof', (req, res) => {
             console.log(err)
             res.sendStatus(500)
           } else {
-            db.all('SELECT * FROM RoguelikeHof ORDER BY Score DESC LIMIT 8', (err, rows) => {
+            db.all('SELECT * FROM RoguelikeHof WHERE Version = ? ORDER BY Score DESC LIMIT 8', [req.body.version], (err, rows) => {
               if (err) {
                 console.log(err)
                 res.sendStatus(500)
