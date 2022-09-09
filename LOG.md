@@ -860,9 +860,9 @@ Another way to introduce variety to room-based dungeons is by _corrosion_. Check
 
 So a breakdown of what's remaining for the _mapgen_ goal post:
 
-- [ ] A corridor placement algorithm
-- [ ] Erosion in room-based dungeons
-- [ ] Cavernous dungeon level generation
+- [x] A corridor placement algorithm
+- [x] Erosion in room-based dungeons
+- [x] Cavernous dungeon level generation
 
 ## 2022-09-03
 

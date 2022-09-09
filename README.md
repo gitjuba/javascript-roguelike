@@ -26,6 +26,6 @@
 
 ## Goal IV
 
-- [ ] Different map generation algorithms
+- [x] Different map generation algorithms (part 1)
 - [ ] Wayfinding
-- [ ] Map features
+- [ ] Map features (part 1)
