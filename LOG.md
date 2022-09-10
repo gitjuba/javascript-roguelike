@@ -1033,3 +1033,19 @@ Let's try converting the level erosion into a feature.
 Note: dungeon features must be added (and other stuff done which alter the tile map) before computing the "derivative" masks (depending on the tile map).
 
 It makes sense to add the feature to the _generator_, not the `Level` instance which also contains the monsters, player placement etc.
+
+Scope for the _Map features_ goal post:
+
+- [x] Whole level erosion
+- [x] Single room erosion
+- [-] Some prefabs
+
+Where to place utility functions which depend only on the tile map geometry/dimensions? Functions like `advanceTo` etc. which basically just need the map width and height. For now I put them in `abstract-map-generator`.
+
+Prefabs! Let's make two to get started. Later on I assume many prefabs would contain items/special monsters or such.
+
+What is a prefab, exactly? Is a given type of prefab always the same size and shape? If it weren't, would it fall under more general features? Yes let's _define_ a prefab to be like a fixed drawing on the tile map.
+
+The random walk based dungeon levels could contain a small room around the staircase. Also, large rooms in the room based layouts could contain a smaller room within them.
+
+Hmm, should I separate prefabs from map features and re-think them at some point? They _are_ a bit different. Yeah, let's consider map features done for now.
