@@ -1,6 +1,9 @@
 var RandomRoomsMapGenerator = require('./mapgen/random-rooms-map-generator')
 var BinarySpacePartitionMapGenerator = require('./mapgen/binary-space-partition-map-generator')
 var RandomWalkMapGenerator = require('./mapgen/random-walk-map-generator')
+
+var ErosionDungeonFeature = require('./mapgen/erosion-dungeon-feature')
+
 var { mapWidth, mapHeight } = require('./layout')
 var { rollMonster } = require('./monsters')
 var { Monster } = require('./entities')
@@ -81,10 +84,10 @@ function isVisible(x, y, x0, y0, level) {
 function Level(level) {
   this.level = level
 
-  var rand = Math.random()
-  if (rand < 0.5) {
+  var chooseMapGenerator = Math.random()
+  if (chooseMapGenerator < 0.5) {
     var generator = new RandomRoomsMapGenerator(level)
-  } else if (rand < 0.75) {
+  } else if (chooseMapGenerator < 0.75) {
     var generator = new BinarySpacePartitionMapGenerator(level)
   } else {
     var generator = new RandomWalkMapGenerator(level)
@@ -98,6 +101,16 @@ function Level(level) {
 
   this.map = generator.getFeatures()
   this.tileMap = generator.getTileMap()
+
+  // Add a dungeon feature
+  var addFeature = Math.random() < 1.0
+  if (addFeature) {
+    var chooseFeature = Math.random()
+    if (chooseFeature < 1.0) {
+      var feature = new ErosionDungeonFeature()
+      feature.addToLevel(generator)
+    }
+  }
 
   this.colorMap = defaultTileColors
 

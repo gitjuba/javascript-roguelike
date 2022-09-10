@@ -1004,3 +1004,32 @@ Hmm, or maybe not. If I understood DLA correctly, you're supposed to fire "parti
 This would simulate the gathering together of randomly moving particles.
 
 Slightly eroded dungeon levels look a bit dull, but strongly eroded dungeons are quite cool. You can still make out a hint of the room layout.
+
+It would be a cool dungeon feature to have erosion in just a small part. This leads to discussion about map features in general.
+
+What possible map features are there?
+
+- eroded rooms
+  - applicable only to room based dungeons
+- erosion of the whole level
+- chasms (the player could fall down)
+- underground rivers
+- pre-fabricated ("man-made") structures
+
+Chasms and rivers require new tiles ("emptyness" and water).
+
+Also, if I want to add resource management to the game, _ore veins_ could be a feature!
+
+At first I listed having several (two) map generation algorithms used in one level. But that is conceptually different from the rest, let's scope that out. For this goal post, map features are considered only as stuff which can be overlaid on top of an already generated level.
+
+How are map features implemented in the code organization sense? As first implementation, a dungeon level could have either zero or one features, with some parametrizable probability of adding a feature. If a feature is to be added, it is selected randomly from all available features. _A priori_ not all features are applicable to all dungeon levels, so adding a feature should be allowed to (silently) fail.
+
+Features could be sub-classed from an "abstract feature" which would define the _Feature API_ (basically just `addToLevel`...)
+
+Let's try converting the level erosion into a feature.
+
+## 2022-09-10
+
+Note: dungeon features must be added (and other stuff done which alter the tile map) before computing the "derivative" masks (depending on the tile map).
+
+It makes sense to add the feature to the _generator_, not the `Level` instance which also contains the monsters, player placement etc.

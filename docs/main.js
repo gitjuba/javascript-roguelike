@@ -272,6 +272,9 @@ module.exports = {
 var RandomRoomsMapGenerator = __webpack_require__(/*! ./mapgen/random-rooms-map-generator */ "./mapgen/random-rooms-map-generator.js")
 var BinarySpacePartitionMapGenerator = __webpack_require__(/*! ./mapgen/binary-space-partition-map-generator */ "./mapgen/binary-space-partition-map-generator.js")
 var RandomWalkMapGenerator = __webpack_require__(/*! ./mapgen/random-walk-map-generator */ "./mapgen/random-walk-map-generator.js")
+
+var ErosionDungeonFeature = __webpack_require__(/*! ./mapgen/erosion-dungeon-feature */ "./mapgen/erosion-dungeon-feature.js")
+
 var { mapWidth, mapHeight } = __webpack_require__(/*! ./layout */ "./layout.js")
 var { rollMonster } = __webpack_require__(/*! ./monsters */ "./monsters.js")
 var { Monster } = __webpack_require__(/*! ./entities */ "./entities.js")
@@ -352,10 +355,10 @@ function isVisible(x, y, x0, y0, level) {
 function Level(level) {
   this.level = level
 
-  var rand = Math.random()
-  if (rand < 0.5) {
+  var chooseMapGenerator = Math.random()
+  if (chooseMapGenerator < 0.5) {
     var generator = new RandomRoomsMapGenerator(level)
-  } else if (rand < 0.75) {
+  } else if (chooseMapGenerator < 0.75) {
     var generator = new BinarySpacePartitionMapGenerator(level)
   } else {
     var generator = new RandomWalkMapGenerator(level)
@@ -369,6 +372,16 @@ function Level(level) {
 
   this.map = generator.getFeatures()
   this.tileMap = generator.getTileMap()
+
+  // Add a dungeon feature
+  var addFeature = Math.random() < 1.0
+  if (addFeature) {
+    var chooseFeature = Math.random()
+    if (chooseFeature < 1.0) {
+      var feature = new ErosionDungeonFeature()
+      feature.addToLevel(generator)
+    }
+  }
 
   this.colorMap = defaultTileColors
 
@@ -536,6 +549,29 @@ Logger.getInstance = function getInstance() {
 }
 
 module.exports = Logger
+
+
+/***/ }),
+
+/***/ "./mapgen/abstract-dungeon-feature.js":
+/*!********************************************!*\
+  !*** ./mapgen/abstract-dungeon-feature.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var { mapWidth, mapHeight } = __webpack_require__(/*! ../layout */ "./layout.js")
+
+function DungeonFeature() {
+  this.isApplicableTo = function isApplicableTo(level) {
+    throw new Error('Use one of the child classes')
+  }
+
+  this.addToLevel = function addToLevel(level) {
+    throw new Error('Use one of the child classes')
+  }
+}
+
+module.exports = DungeonFeature
 
 
 /***/ }),
@@ -843,6 +879,46 @@ module.exports = BinarySpacePartitionMapGenerator
 
 /***/ }),
 
+/***/ "./mapgen/erosion-dungeon-feature.js":
+/*!*******************************************!*\
+  !*** ./mapgen/erosion-dungeon-feature.js ***!
+  \*******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var DungeonFeature = __webpack_require__(/*! ./abstract-dungeon-feature */ "./mapgen/abstract-dungeon-feature.js")
+
+var { randInt } = __webpack_require__(/*! ../utils */ "./utils.js")
+
+var params = {
+  minErodedTiles: 100,
+  maxErodedTiles: 300
+}
+
+function ErosionDungeonFeature() {
+  DungeonFeature.call(this)
+
+  this.addToLevel = function addToLevel(generator) {
+    var numErodedTiles = randInt(params.minErodedTiles, params.maxErodedTiles)
+    for (var i = 0; i < numErodedTiles; i++) {
+      do {
+        var pt = { x: randInt(1, generator.mapWidth - 2), y: randInt(1, generator.mapHeight - 2) }
+        var adjacent = [
+          { x: pt.x - 1, y: pt.y },
+          { x: pt.x, y: pt.y - 1 },
+          { x: pt.x + 1, y: pt.y },
+          { x: pt.x, y: pt.y + 1 }
+        ]
+      } while (generator.tileMap[pt.y][pt.x] != '#' || adjacent.every(p => generator.tileMap[p.y][p.x] == '#'))
+      generator.tileMap[pt.y][pt.x] = '.'
+    }
+  }
+}
+
+module.exports = ErosionDungeonFeature
+
+
+/***/ }),
+
 /***/ "./mapgen/mapgen-commons.js":
 /*!**********************************!*\
   !*** ./mapgen/mapgen-commons.js ***!
@@ -1039,23 +1115,6 @@ function RandomRoomsMapGenerator(level) {
     this.placeRandomCorridors()
 
     this.updateTileMap()
-
-    var addErosion = Math.random() < params.erosionChance
-    if (addErosion) {
-      var numErodedTiles = randInt(params.minErodedTiles, params.maxErodedTiles)
-      for (var i = 0; i < numErodedTiles; i++) {
-        do {
-          var pt = { x: randInt(1, this.mapWidth - 2), y: randInt(1, this.mapHeight - 2) }
-          var adjacent = [
-            { x: pt.x - 1, y: pt.y },
-            { x: pt.x, y: pt.y - 1 },
-            { x: pt.x + 1, y: pt.y },
-            { x: pt.x, y: pt.y + 1 }
-          ]
-        } while (this.tileMap[pt.y][pt.x] != '#' || adjacent.every(p => this.tileMap[p.y][p.x] == '#'))
-        this.tileMap[pt.y][pt.x] = '.'
-      }
-    }
   }
 
   this.isBrushing = function isBrushing(candidate) {
