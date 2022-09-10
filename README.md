@@ -28,4 +28,4 @@
 
 - [x] Different map generation algorithms (part 1)
 - [ ] Wayfinding
-- [ ] Map features (part 1)
+- [x] Map features (part 1)
