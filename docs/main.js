@@ -3374,13 +3374,16 @@ var keyDisplacement = {
   ',': { dx: 0, dy: 1 },
   '.': { dx: 1, dy: 1 }
 }
-
-class GameClass {
-  constructor() {
-
-  }
-
-  resetRenderFlags() {}
+var keyToDir = {
+  u: 7,
+  i: 0,
+  o: 1,
+  j: 6,
+  k: NaN,
+  l: 2,
+  m: 5,
+  ',': 4,
+  '.': 3
 }
 
 function Game(gameOptions) {
@@ -3432,20 +3435,24 @@ function Game(gameOptions) {
     ]
   }
 
-  this.isOnAutoPilot = false
-  this.autoPilotEvent = undefined
-  this.playerEnvironment =
+  this.updatePlayerEnvironment = function updatePlayerEnvironment(dir) {
+    this.playerEnvironment = this.levels[this.currentLevel].tileMap.aroundDir(this.player, dir).join('')
+    console.log(this.playerEnvironment)
+  }
+  this.updatePlayerEnvironment(NaN)
 
   this.engageAutoPilot = function engageAutoPilot(key) {
     this.isOnAutoPilot = true
     this.autoPilotEvent = { key }
-    this.autoPilotEnvironment
+    this.autoPilotEnvironment = this.playerEnvironment
   }
 
   this.disengageAutoPilot = function disengageAutoPilot() {
     this.isOnAutoPilot = false
     this.autoPilotEvent = undefined
+    this.autoPilotEnvironment = undefined
   }
+  this.disengageAutoPilot()
 
   this.updateState = function updateState(event) {
     var dx, dy
@@ -3466,6 +3473,7 @@ function Game(gameOptions) {
 
     if (movementKeys.includes(key)) {
       ({ dx, dy } = keyDisplacement[key])
+      var dir = keyToDir[key]
       if (this.player.attacking) {
         var monster = level.getMonsterAt(this.player.x + dx, this.player.y + dy)
         if (monster) {
@@ -3487,6 +3495,7 @@ function Game(gameOptions) {
         playerTurnDone = true
       } else if (this.player.startedAutoWalk) {
         console.log('auto-walk')
+        this.updatePlayerEnvironment(dir)
         this.engageAutoPilot(key)
         this.player.startedAutoWalk = false
       } else {
@@ -3494,9 +3503,6 @@ function Game(gameOptions) {
           playerTurnDone = true
           this.disengageAutoPilot()
         } else if (!level.isOccupied[this.player.y + dy][this.player.x + dx]) {
-          if (this.isOnAutoPilot) {
-            // check if surroundings of player change
-          }
           level.unoccupy(this.player)
           this.player.x += dx
           this.player.y += dy
@@ -3504,6 +3510,13 @@ function Game(gameOptions) {
           this.shouldRenderSeen = true
           this.shouldRenderVisible = true
           playerTurnDone = true
+          this.updatePlayerEnvironment(dir)
+          if (this.isOnAutoPilot) {
+            // check if surroundings of player change
+            if (this.playerEnvironment != this.autoPilotEnvironment) {
+              this.disengageAutoPilot()
+            }
+          }
         } else {
           // Moving against occupied space, turn not done
           this.disengageAutoPilot()
@@ -3789,7 +3802,6 @@ function startGame(gameOptions) {
 
   function gameLoop() {
     if (game.isOnAutoPilot) {
-      console.log('update state on auto pilot')
       game.updateState(game.autoPilotEvent)
       if (!game.isOnAutoPilot) {
         window.addEventListener('keyup', handleGameInput)
@@ -3802,7 +3814,6 @@ function startGame(gameOptions) {
   function handleGameInput(e) {
     game.updateState(e)
     if (game.isOnAutoPilot) {
-      console.log('on auto pilot, remove event listener')
       window.removeEventListener('keyup', handleGameInput)
     }
     if (e.key == 'Enter' && game.isFinished) {
@@ -4308,7 +4319,7 @@ function MapGenerator(level) {
 
   // general tilemap related functionality
   this.advanceTo = function advanceTo(pt, dir) {
-    var pt1 = this.tileMap.atDir(pt, dir)
+    var pt1 = this.tileMap.toDir(pt, dir)
     if (this.tileMap.inBounds(pt1)) {
       return pt1
     } else {
@@ -5319,26 +5330,51 @@ function TileMap(mapWidth, mapHeight) {
   }
 
   // directions 0: north, 1: northeast, 2: east, ..., 7: northwest
-  this.atDir = function atDir(pt, dir) {
+  this.toDir = function toDir(pt, dir) {
     var pt1
     if (dir == 0) {
-      pt1 =  { x: pt.x, y: pt.y - 1 }
+      pt1 = { x: pt.x, y: pt.y - 1 }
     } else if (dir == 1) {
-      pt1 =  { x: pt.x + 1, y: pt.y - 1 }
+      pt1 = { x: pt.x + 1, y: pt.y - 1 }
     } else if (dir == 2) {
-      pt1 =  { x: pt.x + 1, y: pt.y }
+      pt1 = { x: pt.x + 1, y: pt.y }
     } else if (dir == 3) {
-      pt1 =  { x: pt.x +1 , y: pt.y + 1 }
+      pt1 = { x: pt.x + 1, y: pt.y + 1 }
     } else if (dir == 4) {
-      pt1 =  { x: pt.x, y: pt.y + 1 }
+      pt1 = { x: pt.x, y: pt.y + 1 }
     } else if (dir == 5) {
-      pt1 =  { x: pt.x - 1, y: pt.y + 1 }
+      pt1 = { x: pt.x - 1, y: pt.y + 1 }
     } else if (dir == 6) {
-      pt1 =  { x: pt.x - 1, y: pt.y }
+      pt1 = { x: pt.x - 1, y: pt.y }
     } else if (dir == 7) {
-      pt1 =  { x: pt.x - 1, y: pt.y - 1 }
+      pt1 = { x: pt.x - 1, y: pt.y - 1 }
     }
     return pt1
+  }
+
+  this.atDir = function atDir(pt, dir) {
+    var pt1 = this.toDir(pt, dir)
+    return this.at(pt1)
+  }
+
+  this.atDirs = function atDirs(pt, dirs) {
+    return dirs.map(dir => this.atDir(pt, dir))
+  }
+
+  this.aroundDir = function aroundDir(pt, dir) {
+    // what would be an efficient way to view environments?
+    if (dir >= 0) {
+      var dirs = [dir - 1, dir, dir + 1].map(d => {
+        var dd = d % 8
+        if (dd < 0) {
+          dd += 8
+        }
+        return dd
+      })
+    } else {
+      var dirs = [0, 1, 2, 3, 4, 5, 6, 7]
+    }
+    return this.atDirs(pt, dirs)
   }
 
   this.print = function print() {
@@ -5475,7 +5511,7 @@ module.exports = {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("542b3b966579245cb190")
+/******/ 		__webpack_require__.h = () => ("5404b456f627651000f6")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

@@ -68,13 +68,16 @@ var keyDisplacement = {
   ',': { dx: 0, dy: 1 },
   '.': { dx: 1, dy: 1 }
 }
-
-class GameClass {
-  constructor() {
-
-  }
-
-  resetRenderFlags() {}
+var keyToDir = {
+  u: 7,
+  i: 0,
+  o: 1,
+  j: 6,
+  k: NaN,
+  l: 2,
+  m: 5,
+  ',': 4,
+  '.': 3
 }
 
 function Game(gameOptions) {
@@ -126,20 +129,24 @@ function Game(gameOptions) {
     ]
   }
 
-  this.isOnAutoPilot = false
-  this.autoPilotEvent = undefined
-  this.playerEnvironment =
+  this.updatePlayerEnvironment = function updatePlayerEnvironment(dir) {
+    this.playerEnvironment = this.levels[this.currentLevel].tileMap.aroundDir(this.player, dir).join('')
+    console.log(this.playerEnvironment)
+  }
+  this.updatePlayerEnvironment(NaN)
 
   this.engageAutoPilot = function engageAutoPilot(key) {
     this.isOnAutoPilot = true
     this.autoPilotEvent = { key }
-    this.autoPilotEnvironment
+    this.autoPilotEnvironment = this.playerEnvironment
   }
 
   this.disengageAutoPilot = function disengageAutoPilot() {
     this.isOnAutoPilot = false
     this.autoPilotEvent = undefined
+    this.autoPilotEnvironment = undefined
   }
+  this.disengageAutoPilot()
 
   this.updateState = function updateState(event) {
     var dx, dy
@@ -160,6 +167,7 @@ function Game(gameOptions) {
 
     if (movementKeys.includes(key)) {
       ({ dx, dy } = keyDisplacement[key])
+      var dir = keyToDir[key]
       if (this.player.attacking) {
         var monster = level.getMonsterAt(this.player.x + dx, this.player.y + dy)
         if (monster) {
@@ -181,6 +189,7 @@ function Game(gameOptions) {
         playerTurnDone = true
       } else if (this.player.startedAutoWalk) {
         console.log('auto-walk')
+        this.updatePlayerEnvironment(dir)
         this.engageAutoPilot(key)
         this.player.startedAutoWalk = false
       } else {
@@ -188,9 +197,6 @@ function Game(gameOptions) {
           playerTurnDone = true
           this.disengageAutoPilot()
         } else if (!level.isOccupied[this.player.y + dy][this.player.x + dx]) {
-          if (this.isOnAutoPilot) {
-            // check if surroundings of player change
-          }
           level.unoccupy(this.player)
           this.player.x += dx
           this.player.y += dy
@@ -198,6 +204,13 @@ function Game(gameOptions) {
           this.shouldRenderSeen = true
           this.shouldRenderVisible = true
           playerTurnDone = true
+          this.updatePlayerEnvironment(dir)
+          if (this.isOnAutoPilot) {
+            // check if surroundings of player change
+            if (this.playerEnvironment != this.autoPilotEnvironment) {
+              this.disengageAutoPilot()
+            }
+          }
         } else {
           // Moving against occupied space, turn not done
           this.disengageAutoPilot()
@@ -483,7 +496,6 @@ function startGame(gameOptions) {
 
   function gameLoop() {
     if (game.isOnAutoPilot) {
-      console.log('update state on auto pilot')
       game.updateState(game.autoPilotEvent)
       if (!game.isOnAutoPilot) {
         window.addEventListener('keyup', handleGameInput)
@@ -496,7 +508,6 @@ function startGame(gameOptions) {
   function handleGameInput(e) {
     game.updateState(e)
     if (game.isOnAutoPilot) {
-      console.log('on auto pilot, remove event listener')
       window.removeEventListener('keyup', handleGameInput)
     }
     if (e.key == 'Enter' && game.isFinished) {

@@ -36,7 +36,7 @@ function MapGenerator(level) {
 
   // general tilemap related functionality
   this.advanceTo = function advanceTo(pt, dir) {
-    var pt1 = this.tileMap.atDir(pt, dir)
+    var pt1 = this.tileMap.toDir(pt, dir)
     if (this.tileMap.inBounds(pt1)) {
       return pt1
     } else {

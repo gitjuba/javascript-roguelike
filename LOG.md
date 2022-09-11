@@ -1066,9 +1066,12 @@ Alright, the basic logic seems to work. Now, when to "disengage autopilot"?
   - or, more generally, when the player environment changes
 - when there are monsters within the field of vision
 - when the floor tile is something else than `.` (for example, moving into stairs)
+  - this is a special case of the player environment changing
 
 ## 2022-09-11
 
 Let's create a new class/container for the tile map utilities. When a dungeon level is generated, an instance of a tile map is created which is then accessed by the generator, the level object and the game itself.
 
 All the "tilemap masks" in the level object, such as _seen_, _is visible_, _can monster spawn_ etc, are naturally converted into this utility class objects. This approach would unify the access into a tile map (now it's `{x, y}` some where and `(i, j)` elsewhere). Hmm, or maybe not, none of the masks need the geometry-related functionality.
+
+Stopping auto-walk when player environment changes causes too many interruptions. It's better to check the environment in the forward direction, that is, towards the direction of movement and its neighboring directions.
