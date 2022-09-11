@@ -21,8 +21,8 @@ function ErosionDungeonFeature() {
           { x: pt.x + 1, y: pt.y },
           { x: pt.x, y: pt.y + 1 }
         ]
-      } while (generator.tileMap[pt.y][pt.x] != '#' || adjacent.every(p => generator.tileMap[p.y][p.x] == '#'))
-      generator.tileMap[pt.y][pt.x] = '.'
+      } while (generator.tileMap.at(pt) != '#' || adjacent.every(p => generator.tileMap.at(p) == '#'))
+      generator.tileMap.put(pt, '.')
     }
   }
 }

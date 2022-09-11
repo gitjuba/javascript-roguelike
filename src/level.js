@@ -117,11 +117,11 @@ function Level(level) {
 
   this.colorMap = defaultTileColors
 
-  this.seenMask = this.tileMap.map(row => row.map(() => false))
-  this.isVisibleMask = this.tileMap.map(row => row.map(() => false))
-  this.wasVisibleMask = this.tileMap.map(row => row.map(() => false))
-  this.isOccupied = this.tileMap.map(row => row.map(tile => (tile == '#')))
-  this.canMonsterSpawn = this.tileMap.map(row => row.map(tile => (tile == '.')))
+  this.seenMask = this.tileMap.data.map(row => row.map(() => false))
+  this.isVisibleMask = this.tileMap.data.map(row => row.map(() => false))
+  this.wasVisibleMask = this.tileMap.data.map(row => row.map(() => false))
+  this.isOccupied = this.tileMap.data.map(row => row.map(tile => (tile == '#')))
+  this.canMonsterSpawn = this.tileMap.data.map(row => row.map(tile => (tile == '.')))
 
   this.getRandomUnoccupiedTile = function getRandomUnoccupiedTile() {
     var position
@@ -145,7 +145,7 @@ function Level(level) {
       for (var j = 0; j < mapWidth; j++) {
         this.wasVisibleMask[i][j] = this.isVisibleMask[i][j]
         if (player.isWithinVisRadius(i, j) &&
-            isVisible(j, i, player.x ,player.y, this.tileMap)) {
+            isVisible(j, i, player.x ,player.y, this.tileMap.data)) {
           this.seenMask[i][j] = true
           this.isVisibleMask[i][j] = true
         } else {
@@ -166,10 +166,10 @@ function Level(level) {
     return this.map.up
   }
   this.isDownStaircaseAt = function isDownStaircaseAt(position) {
-    return this.tileMap[position.y][position.x] == '>'
+    return this.tileMap.at(position) == '>'
   }
   this.isUpStaircaseAt = function isUpStaircaseAt(position) {
-    return this.tileMap[position.y][position.x] == '<'
+    return this.tileMap.at(position) == '<'
   }
   this.getDownStaircasePosition = function getDownStaircasePosition() {
     if (this.hasDownStaircase()) {

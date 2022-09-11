@@ -26,9 +26,9 @@ function ErodedRoomDungeonFeature() {
       var pt = room.getRandomEdgePosition(edge)
       do {
         pt = generator.advanceTo(pt, dir)
-      } while (pt && generator.tileMap[pt.y][pt.x] == '.')
+      } while (pt && generator.tileMap.at(pt) == '.')
       if (pt) {
-        generator.tileMap[pt.y][pt.x] = '.'
+        generator.tileMap.put(pt, '.')
       }
     }
   }

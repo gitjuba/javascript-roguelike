@@ -126,6 +126,21 @@ function Game(gameOptions) {
     ]
   }
 
+  this.isOnAutoPilot = false
+  this.autoPilotEvent = undefined
+  this.playerEnvironment =
+
+  this.engageAutoPilot = function engageAutoPilot(key) {
+    this.isOnAutoPilot = true
+    this.autoPilotEvent = { key }
+    this.autoPilotEnvironment
+  }
+
+  this.disengageAutoPilot = function disengageAutoPilot() {
+    this.isOnAutoPilot = false
+    this.autoPilotEvent = undefined
+  }
+
   this.updateState = function updateState(event) {
     var dx, dy
 
@@ -164,10 +179,18 @@ function Game(gameOptions) {
         this.player.attacking = false
         this.shouldRenderObjects = true
         playerTurnDone = true
+      } else if (this.player.startedAutoWalk) {
+        console.log('auto-walk')
+        this.engageAutoPilot(key)
+        this.player.startedAutoWalk = false
       } else {
         if (dx == 0 && dy == 0) {
           playerTurnDone = true
+          this.disengageAutoPilot()
         } else if (!level.isOccupied[this.player.y + dy][this.player.x + dx]) {
+          if (this.isOnAutoPilot) {
+            // check if surroundings of player change
+          }
           level.unoccupy(this.player)
           this.player.x += dx
           this.player.y += dy
@@ -177,6 +200,7 @@ function Game(gameOptions) {
           playerTurnDone = true
         } else {
           // Moving against occupied space, turn not done
+          this.disengageAutoPilot()
         }
         this.shouldRenderObjects = true
       }
@@ -185,6 +209,8 @@ function Game(gameOptions) {
         case 'a':
           this.player.attacking = true
           break
+        case 'g':
+          this.player.startedAutoWalk = true
         case 's':
           if (level.isDownStaircaseAt(this.player)) {
             var newLevel
@@ -220,6 +246,9 @@ function Game(gameOptions) {
             monster.seen = true
           } else if (monster.seen && !level.isVisibleMask[monster.y][monster.x]) {
             monster.seen = false
+          }
+          if (monster.seen) {
+            this.disengageAutoPilot()
           }
           monster.rollAggravation()
           if (monster.aggressive && monster.seen) {
@@ -332,7 +361,7 @@ function Game(gameOptions) {
     var level = this.levels[this.currentLevel]
     for (var i = 0; i < mapHeight; i++) {
       for (var j = 0; j < mapWidth; j++) {
-        var tile = level.tileMap[i][j]
+        var tile = level.tileMap.data[i][j]
         colorRenderer.drawTile(level.colorMap[tile], i, j)
         levelRenderer.drawChar(tile, i, j)
       }
@@ -453,12 +482,23 @@ function startGame(gameOptions) {
   var game = new Game(gameOptions)
 
   function gameLoop() {
+    if (game.isOnAutoPilot) {
+      console.log('update state on auto pilot')
+      game.updateState(game.autoPilotEvent)
+      if (!game.isOnAutoPilot) {
+        window.addEventListener('keyup', handleGameInput)
+      }
+    }
     game.render()
     gameAnimationHandle = window.requestAnimationFrame(gameLoop)
   }
 
   function handleGameInput(e) {
     game.updateState(e)
+    if (game.isOnAutoPilot) {
+      console.log('on auto pilot, remove event listener')
+      window.removeEventListener('keyup', handleGameInput)
+    }
     if (e.key == 'Enter' && game.isFinished) {
       window.removeEventListener('keyup', handleGameInput)
       game.clear()

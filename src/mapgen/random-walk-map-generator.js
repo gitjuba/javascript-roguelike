@@ -65,7 +65,7 @@ function RandomWalkMapGenerator(level) {
         this.walkCoverage[pt.y][pt.x] = true
         coverageFraction += coverageUnit
       }
-      this.tileMap[pt.y][pt.x] = '.'
+      this.tileMap.put(pt, '.')
       walkLength++
 
       if (didMove) { dir = getRandomDirection() }
@@ -78,7 +78,7 @@ function RandomWalkMapGenerator(level) {
       var pt = { x: randInt(0, this.mapWidth - 1), y: randInt(0, this.mapHeight - 1) }
     } while (!this.walkCoverage[pt.y][pt.x])
     this.features[direction] = pt
-    this.tileMap[pt.y][pt.x] = direction == 'up' ? '<' : '>'
+    this.tileMap.put(pt, direction == 'up' ? '<' : '>')
   }
 
   this.placeDownStaircase = function placeDownStaircase() {

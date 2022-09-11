@@ -1049,3 +1049,26 @@ What is a prefab, exactly? Is a given type of prefab always the same size and sh
 The random walk based dungeon levels could contain a small room around the staircase. Also, large rooms in the room based layouts could contain a smaller room within them.
 
 Hmm, should I separate prefabs from map features and re-think them at some point? They _are_ a bit different. Yeah, let's consider map features done for now.
+
+### Wayfinding
+
+Not exactly part of wayfinding, I want to add _auto-walking_ to the game to make walking around already explored dungeons less of a chore. It's related to (player) route finding in the sense that both require the implementation of a game "state" where the player moves automatically until something happens. At the moment, the only such event is a monster entering the field of vision. In a more basic version of the auto-walk, also hitting a wall would be such an event.
+
+Auto-walk or wayfinding is triggered in the game by pressing `g`, followed by a direction (for auto-walk) or, for example `<` or `>` for the staircases. In the future there might be other points of interest on the map, for which wayfinding is provided.
+
+Alternatively, wayfinding and auto-walk could be triggered from different keys, if the former requires showing a list of points of interest on the UI.
+
+Auto-walking is a completely different "state" of the app, in the sense that game state is changed several times without player input. This affects the main game loop: event listeners for user input are disabled for the duration of the automatic progression, and the `game.updateState` method receives a "synthetic" event. Furthermore, during the auto-walk this method needs to be called inside the game loop, once per frame.
+
+Alright, the basic logic seems to work. Now, when to "disengage autopilot"?
+
+- when player moved from a tile with no walls neighboring it to one which has at least one wall tile neighbor
+  - or, more generally, when the player environment changes
+- when there are monsters within the field of vision
+- when the floor tile is something else than `.` (for example, moving into stairs)
+
+## 2022-09-11
+
+Let's create a new class/container for the tile map utilities. When a dungeon level is generated, an instance of a tile map is created which is then accessed by the generator, the level object and the game itself.
+
+All the "tilemap masks" in the level object, such as _seen_, _is visible_, _can monster spawn_ etc, are naturally converted into this utility class objects. This approach would unify the access into a tile map (now it's `{x, y}` some where and `(i, j)` elsewhere). Hmm, or maybe not, none of the masks need the geometry-related functionality.

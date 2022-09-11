@@ -3432,6 +3432,21 @@ function Game(gameOptions) {
     ]
   }
 
+  this.isOnAutoPilot = false
+  this.autoPilotEvent = undefined
+  this.playerEnvironment =
+
+  this.engageAutoPilot = function engageAutoPilot(key) {
+    this.isOnAutoPilot = true
+    this.autoPilotEvent = { key }
+    this.autoPilotEnvironment
+  }
+
+  this.disengageAutoPilot = function disengageAutoPilot() {
+    this.isOnAutoPilot = false
+    this.autoPilotEvent = undefined
+  }
+
   this.updateState = function updateState(event) {
     var dx, dy
 
@@ -3470,10 +3485,18 @@ function Game(gameOptions) {
         this.player.attacking = false
         this.shouldRenderObjects = true
         playerTurnDone = true
+      } else if (this.player.startedAutoWalk) {
+        console.log('auto-walk')
+        this.engageAutoPilot(key)
+        this.player.startedAutoWalk = false
       } else {
         if (dx == 0 && dy == 0) {
           playerTurnDone = true
+          this.disengageAutoPilot()
         } else if (!level.isOccupied[this.player.y + dy][this.player.x + dx]) {
+          if (this.isOnAutoPilot) {
+            // check if surroundings of player change
+          }
           level.unoccupy(this.player)
           this.player.x += dx
           this.player.y += dy
@@ -3483,6 +3506,7 @@ function Game(gameOptions) {
           playerTurnDone = true
         } else {
           // Moving against occupied space, turn not done
+          this.disengageAutoPilot()
         }
         this.shouldRenderObjects = true
       }
@@ -3491,6 +3515,8 @@ function Game(gameOptions) {
         case 'a':
           this.player.attacking = true
           break
+        case 'g':
+          this.player.startedAutoWalk = true
         case 's':
           if (level.isDownStaircaseAt(this.player)) {
             var newLevel
@@ -3526,6 +3552,9 @@ function Game(gameOptions) {
             monster.seen = true
           } else if (monster.seen && !level.isVisibleMask[monster.y][monster.x]) {
             monster.seen = false
+          }
+          if (monster.seen) {
+            this.disengageAutoPilot()
           }
           monster.rollAggravation()
           if (monster.aggressive && monster.seen) {
@@ -3638,7 +3667,7 @@ function Game(gameOptions) {
     var level = this.levels[this.currentLevel]
     for (var i = 0; i < mapHeight; i++) {
       for (var j = 0; j < mapWidth; j++) {
-        var tile = level.tileMap[i][j]
+        var tile = level.tileMap.data[i][j]
         colorRenderer.drawTile(level.colorMap[tile], i, j)
         levelRenderer.drawChar(tile, i, j)
       }
@@ -3759,12 +3788,23 @@ function startGame(gameOptions) {
   var game = new Game(gameOptions)
 
   function gameLoop() {
+    if (game.isOnAutoPilot) {
+      console.log('update state on auto pilot')
+      game.updateState(game.autoPilotEvent)
+      if (!game.isOnAutoPilot) {
+        window.addEventListener('keyup', handleGameInput)
+      }
+    }
     game.render()
     gameAnimationHandle = window.requestAnimationFrame(gameLoop)
   }
 
   function handleGameInput(e) {
     game.updateState(e)
+    if (game.isOnAutoPilot) {
+      console.log('on auto pilot, remove event listener')
+      window.removeEventListener('keyup', handleGameInput)
+    }
     if (e.key == 'Enter' && game.isFinished) {
       window.removeEventListener('keyup', handleGameInput)
       game.clear()
@@ -4033,11 +4073,11 @@ function Level(level) {
 
   this.colorMap = defaultTileColors
 
-  this.seenMask = this.tileMap.map(row => row.map(() => false))
-  this.isVisibleMask = this.tileMap.map(row => row.map(() => false))
-  this.wasVisibleMask = this.tileMap.map(row => row.map(() => false))
-  this.isOccupied = this.tileMap.map(row => row.map(tile => (tile == '#')))
-  this.canMonsterSpawn = this.tileMap.map(row => row.map(tile => (tile == '.')))
+  this.seenMask = this.tileMap.data.map(row => row.map(() => false))
+  this.isVisibleMask = this.tileMap.data.map(row => row.map(() => false))
+  this.wasVisibleMask = this.tileMap.data.map(row => row.map(() => false))
+  this.isOccupied = this.tileMap.data.map(row => row.map(tile => (tile == '#')))
+  this.canMonsterSpawn = this.tileMap.data.map(row => row.map(tile => (tile == '.')))
 
   this.getRandomUnoccupiedTile = function getRandomUnoccupiedTile() {
     var position
@@ -4061,7 +4101,7 @@ function Level(level) {
       for (var j = 0; j < mapWidth; j++) {
         this.wasVisibleMask[i][j] = this.isVisibleMask[i][j]
         if (player.isWithinVisRadius(i, j) &&
-            isVisible(j, i, player.x ,player.y, this.tileMap)) {
+            isVisible(j, i, player.x ,player.y, this.tileMap.data)) {
           this.seenMask[i][j] = true
           this.isVisibleMask[i][j] = true
         } else {
@@ -4082,10 +4122,10 @@ function Level(level) {
     return this.map.up
   }
   this.isDownStaircaseAt = function isDownStaircaseAt(position) {
-    return this.tileMap[position.y][position.x] == '>'
+    return this.tileMap.at(position) == '>'
   }
   this.isUpStaircaseAt = function isUpStaircaseAt(position) {
-    return this.tileMap[position.y][position.x] == '<'
+    return this.tileMap.at(position) == '<'
   }
   this.getDownStaircasePosition = function getDownStaircasePosition() {
     if (this.hasDownStaircase()) {
@@ -4230,6 +4270,8 @@ module.exports = DungeonFeature
   \******************************************/
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
+var TileMap = __webpack_require__(/*! ../tilemap */ "./tilemap.js")
+
 var { mapWidth, mapHeight } = __webpack_require__(/*! ../layout */ "./layout.js")
 
 function MapGenerator(level) {
@@ -4239,7 +4281,8 @@ function MapGenerator(level) {
   this.mapHeight = mapHeight
   this.mapArea = this.mapWidth * this.mapHeight
 
-  this.tileMap = MapGenerator.createEmptyTileMap()
+  // this.tileMap = MapGenerator.createEmptyTileMap()
+  this.tileMap = new TileMap(this.mapWidth, this.mapHeight)
 
   this.features = {}
 
@@ -4265,43 +4308,17 @@ function MapGenerator(level) {
 
   // general tilemap related functionality
   this.advanceTo = function advanceTo(pt, dir) {
-    if (dir == 0) {
-      if (pt.y < 2) { return null }
-      pt.y--
-    } else if (dir == 1) {
-      if (pt.x > this.mapWidth - 3 || pt.y < 2) { return null }
-      pt.x++
-      pt.y--
-    } else if (dir == 2) {
-      if (pt.x > this.mapWidth - 3) { return null }
-      pt.x++
-    } else if (dir == 3) {
-      if (pt.x > this.mapWidth - 3 || pt.y > this.mapHeight - 3) { return null }
-      pt.x++
-      pt.y++
-    } else if (dir == 4) {
-      if (pt.y > this.mapHeight - 3) { return null }
-      pt.y++
-    } else if (dir == 5) {
-      if (pt.x < 2 || pt.y > this.mapHeight - 3) { return null }
-      pt.x--
-      pt.y++
-    } else if (dir == 6) {
-      if (pt.x < 2) { return null }
-      pt.x--
-    } else if (dir == 7) {
-      if (pt.x < 2 || pt.y < 2) { return null }
-      pt.x--
-      pt.y--
+    var pt1 = this.tileMap.atDir(pt, dir)
+    if (this.tileMap.inBounds(pt1)) {
+      return pt1
+    } else {
+      return null
     }
-    return pt
   }
 
   // for debugging
   this.print = function print() {
-    for (var i = 0; i < this.tileMap.length; i++) {
-      console.log(this.tileMap[i].join(''))
-    }
+    this.tileMap.print()
   }
 }
 
@@ -4526,7 +4543,8 @@ function BinarySpacePartitionMapGenerator(level) {
   this.carveRoom = function carveRoom(room) {
     for (var i = room.top; i < room.top + room.height; i++) {
       for (var j = room.left; j < room.left + room.width; j++) {
-        this.tileMap[i][j] = '.'
+        var pt = { x: j, y: i }
+        this.tileMap.put(pt, '.')
       }
     }
   }
@@ -4544,7 +4562,7 @@ function BinarySpacePartitionMapGenerator(level) {
     var roomInd = randInt(0, this.rooms.length - 1)
     var position = this.rooms[roomInd].getRandomPosition()
     this.features[direction] = position
-    this.tileMap[position.y][position.x] = direction == 'up' ? '<' : '>'
+    this.tileMap.put(position, direction == 'up' ? '<' : '>')
   }
 
   this.placeDownStaircase = function placeDownStaircase() {
@@ -4595,9 +4613,9 @@ function ErodedRoomDungeonFeature() {
       var pt = room.getRandomEdgePosition(edge)
       do {
         pt = generator.advanceTo(pt, dir)
-      } while (pt && generator.tileMap[pt.y][pt.x] == '.')
+      } while (pt && generator.tileMap.at(pt) == '.')
       if (pt) {
-        generator.tileMap[pt.y][pt.x] = '.'
+        generator.tileMap.put(pt, '.')
       }
     }
   }
@@ -4637,8 +4655,8 @@ function ErosionDungeonFeature() {
           { x: pt.x + 1, y: pt.y },
           { x: pt.x, y: pt.y + 1 }
         ]
-      } while (generator.tileMap[pt.y][pt.x] != '#' || adjacent.every(p => generator.tileMap[p.y][p.x] == '#'))
-      generator.tileMap[pt.y][pt.x] = '.'
+      } while (generator.tileMap.at(pt) != '#' || adjacent.every(p => generator.tileMap.at(p) == '#'))
+      generator.tileMap.put(pt, '.')
     }
   }
 }
@@ -4922,7 +4940,8 @@ function RandomRoomsMapGenerator(level) {
   this.carveRoom = function carveRoom(room, char = '.') {
     for (var i = room.top; i < room.top + room.height; i++) {
       for (var j = room.left; j < room.left + room.width; j++) {
-        this.tileMap[i][j] = char
+        var pt = { x: j, y: i }
+        this.tileMap.put(pt, char)
       }
     }
   }
@@ -4949,7 +4968,7 @@ function RandomRoomsMapGenerator(level) {
     var roomInd = randInt(0, this.rooms.length - 1)
     var position = this.rooms[roomInd].getRandomPosition()
     this.features[direction] = position
-    this.tileMap[position.y][position.x] = direction == 'up' ? '<' : '>'
+    this.tileMap.put(position, direction == 'up' ? '<' : '>')
   }
 
   this.placeDownStaircase = function placeDownStaircase() {
@@ -5039,7 +5058,7 @@ function RandomWalkMapGenerator(level) {
         this.walkCoverage[pt.y][pt.x] = true
         coverageFraction += coverageUnit
       }
-      this.tileMap[pt.y][pt.x] = '.'
+      this.tileMap.put(pt, '.')
       walkLength++
 
       if (didMove) { dir = getRandomDirection() }
@@ -5052,7 +5071,7 @@ function RandomWalkMapGenerator(level) {
       var pt = { x: randInt(0, this.mapWidth - 1), y: randInt(0, this.mapHeight - 1) }
     } while (!this.walkCoverage[pt.y][pt.x])
     this.features[direction] = pt
-    this.tileMap[pt.y][pt.x] = direction == 'up' ? '<' : '>'
+    this.tileMap.put(pt, direction == 'up' ? '<' : '>')
   }
 
   this.placeDownStaircase = function placeDownStaircase() {
@@ -5274,6 +5293,77 @@ module.exports = Renderer
 
 /***/ }),
 
+/***/ "./tilemap.js":
+/*!********************!*\
+  !*** ./tilemap.js ***!
+  \********************/
+/***/ ((module) => {
+
+
+function TileMap(mapWidth, mapHeight) {
+  this.mapWidth = mapWidth
+  this.mapHeight = mapHeight
+
+  this.data = TileMap.create(this.mapWidth, this.mapHeight)
+
+  this.at = function at(pt) {
+    return this.data[pt.y][pt.x]
+  }
+
+  this.put = function put(pt, char) {
+    this.data[pt.y][pt.x] = char
+  }
+
+  this.inBounds = function inBounds(pt) {
+    return (pt.x > 0 && pt.x < this.mapWidth - 1 && pt.y > 0 && pt.y < this.mapHeight)
+  }
+
+  // directions 0: north, 1: northeast, 2: east, ..., 7: northwest
+  this.atDir = function atDir(pt, dir) {
+    var pt1
+    if (dir == 0) {
+      pt1 =  { x: pt.x, y: pt.y - 1 }
+    } else if (dir == 1) {
+      pt1 =  { x: pt.x + 1, y: pt.y - 1 }
+    } else if (dir == 2) {
+      pt1 =  { x: pt.x + 1, y: pt.y }
+    } else if (dir == 3) {
+      pt1 =  { x: pt.x +1 , y: pt.y + 1 }
+    } else if (dir == 4) {
+      pt1 =  { x: pt.x, y: pt.y + 1 }
+    } else if (dir == 5) {
+      pt1 =  { x: pt.x - 1, y: pt.y + 1 }
+    } else if (dir == 6) {
+      pt1 =  { x: pt.x - 1, y: pt.y }
+    } else if (dir == 7) {
+      pt1 =  { x: pt.x - 1, y: pt.y - 1 }
+    }
+    return pt1
+  }
+
+  this.print = function print() {
+    for (var i = 0; i < this.mapHeight; i++) {
+      console.log(this.data[i].join(''))
+    }
+  }
+}
+
+TileMap.create = function create(width, height, char = '#') {
+  var arr = Array(height)
+  for (var i = 0; i < height; i++) {
+    arr[i] = Array(width)
+    for (var j = 0; j < width; j++) {
+      arr[i][j] = char
+    }
+  }
+  return arr
+}
+
+module.exports = TileMap
+
+
+/***/ }),
+
 /***/ "./utils.js":
 /*!******************!*\
   !*** ./utils.js ***!
@@ -5385,7 +5475,7 @@ module.exports = {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("04ca4afae565cd9c527c")
+/******/ 		__webpack_require__.h = () => ("542b3b966579245cb190")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */
