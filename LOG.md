@@ -1075,3 +1075,31 @@ Let's create a new class/container for the tile map utilities. When a dungeon le
 All the "tilemap masks" in the level object, such as _seen_, _is visible_, _can monster spawn_ etc, are naturally converted into this utility class objects. This approach would unify the access into a tile map (now it's `{x, y}` some where and `(i, j)` elsewhere). Hmm, or maybe not, none of the masks need the geometry-related functionality.
 
 Stopping auto-walk when player environment changes causes too many interruptions. It's better to check the environment in the forward direction, that is, towards the direction of movement and its neighboring directions.
+
+There's still room for streamlining the user experience related to the auto-walk, for example the player should proceed along a corridor when there's a turn (that is, continue auto-walk if there is only one way to go). Leave that for later.
+
+Now, for the actual wayfinding. I'll go with A*, that seems to be widely used. Let's do a trivial test first: wayfinding on an empty tile map.
+
+## 2022-09-12
+
+The A* algorithm is attractively simple, or should I say _easy to learn_. And for a uniform tile map it's particularly simple.
+
+The algorithm needs the edge weights of the wayfinding graph. In this case the weights are just the distances between neighboring tiles, which are all equal to one. We also need a heuristic function which estimates the minimun possible distance from any given node to the end node. This can be given as the (8-way) Manhattan distance, `d(p, q) = max{|p_x-q_x|, |p_y-q_y|}` (convince yourself that this is true!).
+
+Let `g` denote the minimum distance (cost) from the starting node to the currently investigated node, `h` the heuristic cost function and `f = g + h` the total cost function.
+
+- let `p` and `q` be the starting and ending nodes (tiles)
+- start by setting the _open set_ `A = {p}`
+- for each iteration:
+  - choose `n` in `A` such that `f(n) = min{f(m):m in A}`
+    - if tie between multiple, choose at random
+  - if `n = q`, we're done
+  - remove `n` from `A`
+  - for each neighbor `m` of `n` (in our case, floor tiles adjacent to `n`):
+    - define the _tentative cost_ to `m` as `g(n) + 1`
+    - if `g(m)` has not been computed, or it is larger than the above tentative cost, replace `g(m)` by the tentative cost.
+    - if `g(m)` was replaced or initialized during this iteration, add it to `A` if it is not there yet
+
+There are probably some data structures which would speed up the implementation, but let's go with a basic `Array` for the open set and a `Map` for the cost functions.
+
+Hmm, adding entries to a `Map` with object keys doesn't really work. Let's just use an `Object` and compute the keys from the tile coordinates. Using a hash function, that is, and in our case a simple hash is given by e.g. `100*x+y`, because `0 < x,y < 100`. Just add the hash value to all objects added to the open set.

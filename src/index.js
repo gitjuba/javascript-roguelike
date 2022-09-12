@@ -131,7 +131,6 @@ function Game(gameOptions) {
 
   this.updatePlayerEnvironment = function updatePlayerEnvironment(dir) {
     this.playerEnvironment = this.levels[this.currentLevel].tileMap.aroundDir(this.player, dir).join('')
-    console.log(this.playerEnvironment)
   }
   this.updatePlayerEnvironment(NaN)
 
@@ -224,6 +223,7 @@ function Game(gameOptions) {
           break
         case 'g':
           this.player.startedAutoWalk = true
+          break
         case 's':
           if (level.isDownStaircaseAt(this.player)) {
             var newLevel

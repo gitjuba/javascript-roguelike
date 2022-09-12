@@ -3437,7 +3437,6 @@ function Game(gameOptions) {
 
   this.updatePlayerEnvironment = function updatePlayerEnvironment(dir) {
     this.playerEnvironment = this.levels[this.currentLevel].tileMap.aroundDir(this.player, dir).join('')
-    console.log(this.playerEnvironment)
   }
   this.updatePlayerEnvironment(NaN)
 
@@ -3530,6 +3529,7 @@ function Game(gameOptions) {
           break
         case 'g':
           this.player.startedAutoWalk = true
+          break
         case 's':
           if (level.isDownStaircaseAt(this.player)) {
             var newLevel
@@ -4055,7 +4055,7 @@ function Level(level) {
   var chooseMapGenerator = Math.random()
   if (chooseMapGenerator < 0.5) {
     var generator = new RandomRoomsMapGenerator(level)
-  } else if (chooseMapGenerator < 0.75) {
+  } else if (chooseMapGenerator < 0.9) {
     var generator = new BinarySpacePartitionMapGenerator(level)
   } else {
     var generator = new RandomWalkMapGenerator(level)
@@ -4071,7 +4071,7 @@ function Level(level) {
   this.tileMap = generator.getTileMap()
 
   // Add a dungeon feature
-  var addFeature = Math.random() < 0.5
+  var addFeature = Math.random() < 0.15
   if (addFeature) {
     var chooseFeature = Math.random()
     if (chooseFeature < 0.5) {
@@ -5310,12 +5310,14 @@ module.exports = Renderer
   \********************/
 /***/ ((module) => {
 
+var allDirections = [0, 1, 2, 3, 4, 5, 6, 7]
+var cardinalDirections = [0, 2, 4, 6]
 
-function TileMap(mapWidth, mapHeight) {
+function TileMap(mapWidth, mapHeight, char) {
   this.mapWidth = mapWidth
   this.mapHeight = mapHeight
 
-  this.data = TileMap.create(this.mapWidth, this.mapHeight)
+  this.data = TileMap.create(this.mapWidth, this.mapHeight, char)
 
   this.at = function at(pt) {
     return this.data[pt.y][pt.x]
@@ -5377,10 +5379,28 @@ function TileMap(mapWidth, mapHeight) {
     return this.atDirs(pt, dirs)
   }
 
+  // for wayfinding
+  this.accessibleEnvironment = function accessibleEnvironment(pt) {
+    var points = allDirections.map(dir => this.toDir(pt, dir)).filter(this.inBounds.bind(this))
+    var accessiblePoints = points.filter(p => this.at(p) == '.')
+    return accessiblePoints
+  }
+
   this.print = function print() {
     for (var i = 0; i < this.mapHeight; i++) {
       console.log(this.data[i].join(''))
     }
+  }
+
+  this.copy = function copy() {
+    var copy = new TileMap(this.mapWidth, this.mapHeight)
+    for (var i = 0; i < this.mapHeight; i++) {
+      for (var j = 0; j < this.mapWidth; j++) {
+        var pt = { x: j, y: i }
+        copy.put(pt, this.at(pt))
+      }
+    }
+    return copy
   }
 }
 
@@ -5393,6 +5413,23 @@ TileMap.create = function create(width, height, char = '#') {
     }
   }
   return arr
+}
+
+TileMap.fromString = function fromString(str) {
+  var rows = str.split('\n').filter(row => row.length > 0)
+  if (rows.some(row => row.length != rows[0].length)) {
+    throw new Error('Invalid tile map string')
+  }
+  var mapWidth = rows[0].length
+  var mapHeight = rows.length
+  var tileMap = new TileMap(mapWidth, mapHeight)
+  for (var i = 0; i < mapHeight; i++) {
+    for (var j = 0; j < mapWidth; j++) {
+      var pt = { x: j, y: i }
+      tileMap.put(pt, rows[i][j])
+    }
+  }
+  return tileMap
 }
 
 module.exports = TileMap
@@ -5511,7 +5548,7 @@ module.exports = {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("5404b456f627651000f6")
+/******/ 		__webpack_require__.h = () => ("aff1ff3d301074c2a683")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/global */

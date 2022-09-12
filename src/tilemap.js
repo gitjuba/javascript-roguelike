@@ -1,9 +1,11 @@
+var allDirections = [0, 1, 2, 3, 4, 5, 6, 7]
+var cardinalDirections = [0, 2, 4, 6]
 
-function TileMap(mapWidth, mapHeight) {
+function TileMap(mapWidth, mapHeight, char) {
   this.mapWidth = mapWidth
   this.mapHeight = mapHeight
 
-  this.data = TileMap.create(this.mapWidth, this.mapHeight)
+  this.data = TileMap.create(this.mapWidth, this.mapHeight, char)
 
   this.at = function at(pt) {
     return this.data[pt.y][pt.x]
@@ -65,10 +67,28 @@ function TileMap(mapWidth, mapHeight) {
     return this.atDirs(pt, dirs)
   }
 
+  // for wayfinding
+  this.accessibleEnvironment = function accessibleEnvironment(pt) {
+    var points = allDirections.map(dir => this.toDir(pt, dir)).filter(this.inBounds.bind(this))
+    var accessiblePoints = points.filter(p => this.at(p) == '.')
+    return accessiblePoints
+  }
+
   this.print = function print() {
     for (var i = 0; i < this.mapHeight; i++) {
       console.log(this.data[i].join(''))
     }
+  }
+
+  this.copy = function copy() {
+    var copy = new TileMap(this.mapWidth, this.mapHeight)
+    for (var i = 0; i < this.mapHeight; i++) {
+      for (var j = 0; j < this.mapWidth; j++) {
+        var pt = { x: j, y: i }
+        copy.put(pt, this.at(pt))
+      }
+    }
+    return copy
   }
 }
 
@@ -81,6 +101,23 @@ TileMap.create = function create(width, height, char = '#') {
     }
   }
   return arr
+}
+
+TileMap.fromString = function fromString(str) {
+  var rows = str.split('\n').filter(row => row.length > 0)
+  if (rows.some(row => row.length != rows[0].length)) {
+    throw new Error('Invalid tile map string')
+  }
+  var mapWidth = rows[0].length
+  var mapHeight = rows.length
+  var tileMap = new TileMap(mapWidth, mapHeight)
+  for (var i = 0; i < mapHeight; i++) {
+    for (var j = 0; j < mapWidth; j++) {
+      var pt = { x: j, y: i }
+      tileMap.put(pt, rows[i][j])
+    }
+  }
+  return tileMap
 }
 
 module.exports = TileMap

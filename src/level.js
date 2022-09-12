@@ -88,7 +88,7 @@ function Level(level) {
   var chooseMapGenerator = Math.random()
   if (chooseMapGenerator < 0.5) {
     var generator = new RandomRoomsMapGenerator(level)
-  } else if (chooseMapGenerator < 0.75) {
+  } else if (chooseMapGenerator < 0.9) {
     var generator = new BinarySpacePartitionMapGenerator(level)
   } else {
     var generator = new RandomWalkMapGenerator(level)
@@ -104,7 +104,7 @@ function Level(level) {
   this.tileMap = generator.getTileMap()
 
   // Add a dungeon feature
-  var addFeature = Math.random() < 0.5
+  var addFeature = Math.random() < 0.15
   if (addFeature) {
     var chooseFeature = Math.random()
     if (chooseFeature < 0.5) {
