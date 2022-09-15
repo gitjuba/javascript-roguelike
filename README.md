@@ -27,5 +27,11 @@
 ## Goal IV
 
 - [x] Different map generation algorithms (part 1)
-- [ ] Player wayfinding and auto-walk
+- [x] Player wayfinding and auto-walk
 - [x] Map features (part 1)
+
+## Goal V
+
+- [ ] TBA
+- [ ] TBA
+- [ ] TBA

@@ -1144,3 +1144,7 @@ There must be a more elegant way to handle the following:
 - input keys (u, i, o, ...)
 
 The last item could probably be abstracted away, and the movement inputs to the actual game would simply be directions.
+
+## 2022-09-15
+
+Goal IV done. What to do next? Perhaps adding some traditional roguelike elements? Let's have a break first.
