@@ -4,7 +4,7 @@ var Level = require('./level')
 var { Player } = require('./entities')
 var Wayfinder = require('./wayfinder')
 
-var GAME_VERSION = '0.0.2'
+var GAME_VERSION = '0.0.3'
 
 var {
   canvasWidthChars,

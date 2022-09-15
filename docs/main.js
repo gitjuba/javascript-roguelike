@@ -118,6 +118,20 @@ module.exports = {
   \*********************/
 /***/ ((module) => {
 
+// hash 3*dx + dy
+// Is this necessary?
+var displacementToDir = {
+  '-4': 7,
+  '-3': 6,
+  '-2': 5,
+  '-1': 0,
+  '0': -1,
+  '1': 4,
+  '2': 1,
+  '3': 2,
+  '4': 3
+}
+
 function LivingEntity(char, color) {
   this.char = char
   this.color = color
@@ -135,6 +149,12 @@ function LivingEntity(char, color) {
 
   this.isAdjacentTo = function isAdjacentTo(that) {
     return Math.max(Math.abs(this.x - that.x), Math.abs(this.y - that.y)) == 1
+  }
+
+  this.directionTo = function directionTo(that) {
+    var dx = Math.sign(that.x - this.x)
+    var dy = Math.sign(that.y - this.y)
+    return displacementToDir[3 * dx + dy]
   }
 
   this.attack = function attack(that) {
@@ -209,8 +229,14 @@ function Player(char, color, playerName) {
   this.name = playerName
   this.score = 0
 
+  this.route = []
+
   this.isWithinVisRadius = function isWithinVisRadius(i, j) {
     return (this.x - j) ** 2 + (this.y - i) ** 2 < this.visRadius ** 2
+  }
+
+  this.isEnRoute = function isEnRoute() {
+    return this.route.length > 0
   }
 }
 
@@ -356,13 +382,15 @@ function isVisible(x, y, x0, y0, level) {
 function Level(level) {
   this.level = level
 
-  var chooseMapGenerator = Math.random()
-  if (chooseMapGenerator < 0.5) {
-    var generator = new RandomRoomsMapGenerator(level)
-  } else if (chooseMapGenerator < 0.9) {
-    var generator = new BinarySpacePartitionMapGenerator(level)
-  } else {
+  if (level > 0 && level % 5 == 0) {
     var generator = new RandomWalkMapGenerator(level)
+  } else {
+    var chooseMapGenerator = Math.random()
+    if (chooseMapGenerator < 0.5) {
+      var generator = new RandomRoomsMapGenerator(level)
+    } else {
+      var generator = new BinarySpacePartitionMapGenerator(level)
+    }
   }
 
   generator.generate()
@@ -375,14 +403,12 @@ function Level(level) {
   this.tileMap = generator.getTileMap()
 
   // Add a dungeon feature
-  var addFeature = Math.random() < 0.15
-  if (addFeature) {
-    var chooseFeature = Math.random()
-    if (chooseFeature < 0.5) {
-      var feature = new ErosionDungeonFeature()
-    } else {
-      var feature = new ErodedRoomDungeonFeature()
-    }
+  if (level % 10 == 3) {
+    var feature = new ErodedRoomDungeonFeature()
+  } else if (level % 10 == 8) {
+    var feature = new ErosionDungeonFeature()
+  }
+  if (feature) {
     feature.addToLevel(generator)
   }
 
@@ -416,7 +442,7 @@ function Level(level) {
       for (var j = 0; j < mapWidth; j++) {
         this.wasVisibleMask[i][j] = this.isVisibleMask[i][j]
         if (player.isWithinVisRadius(i, j) &&
-            isVisible(j, i, player.x ,player.y, this.tileMap.data)) {
+          isVisible(j, i, player.x, player.y, this.tileMap.data)) {
           this.seenMask[i][j] = true
           this.isVisibleMask[i][j] = true
         } else {
@@ -443,18 +469,10 @@ function Level(level) {
     return this.tileMap.at(position) == '<'
   }
   this.getDownStaircasePosition = function getDownStaircasePosition() {
-    if (this.hasDownStaircase()) {
-      return this.map.down
-    } else {
-      throw new Error('No down staircase in level')
-    }
+    return this.map.down
   }
   this.getUpStaircasePosition = function getUpStaircasePosition() {
-    if (this.hasUpStaircase()) {
-      return this.map.up
-    } else {
-      throw new Error('No up staircase in level')
-    }
+    return this.map.up
   }
 
   this.monsters = []
@@ -928,7 +946,7 @@ function ErodedRoomDungeonFeature() {
       var pt = room.getRandomEdgePosition(edge)
       do {
         pt = generator.advanceTo(pt, dir)
-      } while (pt && generator.tileMap.at(pt) == '.')
+      } while (pt && (generator.tileMap.at(pt) == '.' || generator.tileMap.at(pt) == '<' || generator.tileMap.at(pt) == '>'))
       if (pt) {
         generator.tileMap.put(pt, '.')
       }
@@ -1632,7 +1650,7 @@ function TileMap(mapWidth, mapHeight, char) {
   }
 
   this.inBounds = function inBounds(pt) {
-    return (pt.x > 0 && pt.x < this.mapWidth - 1 && pt.y > 0 && pt.y < this.mapHeight)
+    return (pt.x > 0 && pt.x < this.mapWidth - 1 && pt.y > 0 && pt.y < this.mapHeight - 1)
   }
 
   // directions 0: north, 1: northeast, 2: east, ..., 7: northwest
@@ -1686,7 +1704,7 @@ function TileMap(mapWidth, mapHeight, char) {
   // for wayfinding
   this.accessibleEnvironment = function accessibleEnvironment(pt) {
     var points = allDirections.map(dir => this.toDir(pt, dir)).filter(this.inBounds.bind(this))
-    var accessiblePoints = points.filter(p => this.at(p) == '.')
+    var accessiblePoints = points.filter(p => ['.', '<', '>'].includes(this.at(p)))
     return accessiblePoints
   }
 
@@ -1765,6 +1783,97 @@ module.exports = {
 }
 
 
+/***/ }),
+
+/***/ "./wayfinder.js":
+/*!**********************!*\
+  !*** ./wayfinder.js ***!
+  \**********************/
+/***/ ((module) => {
+
+function Wayfinder() {
+  this.getRouteBetween = function getRouteBetween(start, finish, tileMap) {
+    // debugging
+    var statusMap = tileMap.copy()
+    statusMap.put(start, 's')
+    // A* algorithm
+    var openSet = [start]
+    var gScore = {}
+    var fScore = {}
+    var cameFrom = {}
+    var route = []
+    function hScore(p) {
+      return Math.max(Math.abs(p.x - finish.x), Math.abs(p.y - finish.y))
+    }
+    function hash(p) {
+      return 100 * p.x + p.y
+    }
+    start.hash = hash(start)
+    finish.hash = hash(finish)
+    fScore[start.hash] = hScore(start)
+    gScore[start.hash] = 0
+
+    var maxIter = 1000
+    var iIter = 0
+    while (openSet.length > 0) {
+      var minScore = Infinity
+      var current
+      var currentInd
+      for (var i = 0; i < openSet.length; i++) {
+        if (fScore[openSet[i].hash] < minScore) {
+          minScore = fScore[openSet[i].hash]
+          current = openSet[i]
+          currentInd = i
+        }
+      }
+      openSet.splice(currentInd, 1)
+      statusMap.put(current, '-')
+
+      if (current.hash == finish.hash) {
+        console.log('wayfinding success')
+        route = [current]
+        while (current.hash in cameFrom) {
+          current = cameFrom[current.hash]
+          route.unshift(current)
+        }
+        break
+      }
+      var neighborhood = tileMap.accessibleEnvironment(current)
+      for (var neighbor of neighborhood) {
+        neighbor.hash = hash(neighbor)
+        if (!(neighbor.hash in gScore) || (gScore[neighbor.hash] > gScore[current.hash] + 1)) {
+          gScore[neighbor.hash] = gScore[current.hash] + 1
+          fScore[neighbor.hash] = gScore[neighbor.hash] + hScore(neighbor)
+          cameFrom[neighbor.hash] = current
+
+          if (!openSet.find(p => p.hash == neighbor.hash)) {
+            openSet.push(neighbor)
+            statusMap.put(neighbor, 'o')
+          }
+        }
+      }
+      iIter++
+
+      // statusMap.print()
+      // console.log('\n')
+
+      if (iIter > maxIter) {
+        break
+      }
+    }
+    for (node of route) {
+      // console.log(node)
+      statusMap.put(node, '@')
+    }
+
+    // statusMap.print()
+    return route
+  }
+}
+
+module.exports = Wayfinder
+
+
 /***/ })
 
 /******/ 	});
@@ -1804,8 +1913,9 @@ var Logger = __webpack_require__(/*! ./logger */ "./logger.js")
 var Renderer = __webpack_require__(/*! ./renderer */ "./renderer.js")
 var Level = __webpack_require__(/*! ./level */ "./level.js")
 var { Player } = __webpack_require__(/*! ./entities */ "./entities.js")
+var Wayfinder = __webpack_require__(/*! ./wayfinder */ "./wayfinder.js")
 
-var GAME_VERSION = '0.0.2'
+var GAME_VERSION = '0.0.3'
 
 var {
   canvasWidthChars,
@@ -1833,7 +1943,7 @@ function createCharacterSheet(imageFile) {
   var img = document.createElement('img')
   img.src = imageFile
   img.className = 'character-sheet'
-  img.onload = function() {
+  img.onload = function () {
     splashScreen()
   }
   document.body.appendChild(img)
@@ -1880,6 +1990,16 @@ var keyToDir = {
   m: 5,
   ',': 4,
   '.': 3
+}
+var dirToKey = {
+  0: 'i',
+  1: 'o',
+  2: 'l',
+  3: '.',
+  4: ',',
+  5: 'm',
+  6: 'j',
+  7: 'u'
 }
 
 function Game(gameOptions) {
@@ -1938,7 +2058,23 @@ function Game(gameOptions) {
 
   this.engageAutoPilot = function engageAutoPilot(key) {
     this.isOnAutoPilot = true
-    this.autoPilotEvent = { key }
+    if (this.player.route && this.player.route.length > 0) {
+      this.getAutoPilotEvent = function getAutoPilotEvent() {
+        if (this.player.route.length > 0) {
+          var nextNode = this.player.route.shift()
+          var nextDir = this.player.directionTo(nextNode)
+          return { key: dirToKey[nextDir] }
+        } else {
+          return null
+        }
+      }
+    } else {
+      // auto-walk
+      this.getAutoPilotEvent = function getAutoPilotEvent() {
+        return { key }
+      }
+      this.autoPilotEvent = { key }
+    }
     this.autoPilotEnvironment = this.playerEnvironment
   }
 
@@ -1946,6 +2082,7 @@ function Game(gameOptions) {
     this.isOnAutoPilot = false
     this.autoPilotEvent = undefined
     this.autoPilotEnvironment = undefined
+    this.player.route = []
   }
   this.disengageAutoPilot()
 
@@ -2008,7 +2145,8 @@ function Game(gameOptions) {
           this.updatePlayerEnvironment(dir)
           if (this.isOnAutoPilot) {
             // check if surroundings of player change
-            if (this.playerEnvironment != this.autoPilotEnvironment) {
+            // don't stop wayfinding on env change
+            if (!this.player.isEnRoute() && this.playerEnvironment != this.autoPilotEnvironment) {
               this.disengageAutoPilot()
             }
           }
@@ -2047,6 +2185,32 @@ function Game(gameOptions) {
             this.player.setPosition(newLevel.getDownStaircasePosition())
             newLevel.placePlayer(this.player)
           }
+          break
+        case '>':
+          console.log('move to down staircase')
+          var down = level.getDownStaircasePosition()
+          if (down && level.seenMask[down.y][down.x]) {
+            // console.log('down staircase seen')
+            var wayfinder = new Wayfinder()
+            var route = wayfinder.getRouteBetween(this.player, down, level.tileMap)
+            this.player.route = route
+            this.engageAutoPilot()
+            // console.log(route)
+          }
+          this.player.startedAutoWalk = false
+          break
+        case '<':
+          console.log('move to up staircase')
+          var up = level.getUpStaircasePosition()
+          if (up && level.seenMask[up.y][up.x]) {
+            // console.log('up staircase seen')
+            var wayfinder = new Wayfinder()
+            var route = wayfinder.getRouteBetween(this.player, up, level.tileMap)
+            this.player.route = route
+            this.engageAutoPilot()
+            // console.log(route)
+          }
+          this.player.startedAutoWalk = false
           break
         default:
           console.log('unknown command: ' + key)
@@ -2102,7 +2266,7 @@ function Game(gameOptions) {
           } else {
             var dirInd = Math.floor(9 * Math.random())
             var dir = movementKeys[dirInd]
-            ;({ dx, dy } = keyDisplacement[dir])
+              ; ({ dx, dy } = keyDisplacement[dir])
             if (level.isOccupied[monster.y + dy][monster.x + dx]) {
               dx = 0
               dy = 0
@@ -2298,7 +2462,12 @@ function startGame(gameOptions) {
 
   function gameLoop() {
     if (game.isOnAutoPilot) {
-      game.updateState(game.autoPilotEvent)
+      var nextEvent = game.getAutoPilotEvent()
+      if (nextEvent) {
+        game.updateState(nextEvent)
+      } else {
+        game.disengageAutoPilot()
+      }
       if (!game.isOnAutoPilot) {
         window.addEventListener('keyup', handleGameInput)
       }
@@ -2380,7 +2549,7 @@ function hallOfFame(hofOptions) {
             2 * ind + 5,
             5
           )
-      })
+        })
 
       var congratsText = ''
       if (onlineRanking > -1 && onlineRanking <= numHofEntries) {
