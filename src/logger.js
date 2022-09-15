@@ -9,9 +9,7 @@ function Logger() {
     throw new Error('Use Logger.getInstance')
   }
   Logger.instance = this
-  this.logBuffer = [
-    'Very long line with monsters attacking and all sorts of crazy stuff going on so that this has to be split into multiple lines for sure'
-  ]
+  this.logBuffer = []
   this.maxLineWidth = logWidth - 2 // '> ' prefix
   this.lineRegex = new RegExp(`(.{0,${this.maxLineWidth}}$|.{0,${this.maxLineWidth}}\\b)`, 'g')
 

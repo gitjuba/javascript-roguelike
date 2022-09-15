@@ -512,9 +512,7 @@ function Logger() {
     throw new Error('Use Logger.getInstance')
   }
   Logger.instance = this
-  this.logBuffer = [
-    'Very long line with monsters attacking and all sorts of crazy stuff going on so that this has to be split into multiple lines for sure'
-  ]
+  this.logBuffer = []
   this.maxLineWidth = logWidth - 2 // '> ' prefix
   this.lineRegex = new RegExp(`(.{0,${this.maxLineWidth}}$|.{0,${this.maxLineWidth}}\\b)`, 'g')
 
@@ -2415,6 +2413,10 @@ function splashScreen() {
       splashRenderer.fillWithChar(' ')
       splashRenderer.drawText('a roguelike game', defaultTextColor, 10, 5)
       splashRenderer.drawText('please enter your name: ', defaultTextColor, 12, 5)
+      splashRenderer.drawText('uiojklm,.  to move', defaultTextColor, 14, 5)
+      splashRenderer.drawText('a + move   to attack', defaultTextColor, 15, 5)
+      splashRenderer.drawText('g + move   to walk', defaultTextColor, 16, 5)
+      splashRenderer.drawText('g + < or > to walk to stairs', defaultTextColor, 17, 5)
       shouldRenderSplash = false
     }
 

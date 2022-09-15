@@ -504,6 +504,10 @@ function splashScreen() {
       splashRenderer.fillWithChar(' ')
       splashRenderer.drawText('a roguelike game', defaultTextColor, 10, 5)
       splashRenderer.drawText('please enter your name: ', defaultTextColor, 12, 5)
+      splashRenderer.drawText('uiojklm,.  to move', defaultTextColor, 14, 5)
+      splashRenderer.drawText('a + move   to attack', defaultTextColor, 15, 5)
+      splashRenderer.drawText('g + move   to walk', defaultTextColor, 16, 5)
+      splashRenderer.drawText('g + < or > to walk to stairs', defaultTextColor, 17, 5)
       shouldRenderSplash = false
     }
 
