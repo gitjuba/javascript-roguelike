@@ -1103,3 +1103,44 @@ Let `g` denote the minimum distance (cost) from the starting node to the current
 There are probably some data structures which would speed up the implementation, but let's go with a basic `Array` for the open set and a `Map` for the cost functions.
 
 Hmm, adding entries to a `Map` with object keys doesn't really work. Let's just use an `Object` and compute the keys from the tile coordinates. Using a hash function, that is, and in our case a simple hash is given by e.g. `100*x+y`, because `0 < x,y < 100`. Just add the hash value to all objects added to the open set.
+
+Adding wayfinding to the game:
+
+- player navigating to staircases
+  - press `g` followed by either `<` or `>`
+  - player needs to have seen the staircase in order for wayfinding to take effect
+  - later, when other wayfinding targets are introduced, show a list of them to the player when initiating wayfinding
+- monster wayfinding
+  - the monster "system" needs an overhaul, maybe monster wayfinding could be a part of that, scope it out of the current goal
+  - for the future, monsters could have different behaviors
+    - patrol a given route (several focus points which form a loop), and the monster would follow that route until seeing the player
+    - patrol around a single point (not exactly a special case of the above) in a random'ish manner
+  - when chasing player and losing sight, follow route to last known player position
+  - some monsters could e.g. smell or sense otherwise the player, and find route to them even if not seen
+  - some monsters could alert other monsters which would rush to the current location of the player
+
+So it would often be the case that we need the route from multiple starting points to a single target. Can this be somehow included in the algorithm?
+
+The layout of room based dungeon levels should allow much more efficient wayfinding.
+
+Side note about using various map generation algorithms: It would make more sense story-wise to use a given algorithm on a given level of the dungeon.
+
+## 2022-09-13
+
+Let's add wayfinding to staircases to the game, and then start thinking about the next major milestones.
+
+I've noticed a couple of bugs in the level generation: Sometimes the down staircase is not reachable from the up staircase, and sometimes the corridors brush against the rooms. The latter is probably because I didn't implement the non-brushing algorithm to the binary space partition algo. The former needs to be debugged using the mapgen test.
+
+If the player has seen the staircase to which they initiate wayfinding, a route is computed and attached to the player object. Also "autopilot" is engaged. But, unlike with the auto-walk, there's no fixed "autopilot event" which would be replayed over and over. The autopilot event should be a generator of sorts, that is a function which, in the case of auto-walk, always returns the same event, and in the case of wayfinding, checks the next step on the player route and creates an appropriate event. Also changes in player environment should not cancel the wayfinding.
+
+Note: Player wayfinding should use only the visible portion of the tile map.
+
+Perhaps auto-walk and wayfinding should be two different states? On the other hand, they both fall naturally under the heading _automatic walking_.
+
+There must be a more elegant way to handle the following:
+
+- directions (0, ..., 7)
+- unit displacement vectors (`{ dx, dy }`)
+- input keys (u, i, o, ...)
+
+The last item could probably be abstracted away, and the movement inputs to the actual game would simply be directions.

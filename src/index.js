@@ -2,6 +2,7 @@ var Logger = require('./logger')
 var Renderer = require('./renderer')
 var Level = require('./level')
 var { Player } = require('./entities')
+var Wayfinder = require('./wayfinder')
 
 var GAME_VERSION = '0.0.2'
 
@@ -31,7 +32,7 @@ function createCharacterSheet(imageFile) {
   var img = document.createElement('img')
   img.src = imageFile
   img.className = 'character-sheet'
-  img.onload = function() {
+  img.onload = function () {
     splashScreen()
   }
   document.body.appendChild(img)
@@ -78,6 +79,16 @@ var keyToDir = {
   m: 5,
   ',': 4,
   '.': 3
+}
+var dirToKey = {
+  0: 'i',
+  1: 'o',
+  2: 'l',
+  3: '.',
+  4: ',',
+  5: 'm',
+  6: 'j',
+  7: 'u'
 }
 
 function Game(gameOptions) {
@@ -136,7 +147,23 @@ function Game(gameOptions) {
 
   this.engageAutoPilot = function engageAutoPilot(key) {
     this.isOnAutoPilot = true
-    this.autoPilotEvent = { key }
+    if (this.player.route && this.player.route.length > 0) {
+      this.getAutoPilotEvent = function getAutoPilotEvent() {
+        if (this.player.route.length > 0) {
+          var nextNode = this.player.route.shift()
+          var nextDir = this.player.directionTo(nextNode)
+          return { key: dirToKey[nextDir] }
+        } else {
+          return null
+        }
+      }
+    } else {
+      // auto-walk
+      this.getAutoPilotEvent = function getAutoPilotEvent() {
+        return { key }
+      }
+      this.autoPilotEvent = { key }
+    }
     this.autoPilotEnvironment = this.playerEnvironment
   }
 
@@ -144,6 +171,7 @@ function Game(gameOptions) {
     this.isOnAutoPilot = false
     this.autoPilotEvent = undefined
     this.autoPilotEnvironment = undefined
+    this.player.route = []
   }
   this.disengageAutoPilot()
 
@@ -206,7 +234,8 @@ function Game(gameOptions) {
           this.updatePlayerEnvironment(dir)
           if (this.isOnAutoPilot) {
             // check if surroundings of player change
-            if (this.playerEnvironment != this.autoPilotEnvironment) {
+            // don't stop wayfinding on env change
+            if (!this.player.isEnRoute() && this.playerEnvironment != this.autoPilotEnvironment) {
               this.disengageAutoPilot()
             }
           }
@@ -245,6 +274,32 @@ function Game(gameOptions) {
             this.player.setPosition(newLevel.getDownStaircasePosition())
             newLevel.placePlayer(this.player)
           }
+          break
+        case '>':
+          console.log('move to down staircase')
+          var down = level.getDownStaircasePosition()
+          if (down && level.seenMask[down.y][down.x]) {
+            // console.log('down staircase seen')
+            var wayfinder = new Wayfinder()
+            var route = wayfinder.getRouteBetween(this.player, down, level.tileMap)
+            this.player.route = route
+            this.engageAutoPilot()
+            // console.log(route)
+          }
+          this.player.startedAutoWalk = false
+          break
+        case '<':
+          console.log('move to up staircase')
+          var up = level.getUpStaircasePosition()
+          if (up && level.seenMask[up.y][up.x]) {
+            // console.log('up staircase seen')
+            var wayfinder = new Wayfinder()
+            var route = wayfinder.getRouteBetween(this.player, up, level.tileMap)
+            this.player.route = route
+            this.engageAutoPilot()
+            // console.log(route)
+          }
+          this.player.startedAutoWalk = false
           break
         default:
           console.log('unknown command: ' + key)
@@ -300,7 +355,7 @@ function Game(gameOptions) {
           } else {
             var dirInd = Math.floor(9 * Math.random())
             var dir = movementKeys[dirInd]
-            ;({ dx, dy } = keyDisplacement[dir])
+              ; ({ dx, dy } = keyDisplacement[dir])
             if (level.isOccupied[monster.y + dy][monster.x + dx]) {
               dx = 0
               dy = 0
@@ -496,7 +551,12 @@ function startGame(gameOptions) {
 
   function gameLoop() {
     if (game.isOnAutoPilot) {
-      game.updateState(game.autoPilotEvent)
+      var nextEvent = game.getAutoPilotEvent()
+      if (nextEvent) {
+        game.updateState(nextEvent)
+      } else {
+        game.disengageAutoPilot()
+      }
       if (!game.isOnAutoPilot) {
         window.addEventListener('keyup', handleGameInput)
       }
@@ -578,7 +638,7 @@ function hallOfFame(hofOptions) {
             2 * ind + 5,
             5
           )
-      })
+        })
 
       var congratsText = ''
       if (onlineRanking > -1 && onlineRanking <= numHofEntries) {

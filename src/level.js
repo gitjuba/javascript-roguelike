@@ -85,13 +85,15 @@ function isVisible(x, y, x0, y0, level) {
 function Level(level) {
   this.level = level
 
-  var chooseMapGenerator = Math.random()
-  if (chooseMapGenerator < 0.5) {
-    var generator = new RandomRoomsMapGenerator(level)
-  } else if (chooseMapGenerator < 0.9) {
-    var generator = new BinarySpacePartitionMapGenerator(level)
-  } else {
+  if (level > 0 && level % 5 == 0) {
     var generator = new RandomWalkMapGenerator(level)
+  } else {
+    var chooseMapGenerator = Math.random()
+    if (chooseMapGenerator < 0.5) {
+      var generator = new RandomRoomsMapGenerator(level)
+    } else {
+      var generator = new BinarySpacePartitionMapGenerator(level)
+    }
   }
 
   generator.generate()
@@ -104,14 +106,12 @@ function Level(level) {
   this.tileMap = generator.getTileMap()
 
   // Add a dungeon feature
-  var addFeature = Math.random() < 0.15
-  if (addFeature) {
-    var chooseFeature = Math.random()
-    if (chooseFeature < 0.5) {
-      var feature = new ErosionDungeonFeature()
-    } else {
-      var feature = new ErodedRoomDungeonFeature()
-    }
+  if (level % 10 == 3) {
+    var feature = new ErodedRoomDungeonFeature()
+  } else if (level % 10 == 8) {
+    var feature = new ErosionDungeonFeature()
+  }
+  if (feature) {
     feature.addToLevel(generator)
   }
 
@@ -145,7 +145,7 @@ function Level(level) {
       for (var j = 0; j < mapWidth; j++) {
         this.wasVisibleMask[i][j] = this.isVisibleMask[i][j]
         if (player.isWithinVisRadius(i, j) &&
-            isVisible(j, i, player.x ,player.y, this.tileMap.data)) {
+          isVisible(j, i, player.x, player.y, this.tileMap.data)) {
           this.seenMask[i][j] = true
           this.isVisibleMask[i][j] = true
         } else {
@@ -172,18 +172,10 @@ function Level(level) {
     return this.tileMap.at(position) == '<'
   }
   this.getDownStaircasePosition = function getDownStaircasePosition() {
-    if (this.hasDownStaircase()) {
-      return this.map.down
-    } else {
-      throw new Error('No down staircase in level')
-    }
+    return this.map.down
   }
   this.getUpStaircasePosition = function getUpStaircasePosition() {
-    if (this.hasUpStaircase()) {
-      return this.map.up
-    } else {
-      throw new Error('No up staircase in level')
-    }
+    return this.map.up
   }
 
   this.monsters = []

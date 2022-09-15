@@ -16,7 +16,7 @@ function TileMap(mapWidth, mapHeight, char) {
   }
 
   this.inBounds = function inBounds(pt) {
-    return (pt.x > 0 && pt.x < this.mapWidth - 1 && pt.y > 0 && pt.y < this.mapHeight)
+    return (pt.x > 0 && pt.x < this.mapWidth - 1 && pt.y > 0 && pt.y < this.mapHeight - 1)
   }
 
   // directions 0: north, 1: northeast, 2: east, ..., 7: northwest
@@ -70,7 +70,7 @@ function TileMap(mapWidth, mapHeight, char) {
   // for wayfinding
   this.accessibleEnvironment = function accessibleEnvironment(pt) {
     var points = allDirections.map(dir => this.toDir(pt, dir)).filter(this.inBounds.bind(this))
-    var accessiblePoints = points.filter(p => this.at(p) == '.')
+    var accessiblePoints = points.filter(p => ['.', '<', '>'].includes(this.at(p)))
     return accessiblePoints
   }
 

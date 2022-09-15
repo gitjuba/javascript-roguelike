@@ -1,3 +1,17 @@
+// hash 3*dx + dy
+// Is this necessary?
+var displacementToDir = {
+  '-4': 7,
+  '-3': 6,
+  '-2': 5,
+  '-1': 0,
+  '0': -1,
+  '1': 4,
+  '2': 1,
+  '3': 2,
+  '4': 3
+}
+
 function LivingEntity(char, color) {
   this.char = char
   this.color = color
@@ -15,6 +29,12 @@ function LivingEntity(char, color) {
 
   this.isAdjacentTo = function isAdjacentTo(that) {
     return Math.max(Math.abs(this.x - that.x), Math.abs(this.y - that.y)) == 1
+  }
+
+  this.directionTo = function directionTo(that) {
+    var dx = Math.sign(that.x - this.x)
+    var dy = Math.sign(that.y - this.y)
+    return displacementToDir[3 * dx + dy]
   }
 
   this.attack = function attack(that) {
@@ -89,8 +109,14 @@ function Player(char, color, playerName) {
   this.name = playerName
   this.score = 0
 
+  this.route = []
+
   this.isWithinVisRadius = function isWithinVisRadius(i, j) {
     return (this.x - j) ** 2 + (this.y - i) ** 2 < this.visRadius ** 2
+  }
+
+  this.isEnRoute = function isEnRoute() {
+    return this.route.length > 0
   }
 }
 

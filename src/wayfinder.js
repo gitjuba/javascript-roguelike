@@ -37,7 +37,7 @@ function Wayfinder() {
       statusMap.put(current, '-')
 
       if (current.hash == finish.hash) {
-        console.log('done')
+        console.log('wayfinding success')
         route = [current]
         while (current.hash in cameFrom) {
           current = cameFrom[current.hash]
@@ -61,19 +61,19 @@ function Wayfinder() {
       }
       iIter++
 
-      statusMap.print()
-      console.log('\n')
+      // statusMap.print()
+      // console.log('\n')
 
       if (iIter > maxIter) {
         break
       }
     }
     for (node of route) {
-      console.log(node)
+      // console.log(node)
       statusMap.put(node, '@')
     }
 
-    statusMap.print()
+    // statusMap.print()
     return route
   }
 }
