@@ -508,6 +508,7 @@ function splashScreen() {
       splashRenderer.drawText('a + move   to attack', defaultTextColor, 15, 5)
       splashRenderer.drawText('g + move   to walk', defaultTextColor, 16, 5)
       splashRenderer.drawText('g + < or > to walk to stairs', defaultTextColor, 17, 5)
+      splashRenderer.drawText('s          to ascend/descend stairs', defaultTextColor, 18, 5)
       shouldRenderSplash = false
     }
 
